@@ -34,23 +34,25 @@ for traj in range(0, nrDemo):
     # plot the training set
     plt.figure(0)
     label = 'training sets 1st dim' if traj==0 else ''
-    plt.plot(x, samples[:,0], 'grey', label=label, alpha=0.3)
+    plt.plot(x, samples[:,0], 'grey', label=label, alpha=0.5)
     plt.legend()
     
     plt.figure(1)
     label = 'training sets 2nd dim' if traj==0 else ''
-    plt.plot(x, samples[:,1], 'grey', label=label, alpha=0.3)
+    plt.plot(x, samples[:,1], 'grey', label=label, alpha=0.5)
     plt.legend()
     
     plt.figure(2)
     label = 'training sets whole traj' if traj==0 else ''
-    plt.plot(samples[:,0], samples[:,1], 'grey', label=label, alpha=0.3)
+    plt.plot(samples[:,0], samples[:,1], 'grey', label=label, alpha=0.5)
     plt.legend()
 
 plt.figure(0)
 ndpromp.promps[0].plot(x)
+plt.legend()
 plt.figure(1)
 ndpromp.promps[1].plot(x)
+plt.legend()
 
 # testing set
 #for traj in range(0, nrDemo):
@@ -68,16 +70,31 @@ ndpromp.promps[1].plot(x)
 
 # add via point as observation
 ndpromp.add_viapoint(0.1, np.array([0.12, 0.30]))
+#plt.figure(20)
+#ndpromp.promps[0].plot_updated(ndpromp.x, color='r')
+#plt.figure(21)
+#ndpromp.promps[1].plot_updated(ndpromp.x, color='r')
+
 ndpromp.add_viapoint(0.2, np.array([0.37, 0.65]))
+#plt.figure(22)
+#ndpromp.promps[0].plot_updated(ndpromp.x, color='r')
+#plt.figure(23)
+#ndpromp.promps[1].plot_updated(ndpromp.x, color='r')
+
 ndpromp.add_viapoint(0.4, np.array([0.48, 0.65]))
+#plt.figure(24)
+#ndpromp.promps[0].plot_updated(ndpromp.x, color='r')
+#plt.figure(25)
+#ndpromp.promps[1].plot_updated(ndpromp.x, color='r')
 
 # plot the updated distributions
 plt.figure(0)
 ndpromp.promps[0].plot_updated(ndpromp.x, color='r')
+plt.legend()
 plt.figure(1)
 ndpromp.promps[1].plot_updated(ndpromp.x, color='r')
+plt.legend()
 
 # plot
-plt.legend()
 plt.show()
 
