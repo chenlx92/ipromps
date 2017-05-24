@@ -353,7 +353,18 @@ class ProMP(object):
         for viapoint_id, viapoint in enumerate(self.viapoints):
             x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
             plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
-            
+    
+    def plot_unit(self, x=None, legend='', color='b'):
+        mean = np.dot(self.Phi.T, self.meanW_via)
+        x = self.x if x is None else x
+        plt.plot(x, mean, color=color, label=legend)
+        std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_via, self.Phi))))
+        plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.4)
+        for viapoint_id, viapoint in enumerate(self.viapoints):
+            x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
+            plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
+
+        
     def plot_updated(self, x=None, legend='', color='b'):
         mean0 = np.dot(self.Phi.T, self.meanW_updated)
         std0 = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_updated, self.Phi))))
