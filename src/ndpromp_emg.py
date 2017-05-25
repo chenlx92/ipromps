@@ -3,23 +3,24 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.signal as signal
 import ipromps
 
 # close the all windows
 plt.close('all')
 
 # read txt
-train_set0 = np.loadtxt('../../recorder/datasets/emg_data0.txt');
-train_set1 = np.loadtxt('../../recorder/datasets/emg_data1.txt');
-train_set2 = np.loadtxt('../../recorder/datasets/emg_data2.txt');
-train_set3 = np.loadtxt('../../recorder/datasets/emg_data3.txt');
-train_set4 = np.loadtxt('../../recorder/datasets/emg_data4.txt');
-train_set5 = np.loadtxt('../../recorder/datasets/emg_data5.txt');
-train_set6 = np.loadtxt('../../recorder/datasets/emg_data6.txt');
-train_set7 = np.loadtxt('../../recorder/datasets/emg_data7.txt');
-train_set8 = np.loadtxt('../../recorder/datasets/emg_data8.txt');
-train_set9 = np.loadtxt('../../recorder/datasets/emg_data9.txt');
-train_set11 = np.loadtxt('../../recorder/datasets/emg_data11.txt');
+train_set0 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data0.txt');
+train_set1 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data1.txt');
+train_set2 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data2.txt');
+train_set3 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data3.txt');
+train_set4 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data4.txt');
+train_set5 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data5.txt');
+train_set6 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data6.txt');
+train_set7 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data7.txt');
+train_set8 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data8.txt');
+train_set9 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data9.txt');
+train_set11 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data15.txt');
 
 # plot the origin data,ch0
 plt.figure(0)
@@ -67,6 +68,8 @@ nrTraj = len(train_set_norm_full.T)
 # add demonstration
 for traj in range(0, nrTraj):
     p.add_demonstration(train_set_norm_full[:,traj])
+    
+train_set_norm11_filtered = signal.medfilt(train_set_norm11,15)
 
 # plot the trained model and generated traj
 plt.figure(2)
@@ -74,16 +77,16 @@ p.plot(x=p.x, color='r')
 plt.plot(p.x, p.generate_trajectory(), 'g',linewidth=3)
 
 # add via point as observation
-#p.add_viapoint(0.05, 40, 1.0)
-p.add_viapoint(0.00, train_set_norm11[0.00*100], 1000.0)
-p.add_viapoint(0.05, train_set_norm11[0.05*100], 1000.0)
-p.add_viapoint(0.10, train_set_norm11[0.10*100], 1000.0)
-p.add_viapoint(0.15, train_set_norm11[0.15*100], 1000.0)
-p.add_viapoint(0.25, train_set_norm11[0.25*100], 1000.0)
-p.add_viapoint(0.35, train_set_norm11[0.35*100], 1000.0)
-#p.add_viapoint(0.40, train_set_norm11[0.40*100],50.0)
-#p.add_viapoint(0.45, train_set_norm11[0.45*100],50.0)
-#p.add_viapoint(0.50, train_set_norm11[0.50*100],50.0)
+p.add_viapoint(0.05, 40, 1.0)
+p.add_viapoint(0.00, train_set_norm11_filtered[0.00*100], 20.0)
+p.add_viapoint(0.05, train_set_norm11_filtered[0.05*100], 20.0)
+p.add_viapoint(0.10, train_set_norm11_filtered[0.10*100], 20.0)
+p.add_viapoint(0.15, train_set_norm11_filtered[0.15*100], 20.0)
+p.add_viapoint(0.25, train_set_norm11_filtered[0.25*100], 20.0)
+p.add_viapoint(0.35, train_set_norm11_filtered[0.35*100], 20.0)
+p.add_viapoint(0.40, train_set_norm11_filtered[0.40*100], 50.0)
+p.add_viapoint(0.45, train_set_norm11_filtered[0.45*100], 50.0)
+
 
 # plot the trained model and generated traj
 plt.figure(3)
@@ -91,7 +94,11 @@ p.plot(x=p.x, color='r')
 #p.plot_unit(x=p.x, color='r')
 #p.plot_updated(x=p.x)
 plt.plot(p.x, train_set_norm11)
-#plt.plot(p.x, p.generate_trajectory(), 'g',linewidth=3)
+plt.plot(p.x, p.generate_trajectory(), 'g',linewidth=3)
+
+
+#plt.figure(4)
+plt.plot(p.x, train_set_norm11_filtered)
 
 # show the plot
 #plt.legend()
