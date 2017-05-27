@@ -20,7 +20,7 @@ train_set6 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data6
 train_set7 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data7.txt');
 train_set8 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data8.txt');
 train_set9 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data9.txt');
-train_set11 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data15.txt');
+train_set11 = np.loadtxt('../../recorder/datasets/emg_data_no_timestamp/emg_data1.txt');
 
 # plot the origin data,ch0
 plt.figure(0)
@@ -68,8 +68,9 @@ nrTraj = len(train_set_norm_full.T)
 # add demonstration
 for traj in range(0, nrTraj):
     p.add_demonstration(train_set_norm_full[:,traj])
-    
-train_set_norm11_filtered = signal.medfilt(train_set_norm11,15)
+
+# gaussian filtered data
+train_set_norm11_filtered = signal.medfilt(train_set_norm11,11)
 
 # plot the trained model and generated traj
 plt.figure(2)
@@ -77,15 +78,30 @@ p.plot(x=p.x, color='r')
 plt.plot(p.x, p.generate_trajectory(), 'g',linewidth=3)
 
 # add via point as observation
-p.add_viapoint(0.05, 40, 1.0)
-p.add_viapoint(0.00, train_set_norm11_filtered[0.00*100], 20.0)
-p.add_viapoint(0.05, train_set_norm11_filtered[0.05*100], 20.0)
-p.add_viapoint(0.10, train_set_norm11_filtered[0.10*100], 20.0)
-p.add_viapoint(0.15, train_set_norm11_filtered[0.15*100], 20.0)
-p.add_viapoint(0.25, train_set_norm11_filtered[0.25*100], 20.0)
-p.add_viapoint(0.35, train_set_norm11_filtered[0.35*100], 20.0)
-p.add_viapoint(0.40, train_set_norm11_filtered[0.40*100], 50.0)
-p.add_viapoint(0.45, train_set_norm11_filtered[0.45*100], 50.0)
+#p.add_viapoint(0.00, train_set_norm11_filtered[0.00*100], 10.0)
+#p.add_viapoint(0.05, train_set_norm11_filtered[0.05*100], 10.0)
+#p.add_viapoint(0.10, train_set_norm11_filtered[0.10*100], 10.0)
+#p.add_viapoint(0.15, train_set_norm11_filtered[0.15*100], 10.0)
+#p.add_viapoint(0.25, train_set_norm11_filtered[0.25*100], 10.0)
+#p.add_viapoint(0.30, train_set_norm11_filtered[0.30*100], 10.0)
+#p.add_viapoint(0.35, train_set_norm11_filtered[0.35*100], 10.0)
+#p.add_viapoint(0.40, train_set_norm11_filtered[0.40*100], 10.0)
+#p.add_viapoint(0.45, train_set_norm11_filtered[0.45*100], 10.0)
+#p.add_viapoint(0.50, train_set_norm11_filtered[0.50*100], 10.0)
+#p.add_viapoint(0.55, train_set_norm11_filtered[0.55*100], 10.0)
+#p.add_viapoint(0.60, train_set_norm11_filtered[0.60*100], 10.0)
+#p.add_viapoint(0.65, train_set_norm11_filtered[0.65*100], 10.0)
+
+p.add_viapoint(0.00, train_set_norm11_filtered[0.00*100], 10.0)
+p.add_viapoint(0.02, train_set_norm11_filtered[0.02*100], 10.0)
+p.add_viapoint(0.04, train_set_norm11_filtered[0.04*100], 10.0)
+p.add_viapoint(0.06, train_set_norm11_filtered[0.06*100], 10.0)
+p.add_viapoint(0.08, train_set_norm11_filtered[0.08*100], 10.0)
+p.add_viapoint(0.10, train_set_norm11_filtered[0.10*100], 10.0)
+p.add_viapoint(0.12, train_set_norm11_filtered[0.12*100], 10.0)
+p.add_viapoint(0.14, train_set_norm11_filtered[0.14*100], 10.0)
+p.add_viapoint(0.16, train_set_norm11_filtered[0.16*100], 10.0)
+
 
 
 # plot the trained model and generated traj
@@ -98,7 +114,7 @@ plt.plot(p.x, p.generate_trajectory(), 'g',linewidth=3)
 
 
 #plt.figure(4)
-plt.plot(p.x, train_set_norm11_filtered)
+plt.plot(p.x, train_set_norm11_filtered,'blue',linewidth=4)
 
 # show the plot
 #plt.legend()
