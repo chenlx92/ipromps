@@ -45,7 +45,9 @@ class NDProMP(object):
         for joint_demo_idx, joint_demo in enumerate(demonstration):
             self.promps[joint_demo_idx].add_demonstration(joint_demo)
         
-        self.demo_W_full = np.hstack([self.promps[0].W, self.promps[1].W])
+        self.demo_W_full = np.hstack([self.promps[0].W, self.promps[1].W, self.promps[2].W, self.promps[3].W, self.promps[4].W, 
+                                      self.promps[5].W, self.promps[6].W, self.promps[7].W, self.promps[8].W, self.promps[9].W, 
+                                        self.promps[10].W,self.promps[11].W,self.promps[12].W, self.promps[13].W, self.promps[14].W])
         
         self.mean_W_full = np.mean(self.demo_W_full,0)
         self.mean_W_full = self.mean_W_full.reshape([self.num_joints*self.nrBasis, 1])
@@ -102,6 +104,7 @@ class NDProMP(object):
         for promp in self.promps:
             promp.clear_viapoints()
 
+#    def add_viapoint(self, t, obsys, sigmay=[]):
     def add_viapoint(self, t, obsys, sigmay=1e-6):
         """
         Add a viapoint i.e. an observation at a specific time
@@ -112,11 +115,13 @@ class NDProMP(object):
         """
         if len(obsys) != self.num_joints:
             raise ValueError("The given viapoint has {} joints while num_joints={}".format(len(obsys), self.num_joints))
-
+            
         for joint_demo in range(self.num_joints):
+#            self.promps[joint_demo].add_viapoint(t, obsys[joint_demo], sigmay[joint_demo])
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo], sigmay)
             
         self.generate_trajectory()
+            
 
     def set_goal(self, obsy, sigmay=1e-6):
         if len(obsy) != self.num_joints:
@@ -142,25 +147,32 @@ class NDProMP(object):
         PhiT_full = np.array([])
         
         for num_viapoint in range( len(self.promps[0].viapoints) ):
-            # here is a trick for construct the observation matrix
             PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(self.promps[0].viapoints[num_viapoint]['t'], (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
-            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
-            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T)
+            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points            
+            # here is a trick for construct the observation matrix            
+            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, 
+                                                PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T)
 
-            y_observed = np.array( [[self.promps[0].viapoints[num_viapoint]['obsy']], [self.promps[1].viapoints[num_viapoint]['obsy']]] )
+            y_observed = np.array( [[self.promps[0].viapoints[num_viapoint]['obsy']], [self.promps[1].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[2].viapoints[num_viapoint]['obsy']], [self.promps[3].viapoints[num_viapoint]['obsy']],
+                                    [self.promps[4].viapoints[num_viapoint]['obsy']], [self.promps[5].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[6].viapoints[num_viapoint]['obsy']], [self.promps[7].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[8].viapoints[num_viapoint]['obsy']], [self.promps[9].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[10].viapoints[num_viapoint]['obsy']], [self.promps[11].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[12].viapoints[num_viapoint]['obsy']], [self.promps[13].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[14].viapoints[num_viapoint]['obsy']]] )
             
             aux = measurement_noise + np.dot( PhiT_full, np.dot(new_cov_w_full,PhiT_full.T) )
             K = np.dot( np.dot(new_cov_w_full,PhiT_full.T), np.linalg.inv(aux) )
             
             new_mean_w_full = new_mean_w_full + np.dot(K, y_observed - np.dot(PhiT_full,new_mean_w_full))
             new_cov_w_full = new_cov_w_full + np.dot(K, np.dot(PhiT_full,new_cov_w_full))
-
-        trajectory = np.dot( self.promps[0].Phi.T, new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T )
         
-        self.promps[0].meanW_updated = new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T[:,0]
-        self.promps[1].meanW_updated = new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T[:,1]
-        self.promps[0].sigmaW_updated = new_cov_w_full[0:30,0:30]
-        self.promps[1].sigmaW_updated = new_cov_w_full[30:60,30:60]
+        for i in range(15):
+            self.promps[i].meanW_updated = new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T[:,i]
+            self.promps[i].sigmaW_updated = new_cov_w_full[i*self.nrBasis:(1+i)*self.nrBasis, i*self.nrBasis:(i+1)*self.nrBasis]
+        
+        trajectory = np.dot( self.promps[0].Phi.T, new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T )
         
         return trajectory
         
@@ -195,7 +207,11 @@ class NDProMP(object):
         
         mean1 = np.dot(self.promps[1].Phi.T, self.promps[1].meanW_updated)
         std1 = 2 * np.sqrt(np.diag(np.dot(self.promps[1].Phi.T, np.dot(self.promps[1].sigmaW_updated, self.promps[1].Phi))))
-        plt.fill_between(x, mean1-std1, mean1 + std1, color='b', alpha=0.4)        
+        plt.fill_between(x, mean1-std1, mean1 + std1, color='b', alpha=0.4)
+        
+    def task_rec_mle(self, t, obsys, sigmay=1e-6):
+        pass
+        
         
 class ProMP(object):
     """
@@ -205,24 +221,26 @@ class ProMP(object):
         self.x = np.linspace(0, 1, num_samples) # the time value
         self.nrSamples = len(self.x)    # num of samples
         self.nrBasis = nrBasis          # num of basis func
-        self.sigmaSignal = float('inf') # regarded as measurement noise
+        self.sigmaSignal = float('inf') # the zero-mean noise, including modelling error and the system noise
         self.sigma = sigma              # the sigma of basis func
         self.C = np.arange(0,nrBasis)/(nrBasis-1.0) # the mean of basis func along the time
         self.Phi = np.exp(-.5 * (np.array(map(lambda x: x - self.C, np.tile(self.x, (self.nrBasis, 1)).T)).T ** 2 / (self.sigma ** 2)))
-        self.Phi /= sum(self.Phi)       # the basis func vector at diff time, regrad as (baisi func)11 X (sample len)100 matrix
+        self.Phi /= sum(self.Phi)       # the basis func vector at diff time, an (baisi func)11 X (sample len)100 matrix
 
         self.viapoints = []
         self.W = np.array([])
         self.nrTraj = 0
-        self.meanW = None
-        self.sigmaW = None
         self.Y = np.empty((0, self.nrSamples), float)   # the traj along time
         
-        # the param of output distribution
+        # the w probability distribution from training sets        
+        self.meanW = None
+        self.sigmaW = None
+        
+        # the param of output distribution from unit promp with the via points
         self.meanW_via = None
         self.sigmaW_via = None
         
-        # updated w
+        # the param of output distribution from ndpromp with via point and correlation amongs joints
         self.meanW_updated = None
         self.sigmaW_updated = None
 
@@ -343,12 +361,16 @@ class ProMP(object):
         
         sampW = np.random.multivariate_normal(newMu, randomness*newSigma, 1).T
         return np.dot(self.Phi.T, sampW)
+        
+    def compute_log_likelihood(obs=[]):
+        pass
 
     def plot(self, x=None, legend='', color='b'):
         mean = np.dot(self.Phi.T, self.meanW)
         x = self.x if x is None else x
         plt.plot(x, mean, color=color, label=legend, linewidth=3)
-        std = self.get_std()
+#        std = self.get_std()
+        std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
         plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.4)
         for viapoint_id, viapoint in enumerate(self.viapoints):
             x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
@@ -363,8 +385,7 @@ class ProMP(object):
 #        for viapoint_id, viapoint in enumerate(self.viapoints):
 #            x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
 #            plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
-
-        
+     
     def plot_updated(self, x=None, legend='', color='b'):
         mean0 = np.dot(self.Phi.T, self.meanW_updated)
         std0 = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_updated, self.Phi))))
@@ -374,4 +395,66 @@ class ProMP(object):
         for viapoint_id, viapoint in enumerate(self.viapoints):
             x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
             plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
+            
+class IProMP(NDProMP):
+    """
+    (n)-dimensional Interaction ProMP
+    """
+    def __init__(self, num_joints=15, nrBasis=11, sigma=0.05, num_samples=101):
+        NDProMP.__init__(self, num_joints=15, nrBasis=11, sigma=0.05, num_samples=101)
+        
+    def add_viapoint(self, t, obsys, sigmay=1e-6):
+        """
+        Add a viapoint i.e. an observation at a specific time
+        :param t: Time of observation
+        :param obsys: List of observations obys[joint] for each joint
+        :param sigmay:
+        :return:
+        """
+        if len(obsys) != self.num_joints:
+            raise ValueError("The given viapoint has {} joints while num_joints={}".format(len(obsys), self.num_joints))
+        for joint_demo in range(self.num_joints):
+            self.promps[joint_demo].add_viapoint(t, obsys[joint_demo], sigmay)
+        self.generate_trajectory()
+        
+    def generate_trajectory(self, randomness=1e-10):
+        
+        trajectory = []
+        
+        measurement_noise = np.eye(self.num_joints)*self.promps[0].viapoints[0]['sigmay']
+        new_mean_w_full = self.mean_W_full
+        new_cov_w_full = self.cov_W_full
+        PhiT_full = np.array([])
+        
+        for num_viapoint in range( len(self.promps[0].viapoints) ):
+            PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(self.promps[0].viapoints[num_viapoint]['t'], (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
+            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points            
+            # here is a trick for construct the observation matrix
+            zero_entry = np.zeros([1,11])
+            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, 
+                                                zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry)
+
+            y_observed = np.array( [[self.promps[0].viapoints[num_viapoint]['obsy']], [self.promps[1].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[2].viapoints[num_viapoint]['obsy']], [self.promps[3].viapoints[num_viapoint]['obsy']],
+                                    [self.promps[4].viapoints[num_viapoint]['obsy']], [self.promps[5].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[6].viapoints[num_viapoint]['obsy']], [self.promps[7].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[8].viapoints[num_viapoint]['obsy']], [self.promps[9].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[10].viapoints[num_viapoint]['obsy']], [self.promps[11].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[12].viapoints[num_viapoint]['obsy']], [self.promps[13].viapoints[num_viapoint]['obsy']], 
+                                    [self.promps[14].viapoints[num_viapoint]['obsy']]] )
+            
+            aux = measurement_noise + np.dot( PhiT_full, np.dot(new_cov_w_full,PhiT_full.T) )
+            K = np.dot( np.dot(new_cov_w_full,PhiT_full.T), np.linalg.inv(aux) )
+            
+            new_mean_w_full = new_mean_w_full + np.dot(K, y_observed - np.dot(PhiT_full,new_mean_w_full))
+            new_cov_w_full = new_cov_w_full + np.dot(K, np.dot(PhiT_full,new_cov_w_full))
+        
+        for i in range(15):
+            self.promps[i].meanW_updated = new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T[:,i]
+            self.promps[i].sigmaW_updated = new_cov_w_full[i*self.nrBasis:(1+i)*self.nrBasis, i*self.nrBasis:(i+1)*self.nrBasis]
+        
+        trajectory = np.dot( self.promps[0].Phi.T, new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T )
+        
+        return trajectory
+
             
