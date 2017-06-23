@@ -12,7 +12,7 @@ import ipromps
 plt.close('all')
 
 # the len of normalized traj
-len_normal = 101.0
+len_normal = 101
 # number of trajectoreis for training, here is 20
 nrDemo = 20
 
@@ -476,27 +476,35 @@ for i in range(7):
 
 # filter emg and joint data
 test_set_emg_norm_filtered = signal.medfilt(test_set_emg_norm, [11,1])
-test_set_joint_norm_filtered = signal.medfilt(train_set_joint_norm19, [11,1])
+test_set_joint_norm_filtered_1 = signal.medfilt(train_set_joint_norm19, [11,1])
 test_set_joint_norm_filtered = np.zeros([101,7])
 
 # stack emg and joint data as a new matrix
 test_set_norm_filtered = np.hstack((test_set_emg_norm_filtered, test_set_joint_norm_filtered ))
 
 # add via point as observation
-ndpromp.add_viapoint(0.00, test_set_norm_filtered[0.00*100,:], 0.1)
-ndpromp.add_viapoint(0.08, test_set_norm_filtered[0.08*100,:], 0.1)
-ndpromp.add_viapoint(0.18, test_set_norm_filtered[0.18*100,:], 0.1)
-ndpromp.add_viapoint(0.28, test_set_norm_filtered[0.28*100,:], 0.1)
+ndpromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 0.1)
+ndpromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
+#ndpromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.1)
+#ndpromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.1)
+#ndpromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.1)
+#ndpromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 0.1)
 
 # plot the updated distribution
 plt.figure(4)
 for i in range(8):
     plt.subplot(421+i)
-    plt.plot(ndpromp.x, test_set_emg_norm_filtered[:,i], color='r')
+    plt.plot(ndpromp.x, test_set_emg_norm_filtered[:,i], color='b', linewidth=3)
     ndpromp.promps[i].plot_updated(ndpromp.x, color='r')
 plt.figure(5)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ndpromp.x, test_set_joint_norm_filtered[:,i], color='r')
-    ndpromp.promps[8+i].plot_updated(ndpromp.x, color='r')
+    plt.plot(ndpromp.x, test_set_joint_norm_filtered_1[:,i], color='b', linewidth=3)
+    ndpromp.promps[8+i].plot_updated(ndpromp.x, color='r', via_show=False)
+    
+#obsys = []
+#obsys.append({"t": 0, "obsy": [0], "sigmay": 0.01})
+#ndpromp.task_rec(obsys=[], sigmay=1e-6)
 
+
+    

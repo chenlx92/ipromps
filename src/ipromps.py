@@ -209,7 +209,7 @@ class NDProMP(object):
         std1 = 2 * np.sqrt(np.diag(np.dot(self.promps[1].Phi.T, np.dot(self.promps[1].sigmaW_updated, self.promps[1].Phi))))
         plt.fill_between(x, mean1-std1, mean1 + std1, color='b', alpha=0.4)
         
-    def task_rec_mle(self, t, obsys, sigmay=1e-6):
+    def task_rec(self, obsys=[]):
         pass
         
         
@@ -251,8 +251,8 @@ class ProMP(object):
         self.nrTraj = len(self.Y)
         self.W = np.dot(np.linalg.inv(np.dot(self.Phi, self.Phi.T)), np.dot(self.Phi, self.Y.T)).T  # weights for each trajectory, MLE here
         self.meanW = np.mean(self.W, 0)                                                             # mean of weights
-#        w1 = np.array(map(lambda x: x - self.meanW.T, self.W))
-#        self.sigmaW = np.dot(w1.T, w1)/self.nrTraj              # covariance of weights
+        w1 = np.array(map(lambda x: x - self.meanW.T, self.W))
+        self.sigmaW = np.dot(w1.T, w1)/self.nrTraj              # covariance of weights
         self.sigmaW = np.cov((self.W).T)
         self.sigmaSignal = np.sum(np.sum((np.dot(self.W, self.Phi) - self.Y) ** 2)) / (self.nrTraj * self.nrSamples)
         
@@ -361,11 +361,12 @@ class ProMP(object):
         
         sampW = np.random.multivariate_normal(newMu, randomness*newSigma, 1).T
         return np.dot(self.Phi.T, sampW)
-        
-    def compute_log_likelihood(obs=[]):
-        pass
+
 
     def plot(self, x=None, legend='', color='b'):
+        """
+        plot the prior distribution from training sets
+        """
         mean = np.dot(self.Phi.T, self.meanW)
         x = self.x if x is None else x
         plt.plot(x, mean, color=color, label=legend, linewidth=3)
@@ -377,6 +378,9 @@ class ProMP(object):
             plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
     
     def plot_unit(self, x=None, legend='', color='b'):
+        """
+        plot the unit update ProMP, only valid from unit ProMP
+        """
         mean = np.dot(self.Phi.T, self.meanW_via)
         x = self.x if x is None else x
         plt.plot(x, mean, color=color, label=legend)
@@ -386,22 +390,31 @@ class ProMP(object):
 #            x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
 #            plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
      
-    def plot_updated(self, x=None, legend='', color='b'):
+    def plot_updated(self, x=None, legend='', color='b', via_show=True):
+        """
+        plot the updated distribution, only valid from NDProMP or IProMP
+        """
         mean0 = np.dot(self.Phi.T, self.meanW_updated)
         std0 = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_updated, self.Phi))))
-        plt.plot(x, mean0, linestyle='--', color=color, label=legend)        
+        plt.plot(x, mean0, linestyle='--', color=color, label=legend, linewidth=5)        
         plt.fill_between(x, mean0-std0, mean0+std0, color=color, alpha=0.4)
         
-        for viapoint_id, viapoint in enumerate(self.viapoints):
-            x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
-            plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
+        if via_show == True:
+            for viapoint_id, viapoint in enumerate(self.viapoints):
+                x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
+                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
+            
             
 class IProMP(NDProMP):
     """
-    (n)-dimensional Interaction ProMP
+    (n)-dimensional Interaction ProMP, derived from NDProMP
     """
     def __init__(self, num_joints=15, nrBasis=11, sigma=0.05, num_samples=101):
+        """
+        construct function, call NDProMP construct function onlu
+        """
         NDProMP.__init__(self, num_joints=15, nrBasis=11, sigma=0.05, num_samples=101)
+        
         
     def add_viapoint(self, t, obsys, sigmay=1e-6):
         """
@@ -416,6 +429,7 @@ class IProMP(NDProMP):
         for joint_demo in range(self.num_joints):
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo], sigmay)
         self.generate_trajectory()
+        
         
     def generate_trajectory(self, randomness=1e-10):
         
