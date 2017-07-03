@@ -4,7 +4,8 @@
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-import scipy.linalg 
+import scipy.linalg
+from scipy.stats import multivariate_normal as mvn
 
 class NDProMP(object):
     """
@@ -23,6 +24,7 @@ class NDProMP(object):
         self.promps = [ProMP(nrBasis, sigma, num_samples) for joint in range(num_joints)]
         self.colors = ['b', 'g', 'r', 'c', 'm', 'y', 'chocolate', 'deepskyblue', 'sage', 'darkviolet', 'crimson']
         
+        self.num_samples = num_samples
         self.demo_W_full = np.array([])
         self.mean_W_full = np.array([])
         self.cov_W_full = np.array([])
@@ -52,8 +54,8 @@ class NDProMP(object):
         self.mean_W_full = np.mean(self.demo_W_full,0)
         self.mean_W_full = self.mean_W_full.reshape([self.num_joints*self.nrBasis, 1])
         
-        self.cov_W_full = np.cov(self.demo_W_full.T)
-        self.cov_W_full = self.cov_W_full.reshape([self.num_joints*self.nrBasis, self.num_joints*self.nrBasis])
+        self.cov_W_full = np.cov(self.demo_W_full.T) if self.promps[0].nrTraj > 1 else None
+        self.cov_W_full = self.cov_W_full.reshape([self.num_joints*self.nrBasis, self.num_joints*self.nrBasis]) if self.promps[0].nrTraj > 1 else None
 
 
     @property
@@ -209,8 +211,6 @@ class NDProMP(object):
         std1 = 2 * np.sqrt(np.diag(np.dot(self.promps[1].Phi.T, np.dot(self.promps[1].sigmaW_updated, self.promps[1].Phi))))
         plt.fill_between(x, mean1-std1, mean1 + std1, color='b', alpha=0.4)
         
-    def task_rec(self, obsys=[]):
-        pass
         
         
 class ProMP(object):
@@ -251,9 +251,9 @@ class ProMP(object):
         self.nrTraj = len(self.Y)
         self.W = np.dot(np.linalg.inv(np.dot(self.Phi, self.Phi.T)), np.dot(self.Phi, self.Y.T)).T  # weights for each trajectory, MLE here
         self.meanW = np.mean(self.W, 0)                                                             # mean of weights
-        w1 = np.array(map(lambda x: x - self.meanW.T, self.W))
-        self.sigmaW = np.dot(w1.T, w1)/self.nrTraj              # covariance of weights
-        self.sigmaW = np.cov((self.W).T)
+        # w1 = np.array(map(lambda x: x - self.meanW.T, self.W))
+        # self.sigmaW = np.dot(w1.T, w1)/self.nrTraj              # covariance of weights
+        self.sigmaW = np.cov((self.W).T) if self.nrTraj>1 else None
         self.sigmaSignal = np.sum(np.sum((np.dot(self.W, self.Phi) - self.Y) ** 2)) / (self.nrTraj * self.nrSamples)
         
     @property
@@ -369,7 +369,7 @@ class ProMP(object):
         """
         mean = np.dot(self.Phi.T, self.meanW)
         x = self.x if x is None else x
-        plt.plot(x, mean, color=color, label=legend, linewidth=3)
+        # plt.plot(x, mean, color=color, label=legend, linewidth=3)
 #        std = self.get_std()
         std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
         plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.4)
@@ -389,7 +389,7 @@ class ProMP(object):
 #        for viapoint_id, viapoint in enumerate(self.viapoints):
 #            x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
 #            plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
-     
+
     def plot_updated(self, x=None, legend='', color='b', via_show=True):
         """
         plot the updated distribution, only valid from NDProMP or IProMP
@@ -414,6 +414,7 @@ class IProMP(NDProMP):
         construct function, call NDProMP construct function onlu
         """
         NDProMP.__init__(self, num_joints=15, nrBasis=11, sigma=0.05, num_samples=101)
+        self.obsy = []
         
         
     def add_viapoint(self, t, obsys, sigmay=1e-6):
@@ -468,7 +469,41 @@ class IProMP(NDProMP):
             self.promps[i].sigmaW_updated = new_cov_w_full[i*self.nrBasis:(1+i)*self.nrBasis, i*self.nrBasis:(i+1)*self.nrBasis]
         
         trajectory = np.dot( self.promps[0].Phi.T, new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T )
-        
         return trajectory
 
+    def add_obsy(self, t, obsy, sigmay=1e-6):
+        """
+        Add a observation to the trajectory
+        Observations and corresponding basis activations
+        :param t: timestamp of viapoint
+        :param obsy: observed value at time t
+        :param sigmay: observation variance (constraint strength)
+        :return:
+        """
+        self.obsy.append({"t": t, "obsy": obsy, "sigmay": sigmay})
             
+    def prob_obs(self):
+        """
+        compute the pdf of observation sets
+        :return: the total joint probability
+        """
+        PhiT = self.promps[0].Phi.T
+        # here is a trick for construct the observation matrix
+        PhiT_full = scipy.linalg.block_diag(PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT)
+        # the obsvation distribution from weight distribution
+        mean = np.dot( PhiT_full, self.mean_W_full )
+        cov = np.dot( PhiT_full, np.dot(self.cov_W_full, PhiT_full.T))
+        # compute the pdf of obsy
+        prob_full = 1.0
+        for obsy in self.obsy:
+            # the mean for EMG singnal observation distribution
+            mean_t = mean.reshape(self.num_joints, self.num_samples).T[np.int(obsy['t']*100),:]
+            mean_t = mean_t[0:8]
+            # the covariance for EMG singnal observation distribution
+            idx = np.arange(15)*101 + np.int(obsy['t']*100)
+            cov_t = cov[idx,:][:,idx]
+            cov_t = cov_t[0:8,0:8]            
+            # compute the prob of partial observation
+            prob = mvn.pdf(obsy['obsy'][0:8], mean_t, cov_t)
+            prob_full = prob_full*prob
+        return prob_full

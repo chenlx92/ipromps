@@ -5,20 +5,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.signal as signal
-#from sklearn.preprocessing import normalize
 import ipromps
 
-# close all windows
-plt.close('all')
-
-# the len of normalized traj
-len_normal = 101
-# number of trajectoreis for training, here is 20
-nrDemo = 20
+plt.close('all')    # close all windows
+len_normal = 101    # the len of normalized traj
+nrDemo = 20         # number of trajectoreis for training
 
 
 #########################################
-# read date sets
+# load date sets
 #########################################
 # read emg csv files
 dir_prefix = '../../recorder/datasets/joint_emg/hold/csv/'
@@ -66,187 +61,35 @@ train_set_emg_18 = np.float32(train_set_emg_18_pd.values[:,5:13])
 train_set_emg_19 = np.float32(train_set_emg_19_pd.values[:,5:13])
 test_set_emg = np.float32(test_set_emg_pd.values[:,5:13])
 
-## read joint csv files
-#train_set_joint_00_pd = pd.read_csv(dir_prefix + '2017-05-27-11-44-31-robot-joint_states_postproc.csv')
-#train_set_joint_00_pd = pd.read_csv(dir_prefix + '2017-05-27-11-44-31-robot-joint_states_postproc.csv')
-#train_set_joint_01_pd = pd.read_csv(dir_prefix + '2017-05-27-11-44-56-robot-joint_states_postproc.csv')
-#train_set_joint_02_pd = pd.read_csv(dir_prefix + '2017-05-27-11-45-20-robot-joint_states_postproc.csv')
-#train_set_joint_03_pd = pd.read_csv(dir_prefix + '2017-05-27-11-46-31-robot-joint_states_postproc.csv')
-#train_set_joint_04_pd = pd.read_csv(dir_prefix + '2017-05-27-11-46-55-robot-joint_states_postproc.csv')
-#train_set_joint_05_pd = pd.read_csv(dir_prefix + '2017-05-27-11-47-26-robot-joint_states_postproc.csv')
-#train_set_joint_06_pd = pd.read_csv(dir_prefix + '2017-05-27-11-47-53-robot-joint_states_postproc.csv')
-#train_set_joint_07_pd = pd.read_csv(dir_prefix + '2017-05-27-11-48-15-robot-joint_states_postproc.csv')
-#train_set_joint_08_pd = pd.read_csv(dir_prefix + '2017-05-27-11-48-36-robot-joint_states_postproc.csv')
-#train_set_joint_09_pd = pd.read_csv(dir_prefix + '2017-05-27-11-48-59-robot-joint_states_postproc.csv')
-#train_set_joint_10_pd = pd.read_csv(dir_prefix + '2017-05-27-11-49-27-robot-joint_states_postproc.csv')
-#train_set_joint_11_pd = pd.read_csv(dir_prefix + '2017-05-27-11-49-55-robot-joint_states_postproc.csv')
-#train_set_joint_12_pd = pd.read_csv(dir_prefix + '2017-05-27-11-50-19-robot-joint_states_postproc.csv')
-#train_set_joint_13_pd = pd.read_csv(dir_prefix + '2017-05-27-11-50-42-robot-joint_states_postproc.csv')
-#train_set_joint_14_pd = pd.read_csv(dir_prefix + '2017-05-27-11-51-10-robot-joint_states_postproc.csv')
-#train_set_joint_15_pd = pd.read_csv(dir_prefix + '2017-05-27-11-51-32-robot-joint_states_postproc.csv')
-#train_set_joint_16_pd = pd.read_csv(dir_prefix + '2017-05-27-11-51-59-robot-joint_states_postproc.csv')
-#train_set_joint_17_pd = pd.read_csv(dir_prefix + '2017-05-27-11-52-23-robot-joint_states_postproc.csv')
-#train_set_joint_18_pd = pd.read_csv(dir_prefix + '2017-05-27-11-52-48-robot-joint_states_postproc.csv')
-#train_set_joint_19_pd = pd.read_csv(dir_prefix + '2017-05-27-11-53-09-robot-joint_states_postproc.csv')
-#test_set_joint_pd = pd.read_csv(dir_prefix + '2017-05-27-11-53-38-robot-joint_states_postproc.csv')
-## invert the object to float32 for easy computing
-## joint 0
-#train_set_joint_00=np.array([])
-#for i in range(len(train_set_joint_00_pd.values[:,6])):
-#    train_set_joint_00 = np.hstack(( train_set_joint_00, np.fromstring(train_set_joint_00_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_00 = train_set_joint_00.reshape((len(train_set_joint_00_pd.values[:,6]), 17))
-## joint 1
-#train_set_joint_01=np.array([])
-#for i in range(len(train_set_joint_01_pd.values[:,6])):
-#    train_set_joint_01 = np.hstack(( train_set_joint_01, np.fromstring(train_set_joint_01_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_01 = train_set_joint_01.reshape((len(train_set_joint_01_pd.values[:,6]), 17))
-## joint 2
-#train_set_joint_02=np.array([])
-#for i in range(len(train_set_joint_02_pd.values[:,6])):
-#    train_set_joint_02 = np.hstack(( train_set_joint_02, np.fromstring(train_set_joint_02_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_02 = train_set_joint_02.reshape((len(train_set_joint_02_pd.values[:,6]), 17))
-## joint 3
-#train_set_joint_03=np.array([])
-#for i in range(len(train_set_joint_03_pd.values[:,6])):
-#    train_set_joint_03 = np.hstack(( train_set_joint_03, np.fromstring(train_set_joint_03_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_03 = train_set_joint_03.reshape((len(train_set_joint_03_pd.values[:,6]), 17))
-## joint 4
-#train_set_joint_04=np.array([])
-#for i in range(len(train_set_joint_04_pd.values[:,6])):
-#    train_set_joint_04 = np.hstack(( train_set_joint_04, np.fromstring(train_set_joint_04_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_04 = train_set_joint_04.reshape((len(train_set_joint_04_pd.values[:,6]), 17))
-## joint 5
-#train_set_joint_05=np.array([])
-#for i in range(len(train_set_joint_05_pd.values[:,6])):
-#    train_set_joint_05 = np.hstack(( train_set_joint_05, np.fromstring(train_set_joint_05_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_05 = train_set_joint_05.reshape((len(train_set_joint_05_pd.values[:,6]), 17))
-## joint 6
-#train_set_joint_06=np.array([])
-#for i in range(len(train_set_joint_06_pd.values[:,6])):
-#    train_set_joint_06 = np.hstack(( train_set_joint_06, np.fromstring(train_set_joint_06_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_06 = train_set_joint_06.reshape((len(train_set_joint_06_pd.values[:,6]), 17))
-## joint 7
-#train_set_joint_07=np.array([])
-#for i in range(len(train_set_joint_07_pd.values[:,6])):
-#    train_set_joint_07 = np.hstack(( train_set_joint_07, np.fromstring(train_set_joint_07_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_07 = train_set_joint_07.reshape((len(train_set_joint_07_pd.values[:,6]), 17))
-## joint 8
-#train_set_joint_08=np.array([])
-#for i in range(len(train_set_joint_08_pd.values[:,6])):
-#    train_set_joint_08 = np.hstack(( train_set_joint_08, np.fromstring(train_set_joint_08_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_08 = train_set_joint_08.reshape((len(train_set_joint_08_pd.values[:,6]), 17))
-## joint 9
-#train_set_joint_09=np.array([])
-#for i in range(len(train_set_joint_09_pd.values[:,6])):
-#    train_set_joint_09 = np.hstack(( train_set_joint_09, np.fromstring(train_set_joint_09_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_09 = train_set_joint_09.reshape((len(train_set_joint_09_pd.values[:,6]), 17))
-## joint 10
-#train_set_joint_10=np.array([])
-#for i in range(len(train_set_joint_10_ptest_set_norm_filtered[0.00*100,:]d.values[:,6])):
-#    train_set_joint_10 = np.hstack(( train_set_joint_10, np.fromstring(train_set_joint_10_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_10 = train_set_joint_10.reshape((len(train_set_joint_10_pd.values[:,6]), 17))
-## joint 11
-#train_set_joint_11=np.array([])
-#for i in range(len(train_set_joint_11_pd.values[:,6])):
-#    train_set_joint_11 = np.hstack(( train_set_joint_11, np.fromstring(train_set_joint_11_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_11 = train_set_joint_11.reshape((len(train_set_joint_11_pd.values[:,6]), 17))
-## joint 12
-#train_set_joint_12=np.array([])
-#for i in range(len(train_set_joint_12_pd.values[:,6])):
-#    train_set_joint_12 = np.hstack(( train_set_joint_12, np.fromstring(train_set_joint_12_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_12 = train_set_joint_12.reshape((len(train_set_joint_12_pd.values[:,6]), 17))
-## joint 13
-#train_set_joint_13=np.array([])
-#for i in range(len(train_set_joint_13_pd.values[:,6])):
-#    train_set_joint_13 = np.hstack(( train_set_joint_13, np.fromstring(train_set_joint_13_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_13 = train_set_joint_13.reshape((len(train_set_joint_13_pd.values[:,6]), 17))
-## joint 14
-#train_set_joint_14=np.array([])
-#for i in range(len(train_set_joint_14_pd.values[:,6])):
-#    train_set_joint_14 = np.hstack(( train_set_joint_14, np.fromstring(train_set_joint_14_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_14 = train_set_joint_14.reshape((len(train_set_joint_14_pd.values[:,6]), 17))
-## joint 15
-#train_set_joint_15=np.array([])
-#for i in range(len(train_set_joint_15_pd.values[:,6])):
-#    train_set_joint_15 = np.hstack(( train_set_joint_15, np.fromstring(train_set_joint_15_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_15 = train_set_joint_15.reshape((len(train_set_joint_15_pd.values[:,6]), 17))
-## joint 16
-#train_set_joint_16=np.array([])
-#for i in range(len(train_set_joint_16_pd.values[:,6])):
-#    train_set_joint_16 = np.hstack(( train_set_joint_16, np.fromstring(train_set_joint_16_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_16 = train_set_joint_16.reshape((len(train_set_joint_16_pd.values[:,6]), 17))
-## joint 17
-#train_set_joint_17=np.array([])
-#for i in range(len(train_set_joint_17_pd.values[:,6])):
-#    train_set_joint_17 = np.hstack(( train_set_joint_17, np.fromstring(train_set_joint_17_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_17 = train_set_joint_17.reshape((len(train_set_joint_17_pd.values[:,6]), 17))
-## joint 18
-#train_set_joint_18=np.array([])
-#for i in range(len(train_set_joint_18_pd.values[:,6])):
-#    train_set_joint_18 = np.hstack(( train_set_joint_18, np.fromstring(train_set_joint_18_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_18 = train_set_joint_18.reshape((len(train_set_joint_18_pd.values[:,6]), 17))
-## joint 19
-#train_set_joint_19=np.array([])
-#for i in range(len(train_set_joint_19_pd.values[:,6])):
-#    train_set_joint_19 = np.hstack(( train_set_joint_19, np.fromstring(train_set_joint_19_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#train_set_joint_19 = train_set_joint_19.reshape((len(train_set_joint_19_pd.values[:,6]), 17))
-## joint test_set_joint_pd
-#test_set_joint=np.array([])
-#for i in range(len(test_set_joint_pd.values[:,6])):
-#    test_set_joint = np.hstack(( test_set_joint, np.fromstring(test_set_joint_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
-#test_set_joint = test_set_joint.reshape((len(test_set_joint_pd.values[:,6]), 17))
-#
-#np.savetxt(dir_prefix +'train_set_joint_00.txt',train_set_joint_00)
-#np.savetxt(dir_prefix +'train_set_joint_01.txt',train_set_joint_01)
-#np.savetxt(dir_prefix +'train_set_joint_02.txt',train_set_joint_02)
-#np.savetxt(dir_prefix +'train_set_joint_03.txt',train_set_joint_03)
-#np.savetxt(dir_prefix +'train_set_joint_04.txt',train_set_joint_04)
-#np.savetxt(dir_prefix +'train_set_joint_05.txt',train_set_joint_05)
-#np.savetxt(dir_prefix +'train_set_joint_06.txt',train_set_joint_06)
-#np.savetxt(dir_prefix +'train_set_joint_07.txt',train_set_joint_07)
-#np.savetxt(dir_prefix +'train_set_joint_08.txt',train_set_joint_08)
-#np.savetxt(dir_prefix +'train_set_joint_09.txt',train_set_joint_09)
-#np.savetxt(dir_prefix +'train_set_joint_10.txt',train_set_joint_10)
-#np.savetxt(dir_prefix +'train_set_joint_11.txt',train_set_joint_11)
-#np.savetxt(dir_prefix +'train_set_joint_12.txt',train_set_joint_12)
-#np.savetxt(dir_prefix +'train_set_joint_13.txt',train_set_joint_13)
-#np.savetxt(dir_prefix +'train_set_joint_14.txt',train_set_joint_14)
-#np.savetxt(dir_prefix +'train_set_joint_15.txt',train_set_joint_15)
-#np.savetxt(dir_prefix +'train_set_joint_16.txt',train_set_joint_16)
-#np.savetxt(dir_prefix +'train_set_joint_17.txt',train_set_joint_17)
-#np.savetxt(dir_prefix +'train_set_joint_18.txt',train_set_joint_18)
-#np.savetxt(dir_prefix +'train_set_joint_19.txt',train_set_joint_19)
-#np.savetxt(dir_prefix +'test_set_joint.txt',test_set_joint)
-
 # read the joint txt file for fast reading
-train_set_joint_00 = np.loadtxt(dir_prefix +'train_set_joint_00.txt')
-train_set_joint_01 = np.loadtxt(dir_prefix +'train_set_joint_01.txt')
-train_set_joint_02 = np.loadtxt(dir_prefix +'train_set_joint_02.txt')
-train_set_joint_03 = np.loadtxt(dir_prefix +'train_set_joint_03.txt')
-train_set_joint_04 = np.loadtxt(dir_prefix +'train_set_joint_04.txt')
-train_set_joint_05 = np.loadtxt(dir_prefix +'train_set_joint_05.txt')
-train_set_joint_06 = np.loadtxt(dir_prefix +'train_set_joint_06.txt')
-train_set_joint_07 = np.loadtxt(dir_prefix +'train_set_joint_07.txt')
-train_set_joint_08 = np.loadtxt(dir_prefix +'train_set_joint_08.txt')
-train_set_joint_09 = np.loadtxt(dir_prefix +'train_set_joint_09.txt')
-train_set_joint_10 = np.loadtxt(dir_prefix +'train_set_joint_10.txt')
-train_set_joint_11 = np.loadtxt(dir_prefix +'train_set_joint_11.txt')
-train_set_joint_12 = np.loadtxt(dir_prefix +'train_set_joint_12.txt')
-train_set_joint_13 = np.loadtxt(dir_prefix +'train_set_joint_13.txt')
-train_set_joint_14 = np.loadtxt(dir_prefix +'train_set_joint_14.txt')
-train_set_joint_15 = np.loadtxt(dir_prefix +'train_set_joint_15.txt')
-train_set_joint_16 = np.loadtxt(dir_prefix +'train_set_joint_16.txt')
-train_set_joint_17 = np.loadtxt(dir_prefix +'train_set_joint_17.txt')
-train_set_joint_18 = np.loadtxt(dir_prefix +'train_set_joint_18.txt')
-train_set_joint_19 = np.loadtxt(dir_prefix +'train_set_joint_19.txt')
-test_set_joint = np.loadtxt(dir_prefix +'test_set_joint.txt')
+train_set_joint_00 = np.loadtxt(dir_prefix + 'train_set_joint_00.txt')
+train_set_joint_01 = np.loadtxt(dir_prefix + 'train_set_joint_01.txt')
+train_set_joint_02 = np.loadtxt(dir_prefix + 'train_set_joint_02.txt')
+train_set_joint_03 = np.loadtxt(dir_prefix + 'train_set_joint_03.txt')
+train_set_joint_04 = np.loadtxt(dir_prefix + 'train_set_joint_04.txt')
+train_set_joint_05 = np.loadtxt(dir_prefix + 'train_set_joint_05.txt')
+train_set_joint_06 = np.loadtxt(dir_prefix + 'train_set_joint_06.txt')
+train_set_joint_07 = np.loadtxt(dir_prefix + 'train_set_joint_07.txt')
+train_set_joint_08 = np.loadtxt(dir_prefix + 'train_set_joint_08.txt')
+train_set_joint_09 = np.loadtxt(dir_prefix + 'train_set_joint_09.txt')
+train_set_joint_10 = np.loadtxt(dir_prefix + 'train_set_joint_10.txt')
+train_set_joint_11 = np.loadtxt(dir_prefix + 'train_set_joint_11.txt')
+train_set_joint_12 = np.loadtxt(dir_prefix + 'train_set_joint_12.txt')
+train_set_joint_13 = np.loadtxt(dir_prefix + 'train_set_joint_13.txt')
+train_set_joint_14 = np.loadtxt(dir_prefix + 'train_set_joint_14.txt')
+train_set_joint_15 = np.loadtxt(dir_prefix + 'train_set_joint_15.txt')
+train_set_joint_16 = np.loadtxt(dir_prefix + 'train_set_joint_16.txt')
+train_set_joint_17 = np.loadtxt(dir_prefix + 'train_set_joint_17.txt')
+train_set_joint_18 = np.loadtxt(dir_prefix + 'train_set_joint_18.txt')
+train_set_joint_19 = np.loadtxt(dir_prefix + 'train_set_joint_19.txt')
+test_set_joint = np.loadtxt(dir_prefix + 'test_set_joint.txt')
 
-##########################################
-## plot raw data
-##########################################
-## plot the origin emg data
-#plt.figure(0)
-#for ch_ex in range(8):
+# #########################################
+# # plot raw data
+# #########################################
+# # plot the origin emg data
+# plt.figure(0)
+# for ch_ex in range(8):
 #    plt.subplot(421+ch_ex)
 #    plt.plot(range(len(train_set_emg_00)), train_set_emg_00[:,ch_ex])
 #    plt.plot(range(len(train_set_emg_01)), train_set_emg_01[:,ch_ex])
@@ -268,9 +111,9 @@ test_set_joint = np.loadtxt(dir_prefix +'test_set_joint.txt')
 #    plt.plot(range(len(train_set_emg_17)), train_set_emg_17[:,ch_ex])
 #    plt.plot(range(len(train_set_emg_18)), train_set_emg_18[:,ch_ex])
 #    plt.plot(range(len(train_set_emg_19)), train_set_emg_19[:,ch_ex])
-## plot the origin joint data
-#plt.figure(1)
-#for ch_ex in range(7):
+# # plot the origin joint data
+# plt.figure(1)
+# for ch_ex in range(7):
 #    plt.subplot(711+ch_ex)
 #    plt.plot(range(len(train_set_joint_00)), train_set_joint_00[:,9+ch_ex])
 #    plt.plot(range(len(train_set_joint_01)), train_set_joint_01[:,9+ch_ex])
@@ -294,7 +137,10 @@ test_set_joint = np.loadtxt(dir_prefix +'test_set_joint.txt')
 #    plt.plot(range(len(train_set_joint_19)), train_set_joint_19[:,9+ch_ex])
 
 
-# resampling the emg signals
+#########################################
+# resampling the signals for experiencing the same duration
+#########################################
+# resampling emg signals
 train_set_emg_norm00=np.array([]);train_set_emg_norm01=np.array([]);train_set_emg_norm02=np.array([]);train_set_emg_norm03=np.array([]);train_set_emg_norm04=np.array([]);
 train_set_emg_norm05=np.array([]);train_set_emg_norm06=np.array([]);train_set_emg_norm07=np.array([]);train_set_emg_norm08=np.array([]);train_set_emg_norm09=np.array([]);
 train_set_emg_norm10=np.array([]);train_set_emg_norm11=np.array([]);train_set_emg_norm12=np.array([]);train_set_emg_norm13=np.array([]);train_set_emg_norm14=np.array([]);
@@ -347,8 +193,7 @@ train_set_emg_norm_full = np.array([train_set_emg_norm00,train_set_emg_norm01,tr
                                     train_set_emg_norm05,train_set_emg_norm06,train_set_emg_norm07,train_set_emg_norm08,train_set_emg_norm09,
                                     train_set_emg_norm10,train_set_emg_norm11,train_set_emg_norm12,train_set_emg_norm13,train_set_emg_norm14,
                                     train_set_emg_norm15,train_set_emg_norm16,train_set_emg_norm17,train_set_emg_norm18,train_set_emg_norm19])
-
-# resampling the joint signals
+# resampling joint signals
 train_set_joint_norm00=np.array([]);train_set_joint_norm01=np.array([]);train_set_joint_norm02=np.array([]);train_set_joint_norm03=np.array([]);train_set_joint_norm04=np.array([]);
 train_set_joint_norm05=np.array([]);train_set_joint_norm06=np.array([]);train_set_joint_norm07=np.array([]);train_set_joint_norm08=np.array([]);train_set_joint_norm09=np.array([]);
 train_set_joint_norm10=np.array([]);train_set_joint_norm11=np.array([]);train_set_joint_norm12=np.array([]);train_set_joint_norm13=np.array([]);train_set_joint_norm14=np.array([]);
@@ -403,108 +248,110 @@ train_set_joint_norm_full = np.array([train_set_joint_norm00, train_set_joint_no
                                       train_set_joint_norm15, train_set_joint_norm16, train_set_joint_norm17, train_set_joint_norm18, train_set_joint_norm19])
 
 
-##########################################
-## plot norm data
-##########################################
-## plot the norm emg data
-#plt.figure(2)
-#for ch_ex in range(8):
-#    plt.subplot(421+ch_ex)
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm00[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm01[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm02[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm03[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm04[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm05[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm06[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm07[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm08[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm09[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm10[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm11[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm12[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm13[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm14[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm15[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm16[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm17[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm18[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm19[:,ch_ex])
-## plot the norm joint data
-#plt.figure(3)
-#for ch_ex in range(7):
-#    plt.subplot(711+ch_ex)
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm00[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm01[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm02[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm03[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm04[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm05[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm06[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm07[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm08[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm09[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm10[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm11[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm12[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm13[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm14[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm15[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm16[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm17[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm18[:,ch_ex])
-#    plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm19[:,ch_ex])
+#########################################
+# plot norm data
+#########################################
+# plot the norm emg data
+plt.figure(2)
+for ch_ex in range(8):
+   plt.subplot(421+ch_ex)
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm00[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm01[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm02[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm03[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm04[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm05[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm06[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm07[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm08[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm09[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm10[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm11[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm12[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm13[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm14[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm15[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm16[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm17[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm18[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_emg_norm19[:,ch_ex])
+# plot the norm joint data
+plt.figure(3)
+for ch_ex in range(7):
+   plt.subplot(711+ch_ex)
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm00[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm01[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm02[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm03[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm04[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm05[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm06[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm07[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm08[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm09[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm10[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm11[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm12[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm13[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm14[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm15[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm16[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm17[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm18[:,ch_ex])
+   plt.plot(np.arange(0,1.01,0.01), train_set_joint_norm19[:,ch_ex])
 
 
-# create a n-dimensional ProMP
-ndpromp = ipromps.IProMP(num_joints=15, nrBasis=11, sigma=0.05, num_samples=101)
+# create a n-dimensional iProMP
+ipromp = ipromps.IProMP(num_joints=15, nrBasis=11, sigma=0.05, num_samples=101)
 
 # add demostration
-for indx in range(0, nrDemo):
-    demo_temp = np.hstack([ train_set_emg_norm_full[indx], train_set_joint_norm_full[indx] ])
-    ndpromp.add_demonstration(demo_temp)
+for idx in range(0, nrDemo):
+    demo_temp = np.hstack([train_set_emg_norm_full[idx], train_set_joint_norm_full[idx]])
+    ipromp.add_demonstration(demo_temp)
 
 # plot the prior distributioin
 plt.figure(4)
 for i in range(8):
     plt.subplot(421+i)
-    ndpromp.promps[i].plot(np.arange(0,1.01,0.01), color='g')
+    ipromp.promps[i].plot(np.arange(0,1.01,0.01), color='g')
 plt.figure(5)
 for i in range(7):
     plt.subplot(711+i)
-    ndpromp.promps[8+i].plot(np.arange(0,1.01,0.01), color='g')
+    ipromp.promps[8+i].plot(np.arange(0,1.01,0.01), color='g')
 
 # filter emg and joint data
-test_set_emg_norm_filtered = signal.medfilt(test_set_emg_norm, [11,1])
-test_set_joint_norm_filtered_1 = signal.medfilt(train_set_joint_norm19, [11,1])
-test_set_joint_norm_filtered = np.zeros([101,7])
+# test_set_emg_norm_filtered = signal.medfilt(test_set_emg_norm, [11,1])
+# test_set_joint_norm_filtered = signal.medfilt(test_set_joint_norm, [5,1])
+test_set_emg_norm_filtered = signal.medfilt(train_set_emg_norm19, [11,1])
+test_set_joint_norm_filtered = signal.medfilt(train_set_joint_norm19, [5,1])
+test_set_joint_norm_filtered_zero = np.zeros([101,7])
 
 # stack emg and joint data as a new matrix
-test_set_norm_filtered = np.hstack((test_set_emg_norm_filtered, test_set_joint_norm_filtered ))
+test_set_norm_filtered = np.hstack((test_set_emg_norm_filtered, test_set_joint_norm_filtered_zero))
 
 # add via point as observation
-ndpromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 0.1)
-ndpromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
-#ndpromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.1)
-#ndpromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.1)
-#ndpromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.1)
-#ndpromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 0.1)
+ipromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 0.1)
+ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
+# ipromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.1)
+# ipromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.1)
+# ipromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.1)
+# ipromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 0.1)
 
 # plot the updated distribution
 plt.figure(4)
 for i in range(8):
     plt.subplot(421+i)
-    plt.plot(ndpromp.x, test_set_emg_norm_filtered[:,i], color='b', linewidth=3)
-    ndpromp.promps[i].plot_updated(ndpromp.x, color='r')
+    plt.plot(ipromp.x, test_set_emg_norm_filtered[:,i], color='b', linewidth=3)
+    ipromp.promps[i].plot_updated(ipromp.x, color='r')
 plt.figure(5)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ndpromp.x, test_set_joint_norm_filtered_1[:,i], color='b', linewidth=3)
-    ndpromp.promps[8+i].plot_updated(ndpromp.x, color='r', via_show=False)
-    
-#obsys = []
-#obsys.append({"t": 0, "obsy": [0], "sigmay": 0.01})
-#ndpromp.task_rec(obsys=[], sigmay=1e-6)
+    plt.plot(ipromp.x, test_set_joint_norm_filtered[:,i], color='b', linewidth=3)
+    ipromp.promps[8+i].plot_updated(ipromp.x, color='r', via_show=False)
 
+ipromp.add_obsy(t=0.00, obsy=test_set_norm_filtered[0,:], sigmay=0.1)
+ipromp.add_obsy(t=0.08, obsy=test_set_norm_filtered[8,:], sigmay=0.1)
+prob = ipromp.prob_obs()
+print prob
 
-    
+plt.show()
