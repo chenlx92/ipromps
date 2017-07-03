@@ -66,6 +66,158 @@ train_set_emg_18 = np.float32(train_set_emg_18_pd.values[:,5:13])
 train_set_emg_19 = np.float32(train_set_emg_19_pd.values[:,5:13])
 test_set_emg = np.float32(test_set_emg_pd.values[:,5:13])
 
+## read joint csv files
+#train_set_joint_00_pd = pd.read_csv(dir_prefix + '2017-05-27-11-44-31-robot-joint_states_postproc.csv')
+#train_set_joint_00_pd = pd.read_csv(dir_prefix + '2017-05-27-11-44-31-robot-joint_states_postproc.csv')
+#train_set_joint_01_pd = pd.read_csv(dir_prefix + '2017-05-27-11-44-56-robot-joint_states_postproc.csv')
+#train_set_joint_02_pd = pd.read_csv(dir_prefix + '2017-05-27-11-45-20-robot-joint_states_postproc.csv')
+#train_set_joint_03_pd = pd.read_csv(dir_prefix + '2017-05-27-11-46-31-robot-joint_states_postproc.csv')
+#train_set_joint_04_pd = pd.read_csv(dir_prefix + '2017-05-27-11-46-55-robot-joint_states_postproc.csv')
+#train_set_joint_05_pd = pd.read_csv(dir_prefix + '2017-05-27-11-47-26-robot-joint_states_postproc.csv')
+#train_set_joint_06_pd = pd.read_csv(dir_prefix + '2017-05-27-11-47-53-robot-joint_states_postproc.csv')
+#train_set_joint_07_pd = pd.read_csv(dir_prefix + '2017-05-27-11-48-15-robot-joint_states_postproc.csv')
+#train_set_joint_08_pd = pd.read_csv(dir_prefix + '2017-05-27-11-48-36-robot-joint_states_postproc.csv')
+#train_set_joint_09_pd = pd.read_csv(dir_prefix + '2017-05-27-11-48-59-robot-joint_states_postproc.csv')
+#train_set_joint_10_pd = pd.read_csv(dir_prefix + '2017-05-27-11-49-27-robot-joint_states_postproc.csv')
+#train_set_joint_11_pd = pd.read_csv(dir_prefix + '2017-05-27-11-49-55-robot-joint_states_postproc.csv')
+#train_set_joint_12_pd = pd.read_csv(dir_prefix + '2017-05-27-11-50-19-robot-joint_states_postproc.csv')
+#train_set_joint_13_pd = pd.read_csv(dir_prefix + '2017-05-27-11-50-42-robot-joint_states_postproc.csv')
+#train_set_joint_14_pd = pd.read_csv(dir_prefix + '2017-05-27-11-51-10-robot-joint_states_postproc.csv')
+#train_set_joint_15_pd = pd.read_csv(dir_prefix + '2017-05-27-11-51-32-robot-joint_states_postproc.csv')
+#train_set_joint_16_pd = pd.read_csv(dir_prefix + '2017-05-27-11-51-59-robot-joint_states_postproc.csv')
+#train_set_joint_17_pd = pd.read_csv(dir_prefix + '2017-05-27-11-52-23-robot-joint_states_postproc.csv')
+#train_set_joint_18_pd = pd.read_csv(dir_prefix + '2017-05-27-11-52-48-robot-joint_states_postproc.csv')
+#train_set_joint_19_pd = pd.read_csv(dir_prefix + '2017-05-27-11-53-09-robot-joint_states_postproc.csv')
+#test_set_joint_pd = pd.read_csv(dir_prefix + '2017-05-27-11-53-38-robot-joint_states_postproc.csv')
+## invert the object to float32 for easy computing
+## joint 0
+#train_set_joint_00=np.array([])
+#for i in range(len(train_set_joint_00_pd.values[:,6])):
+#    train_set_joint_00 = np.hstack(( train_set_joint_00, np.fromstring(train_set_joint_00_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_00 = train_set_joint_00.reshape((len(train_set_joint_00_pd.values[:,6]), 17))
+## joint 1
+#train_set_joint_01=np.array([])
+#for i in range(len(train_set_joint_01_pd.values[:,6])):
+#    train_set_joint_01 = np.hstack(( train_set_joint_01, np.fromstring(train_set_joint_01_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_01 = train_set_joint_01.reshape((len(train_set_joint_01_pd.values[:,6]), 17))
+## joint 2
+#train_set_joint_02=np.array([])
+#for i in range(len(train_set_joint_02_pd.values[:,6])):
+#    train_set_joint_02 = np.hstack(( train_set_joint_02, np.fromstring(train_set_joint_02_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_02 = train_set_joint_02.reshape((len(train_set_joint_02_pd.values[:,6]), 17))
+## joint 3
+#train_set_joint_03=np.array([])
+#for i in range(len(train_set_joint_03_pd.values[:,6])):
+#    train_set_joint_03 = np.hstack(( train_set_joint_03, np.fromstring(train_set_joint_03_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_03 = train_set_joint_03.reshape((len(train_set_joint_03_pd.values[:,6]), 17))
+## joint 4
+#train_set_joint_04=np.array([])
+#for i in range(len(train_set_joint_04_pd.values[:,6])):
+#    train_set_joint_04 = np.hstack(( train_set_joint_04, np.fromstring(train_set_joint_04_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_04 = train_set_joint_04.reshape((len(train_set_joint_04_pd.values[:,6]), 17))
+## joint 5
+#train_set_joint_05=np.array([])
+#for i in range(len(train_set_joint_05_pd.values[:,6])):
+#    train_set_joint_05 = np.hstack(( train_set_joint_05, np.fromstring(train_set_joint_05_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_05 = train_set_joint_05.reshape((len(train_set_joint_05_pd.values[:,6]), 17))
+## joint 6
+#train_set_joint_06=np.array([])
+#for i in range(len(train_set_joint_06_pd.values[:,6])):
+#    train_set_joint_06 = np.hstack(( train_set_joint_06, np.fromstring(train_set_joint_06_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_06 = train_set_joint_06.reshape((len(train_set_joint_06_pd.values[:,6]), 17))
+## joint 7
+#train_set_joint_07=np.array([])
+#for i in range(len(train_set_joint_07_pd.values[:,6])):
+#    train_set_joint_07 = np.hstack(( train_set_joint_07, np.fromstring(train_set_joint_07_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_07 = train_set_joint_07.reshape((len(train_set_joint_07_pd.values[:,6]), 17))
+## joint 8
+#train_set_joint_08=np.array([])
+#for i in range(len(train_set_joint_08_pd.values[:,6])):
+#    train_set_joint_08 = np.hstack(( train_set_joint_08, np.fromstring(train_set_joint_08_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_08 = train_set_joint_08.reshape((len(train_set_joint_08_pd.values[:,6]), 17))
+## joint 9
+#train_set_joint_09=np.array([])
+#for i in range(len(train_set_joint_09_pd.values[:,6])):
+#    train_set_joint_09 = np.hstack(( train_set_joint_09, np.fromstring(train_set_joint_09_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_09 = train_set_joint_09.reshape((len(train_set_joint_09_pd.values[:,6]), 17))
+## joint 10
+#train_set_joint_10=np.array([])
+#for i in range(len(train_set_joint_10_ptest_set_norm_filtered[0.00*100,:]d.values[:,6])):
+#    train_set_joint_10 = np.hstack(( train_set_joint_10, np.fromstring(train_set_joint_10_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_10 = train_set_joint_10.reshape((len(train_set_joint_10_pd.values[:,6]), 17))
+## joint 11
+#train_set_joint_11=np.array([])
+#for i in range(len(train_set_joint_11_pd.values[:,6])):
+#    train_set_joint_11 = np.hstack(( train_set_joint_11, np.fromstring(train_set_joint_11_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_11 = train_set_joint_11.reshape((len(train_set_joint_11_pd.values[:,6]), 17))
+## joint 12
+#train_set_joint_12=np.array([])
+#for i in range(len(train_set_joint_12_pd.values[:,6])):
+#    train_set_joint_12 = np.hstack(( train_set_joint_12, np.fromstring(train_set_joint_12_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_12 = train_set_joint_12.reshape((len(train_set_joint_12_pd.values[:,6]), 17))
+## joint 13
+#train_set_joint_13=np.array([])
+#for i in range(len(train_set_joint_13_pd.values[:,6])):
+#    train_set_joint_13 = np.hstack(( train_set_joint_13, np.fromstring(train_set_joint_13_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_13 = train_set_joint_13.reshape((len(train_set_joint_13_pd.values[:,6]), 17))
+## joint 14
+#train_set_joint_14=np.array([])
+#for i in range(len(train_set_joint_14_pd.values[:,6])):
+#    train_set_joint_14 = np.hstack(( train_set_joint_14, np.fromstring(train_set_joint_14_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_14 = train_set_joint_14.reshape((len(train_set_joint_14_pd.values[:,6]), 17))
+## joint 15
+#train_set_joint_15=np.array([])
+#for i in range(len(train_set_joint_15_pd.values[:,6])):
+#    train_set_joint_15 = np.hstack(( train_set_joint_15, np.fromstring(train_set_joint_15_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_15 = train_set_joint_15.reshape((len(train_set_joint_15_pd.values[:,6]), 17))
+## joint 16
+#train_set_joint_16=np.array([])
+#for i in range(len(train_set_joint_16_pd.values[:,6])):
+#    train_set_joint_16 = np.hstack(( train_set_joint_16, np.fromstring(train_set_joint_16_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_16 = train_set_joint_16.reshape((len(train_set_joint_16_pd.values[:,6]), 17))
+## joint 17
+#train_set_joint_17=np.array([])
+#for i in range(len(train_set_joint_17_pd.values[:,6])):
+#    train_set_joint_17 = np.hstack(( train_set_joint_17, np.fromstring(train_set_joint_17_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_17 = train_set_joint_17.reshape((len(train_set_joint_17_pd.values[:,6]), 17))
+## joint 18
+#train_set_joint_18=np.array([])
+#for i in range(len(train_set_joint_18_pd.values[:,6])):
+#    train_set_joint_18 = np.hstack(( train_set_joint_18, np.fromstring(train_set_joint_18_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_18 = train_set_joint_18.reshape((len(train_set_joint_18_pd.values[:,6]), 17))
+## joint 19
+#train_set_joint_19=np.array([])
+#for i in range(len(train_set_joint_19_pd.values[:,6])):
+#    train_set_joint_19 = np.hstack(( train_set_joint_19, np.fromstring(train_set_joint_19_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#train_set_joint_19 = train_set_joint_19.reshape((len(train_set_joint_19_pd.values[:,6]), 17))
+## joint test_set_joint_pd
+#test_set_joint=np.array([])
+#for i in range(len(test_set_joint_pd.values[:,6])):
+#    test_set_joint = np.hstack(( test_set_joint, np.fromstring(test_set_joint_pd.values[i,6][1:-1], dtype=np.float32, sep=',') ))
+#test_set_joint = test_set_joint.reshape((len(test_set_joint_pd.values[:,6]), 17))
+#
+#np.savetxt(dir_prefix +'train_set_joint_00.txt',train_set_joint_00)
+#np.savetxt(dir_prefix +'train_set_joint_01.txt',train_set_joint_01)
+#np.savetxt(dir_prefix +'train_set_joint_02.txt',train_set_joint_02)
+#np.savetxt(dir_prefix +'train_set_joint_03.txt',train_set_joint_03)
+#np.savetxt(dir_prefix +'train_set_joint_04.txt',train_set_joint_04)
+#np.savetxt(dir_prefix +'train_set_joint_05.txt',train_set_joint_05)
+#np.savetxt(dir_prefix +'train_set_joint_06.txt',train_set_joint_06)
+#np.savetxt(dir_prefix +'train_set_joint_07.txt',train_set_joint_07)
+#np.savetxt(dir_prefix +'train_set_joint_08.txt',train_set_joint_08)
+#np.savetxt(dir_prefix +'train_set_joint_09.txt',train_set_joint_09)
+#np.savetxt(dir_prefix +'train_set_joint_10.txt',train_set_joint_10)
+#np.savetxt(dir_prefix +'train_set_joint_11.txt',train_set_joint_11)
+#np.savetxt(dir_prefix +'train_set_joint_12.txt',train_set_joint_12)
+#np.savetxt(dir_prefix +'train_set_joint_13.txt',train_set_joint_13)
+#np.savetxt(dir_prefix +'train_set_joint_14.txt',train_set_joint_14)
+#np.savetxt(dir_prefix +'train_set_joint_15.txt',train_set_joint_15)
+#np.savetxt(dir_prefix +'train_set_joint_16.txt',train_set_joint_16)
+#np.savetxt(dir_prefix +'train_set_joint_17.txt',train_set_joint_17)
+#np.savetxt(dir_prefix +'train_set_joint_18.txt',train_set_joint_18)
+#np.savetxt(dir_prefix +'train_set_joint_19.txt',train_set_joint_19)
+#np.savetxt(dir_prefix +'test_set_joint.txt',test_set_joint)
+
 # read the joint txt file for fast reading
 train_set_joint_00 = np.loadtxt(dir_prefix +'train_set_joint_00.txt')
 train_set_joint_01 = np.loadtxt(dir_prefix +'train_set_joint_01.txt')
