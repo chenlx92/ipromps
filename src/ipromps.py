@@ -485,7 +485,7 @@ class IProMP(NDProMP):
         trajectory = np.dot( self.promps[0].Phi.T, new_mean_w_full.reshape([self.num_joints,self.nrBasis]).T )
         return trajectory
 
-    def add_obsy(self, t, obsy, sigmay=1e-6):
+    def add_obs(self, t, obsy, sigmay=1e-6):
         """
         Add a observation to the trajectory
         Observations and corresponding basis activations
@@ -494,7 +494,7 @@ class IProMP(NDProMP):
         :param sigmay: observation variance (constraint strength)
         :return:
         """
-        self.obs.append({"t": t, "obsy": obsy, "sigmay": sigmay})
+        self.obs.append({"t": t, "obs": obsy, "sigmay": sigmay})
             
     def prob_obs(self):
         """
@@ -511,13 +511,13 @@ class IProMP(NDProMP):
         prob_full = 1.0
         for obs in self.obs:
             # the mean for EMG singnal observation distribution
-            mean_t = mean.reshape(self.num_joints, self.num_samples).T[np.int(obsy['t']*100),:]
+            mean_t = mean.reshape(self.num_joints, self.num_samples).T[np.int(obs['t']*100),:]
             mean_t = mean_t[0:8]
             # the covariance for EMG singnal observation distribution
-            idx = np.arange(15)*101 + np.int(obsy['t']*100)
+            idx = np.arange(15)*101 + np.int(obs['t']*100)
             cov_t = cov[idx,:][:,idx]
             cov_t = cov_t[0:8,0:8]            
             # compute the prob of partial observation
-            prob = mvn.pdf(obsy['obsy'][0:8], mean_t, cov_t)
+            prob = mvn.pdf(obs['obs'][0:8], mean_t, cov_t)
             prob_full = prob_full*prob
         return prob_full

@@ -334,7 +334,7 @@ ipromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 0.1)
 # ipromp.add_viapoint(0.02, test_set_norm_filtered[2,:], 0.1)
 # ipromp.add_viapoint(0.04, test_set_norm_filtered[4,:], 0.1)
 # ipromp.add_viapoint(0.06, test_set_norm_filtered[6,:], 0.1)
-# ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
+ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
 # ipromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.1)
 ipromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.1)
 # ipromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.1)
@@ -352,8 +352,8 @@ for i in range(7):
     plt.plot(ipromp.x, test_set_joint_norm_filtered[:,i], color='b', linewidth=3)
     ipromp.promps[8+i].plot_updated(ipromp.x, color='b', via_show=False)
 
-ipromp.add_obsy(t=0.00, obsy=test_set_norm_filtered[0,:], sigmay=0.1)
-ipromp.add_obsy(t=0.08, obsy=test_set_norm_filtered[8,:], sigmay=0.1)
+ipromp.add_obs(t=0.00, obsy=test_set_norm_filtered[0,:], sigmay=0.1)
+ipromp.add_obs(t=0.08, obsy=test_set_norm_filtered[8,:], sigmay=0.1)
 prob = ipromp.prob_obs()
 print prob
 
