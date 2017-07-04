@@ -302,7 +302,7 @@ for ch_ex in range(7):
 
 
 # create a n-dimensional iProMP
-ipromp = ipromps.IProMP(num_joints=15, nrBasis=11, sigma=0.05, num_samples=101)
+ipromp = ipromps.IProMP(num_joints=15, nrBasis=31, sigma=0.05, num_samples=101)
 
 # add demostration
 for idx in range(0, nrDemo):
@@ -322,8 +322,8 @@ for i in range(7):
 # filter emg and joint data
 # test_set_emg_norm_filtered = signal.medfilt(test_set_emg_norm, [11,1])
 # test_set_joint_norm_filtered = signal.medfilt(test_set_joint_norm, [5,1])
-test_set_emg_norm_filtered = signal.medfilt(train_set_emg_norm19, [11,1])
-test_set_joint_norm_filtered = signal.medfilt(train_set_joint_norm19, [5,1])
+test_set_emg_norm_filtered = signal.medfilt(train_set_emg_norm18, [11,1])
+test_set_joint_norm_filtered = signal.medfilt(train_set_joint_norm18, [5,1])
 test_set_joint_norm_filtered_zero = np.zeros([101,7])
 
 # stack emg and joint data as a new matrix
@@ -331,23 +331,26 @@ test_set_norm_filtered = np.hstack((test_set_emg_norm_filtered, test_set_joint_n
 
 # add via point as observation
 ipromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 0.1)
-ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
+# ipromp.add_viapoint(0.02, test_set_norm_filtered[2,:], 0.1)
+# ipromp.add_viapoint(0.04, test_set_norm_filtered[4,:], 0.1)
+# ipromp.add_viapoint(0.06, test_set_norm_filtered[6,:], 0.1)
+# ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
 # ipromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.1)
-# ipromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.1)
+ipromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.1)
 # ipromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.1)
 # ipromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 0.1)
 
 # plot the updated distribution
 plt.figure(4)
 for i in range(8):
-    plt.subplot(421+i)
+    plt.subplot(421+i);plt.legend('')
     plt.plot(ipromp.x, test_set_emg_norm_filtered[:,i], color='b', linewidth=3)
-    ipromp.promps[i].plot_updated(ipromp.x, color='r')
+    ipromp.promps[i].plot_updated(ipromp.x, color='b')
 plt.figure(5)
 for i in range(7):
     plt.subplot(711+i)
     plt.plot(ipromp.x, test_set_joint_norm_filtered[:,i], color='b', linewidth=3)
-    ipromp.promps[8+i].plot_updated(ipromp.x, color='r', via_show=False)
+    ipromp.promps[8+i].plot_updated(ipromp.x, color='b', via_show=False)
 
 ipromp.add_obsy(t=0.00, obsy=test_set_norm_filtered[0,:], sigmay=0.1)
 ipromp.add_obsy(t=0.08, obsy=test_set_norm_filtered[8,:], sigmay=0.1)
