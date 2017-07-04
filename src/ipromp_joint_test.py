@@ -1,11 +1,11 @@
 #!/usr/bin/python
-# Filename: ndpromp_joint_emg_lib.py
+# Filename: ndpromp_joint_emg_test.py
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.signal as signal
-import ipromps_lib
+import ipromps_joint_test
 
 plt.close('all')    # close all windows
 len_normal = 101    # the len of normalized traj
@@ -156,7 +156,7 @@ for ch_ex in range(7):
 
 
 # create a n-dimensional iProMP
-ipromp = ipromps_lib.IProMP(num_joints=7, nrBasis=11, sigma=0.05, num_samples=101)
+ipromp = ipromps_joint_test.IProMP(num_joints=7, nrBasis=11, sigma=0.05, num_samples=101)
 
 # add demostration
 for idx in range(0, nrDemo):
@@ -175,11 +175,11 @@ test_set_joint_norm_filtered_zero = np.zeros([101,4])
 test_set_norm_filtered = np.hstack((test_set_joint_norm_filtered[:,0:3], test_set_joint_norm_filtered_zero))
 # add via point as observation
 ipromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 0.0001)
-ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.0001)
-ipromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.0001)
+# ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.0001)
+# ipromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.0001)
 ipromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.0001)
-ipromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.0001)
-ipromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 0.0001)
+# ipromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.0001)
+# ipromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 0.0001)
 
 # plot the updated distribution: blue
 plt.figure(5)
