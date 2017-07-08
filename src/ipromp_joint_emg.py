@@ -1,11 +1,14 @@
 #!/usr/bin/python
 # Filename: ndpromp_joint_emg.py
 
+from __future__ import print_function
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import scipy.signal as signal
+# import scipy.signal as signal
 import ipromps
+# import rospy
 
 plt.close('all')    # close all windows
 len_normal = 101    # the len of normalized traj
@@ -15,6 +18,8 @@ nrDemo = 20         # number of trajectoreis for training
 #########################################
 # load date sets
 #########################################
+# rospy.loginfo('reading data sets')
+print('reading data sets')
 # read emg csv files
 dir_prefix = '../../recorder/datasets/joint_emg/hold/csv/'
 train_set_emg_00_pd = pd.read_csv(dir_prefix + '2017-05-27-11-44-31-myo_raw_pub.csv')
@@ -84,62 +89,64 @@ train_set_joint_18 = np.loadtxt(dir_prefix + 'train_set_joint_18.txt')
 train_set_joint_19 = np.loadtxt(dir_prefix + 'train_set_joint_19.txt')
 test_set_joint = np.loadtxt(dir_prefix + 'test_set_joint.txt')
 
-# #########################################
-# # plot raw data
-# #########################################
-# # plot the origin emg data
-# plt.figure(0)
-# for ch_ex in range(8):
-#    plt.subplot(421+ch_ex)
-#    plt.plot(range(len(train_set_emg_00)), train_set_emg_00[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_01)), train_set_emg_01[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_02)), train_set_emg_02[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_03)), train_set_emg_03[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_04)), train_set_emg_04[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_05)), train_set_emg_05[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_06)), train_set_emg_06[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_07)), train_set_emg_07[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_08)), train_set_emg_08[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_09)), train_set_emg_09[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_10)), train_set_emg_10[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_11)), train_set_emg_11[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_12)), train_set_emg_12[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_13)), train_set_emg_13[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_14)), train_set_emg_14[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_15)), train_set_emg_15[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_16)), train_set_emg_16[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_17)), train_set_emg_17[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_18)), train_set_emg_18[:,ch_ex])
-#    plt.plot(range(len(train_set_emg_19)), train_set_emg_19[:,ch_ex])
-# # plot the origin joint data
-# plt.figure(1)
-# for ch_ex in range(7):
-#    plt.subplot(711+ch_ex)
-#    plt.plot(range(len(train_set_joint_00)), train_set_joint_00[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_01)), train_set_joint_01[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_02)), train_set_joint_02[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_03)), train_set_joint_03[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_04)), train_set_joint_04[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_05)), train_set_joint_05[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_06)), train_set_joint_06[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_07)), train_set_joint_07[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_08)), train_set_joint_08[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_09)), train_set_joint_09[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_10)), train_set_joint_10[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_11)), train_set_joint_11[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_12)), train_set_joint_12[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_13)), train_set_joint_13[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_14)), train_set_joint_14[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_15)), train_set_joint_15[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_16)), train_set_joint_16[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_17)), train_set_joint_17[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_18)), train_set_joint_18[:,9+ch_ex])
-#    plt.plot(range(len(train_set_joint_19)), train_set_joint_19[:,9+ch_ex])
+#########################################
+# plot raw data
+#########################################
+# plot the origin emg data
+plt.figure(0)
+for ch_ex in range(8):
+   plt.subplot(421+ch_ex)
+   plt.plot(range(len(train_set_emg_00)), train_set_emg_00[:,ch_ex])
+   plt.plot(range(len(train_set_emg_01)), train_set_emg_01[:,ch_ex])
+   plt.plot(range(len(train_set_emg_02)), train_set_emg_02[:,ch_ex])
+   plt.plot(range(len(train_set_emg_03)), train_set_emg_03[:,ch_ex])
+   plt.plot(range(len(train_set_emg_04)), train_set_emg_04[:,ch_ex])
+   plt.plot(range(len(train_set_emg_05)), train_set_emg_05[:,ch_ex])
+   plt.plot(range(len(train_set_emg_06)), train_set_emg_06[:,ch_ex])
+   plt.plot(range(len(train_set_emg_07)), train_set_emg_07[:,ch_ex])
+   plt.plot(range(len(train_set_emg_08)), train_set_emg_08[:,ch_ex])
+   plt.plot(range(len(train_set_emg_09)), train_set_emg_09[:,ch_ex])
+   plt.plot(range(len(train_set_emg_10)), train_set_emg_10[:,ch_ex])
+   plt.plot(range(len(train_set_emg_11)), train_set_emg_11[:,ch_ex])
+   plt.plot(range(len(train_set_emg_12)), train_set_emg_12[:,ch_ex])
+   plt.plot(range(len(train_set_emg_13)), train_set_emg_13[:,ch_ex])
+   plt.plot(range(len(train_set_emg_14)), train_set_emg_14[:,ch_ex])
+   plt.plot(range(len(train_set_emg_15)), train_set_emg_15[:,ch_ex])
+   plt.plot(range(len(train_set_emg_16)), train_set_emg_16[:,ch_ex])
+   plt.plot(range(len(train_set_emg_17)), train_set_emg_17[:,ch_ex])
+   plt.plot(range(len(train_set_emg_18)), train_set_emg_18[:,ch_ex])
+   plt.plot(range(len(train_set_emg_19)), train_set_emg_19[:,ch_ex])
+# plot the origin joint data
+plt.figure(1)
+for ch_ex in range(7):
+   plt.subplot(711+ch_ex)
+   plt.plot(range(len(train_set_joint_00)), train_set_joint_00[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_01)), train_set_joint_01[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_02)), train_set_joint_02[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_03)), train_set_joint_03[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_04)), train_set_joint_04[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_05)), train_set_joint_05[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_06)), train_set_joint_06[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_07)), train_set_joint_07[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_08)), train_set_joint_08[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_09)), train_set_joint_09[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_10)), train_set_joint_10[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_11)), train_set_joint_11[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_12)), train_set_joint_12[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_13)), train_set_joint_13[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_14)), train_set_joint_14[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_15)), train_set_joint_15[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_16)), train_set_joint_16[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_17)), train_set_joint_17[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_18)), train_set_joint_18[:,9+ch_ex])
+   plt.plot(range(len(train_set_joint_19)), train_set_joint_19[:,9+ch_ex])
 
 
 #########################################
 # resampling the signals for experiencing the same duration
 #########################################
+# rospy.loginfo('normalizing data into same duration')
+print('normalizing data into same duration')
 # resampling emg signals
 train_set_emg_norm00=np.array([]);train_set_emg_norm01=np.array([]);train_set_emg_norm02=np.array([]);train_set_emg_norm03=np.array([]);train_set_emg_norm04=np.array([]);
 train_set_emg_norm05=np.array([]);train_set_emg_norm06=np.array([]);train_set_emg_norm07=np.array([]);train_set_emg_norm08=np.array([]);train_set_emg_norm09=np.array([]);
@@ -313,48 +320,51 @@ for idx in range(0, nrDemo):
 plt.figure(4)
 for i in range(8):
     plt.subplot(421+i)
-    ipromp.promps[i].plot(np.arange(0,1.01,0.01), color='g')
+    ipromp.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend="Prior of Joints");
 plt.figure(5)
 for i in range(7):
     plt.subplot(711+i)
-    ipromp.promps[8+i].plot(np.arange(0,1.01,0.01), color='g')
+    ipromp.promps[8+i].plot(np.arange(0,1.01,0.01), color='g', legend="Prior of Joints");
+
 
 # filter emg and joint data
 # test_set_emg_norm_filtered = signal.medfilt(test_set_emg_norm, [11,1])
+# test_set_emg_norm_filtered = test_set_emg_norm
+test_set_emg_norm_filtered = train_set_emg_norm14
 # test_set_joint_norm_filtered = signal.medfilt(test_set_joint_norm, [5,1])
-test_set_emg_norm_filtered = signal.medfilt(train_set_emg_norm18, [11,1])
-test_set_joint_norm_filtered = signal.medfilt(train_set_joint_norm18, [5,1])
+# test_set_joint_norm_filtered = test_set_joint_norm
+test_set_joint_norm_filtered = train_set_joint_norm14
 test_set_joint_norm_filtered_zero = np.zeros([101,7])
 
 # stack emg and joint data as a new matrix
 test_set_norm_filtered = np.hstack((test_set_emg_norm_filtered, test_set_joint_norm_filtered_zero))
 
 # add via point as observation
-ipromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 0.1)
-# ipromp.add_viapoint(0.02, test_set_norm_filtered[2,:], 0.1)
-# ipromp.add_viapoint(0.04, test_set_norm_filtered[4,:], 0.1)
-# ipromp.add_viapoint(0.06, test_set_norm_filtered[6,:], 0.1)
-ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 0.1)
-# ipromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 0.1)
-ipromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 0.1)
-# ipromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 0.1)
-# ipromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 0.1)
+ipromp.add_viapoint(0.00, test_set_norm_filtered[0,:], 250)
+ipromp.add_viapoint(0.02, test_set_norm_filtered[2,:], 250)
+ipromp.add_viapoint(0.04, test_set_norm_filtered[4,:], 250)
+ipromp.add_viapoint(0.06, test_set_norm_filtered[6,:], 250)
+ipromp.add_viapoint(0.08, test_set_norm_filtered[8,:], 250)
+ipromp.add_viapoint(0.18, test_set_norm_filtered[18,:], 250)
+ipromp.add_viapoint(0.28, test_set_norm_filtered[28,:], 250)
+ipromp.add_viapoint(0.40, test_set_norm_filtered[40,:], 250)
+ipromp.add_viapoint(0.50, test_set_norm_filtered[50,:], 250)
 
 # plot the updated distribution
 plt.figure(4)
 for i in range(8):
-    plt.subplot(421+i);plt.legend('')
-    plt.plot(ipromp.x, test_set_emg_norm_filtered[:,i], color='b', linewidth=3)
-    ipromp.promps[i].plot_updated(ipromp.x, color='b')
+    plt.subplot(421+i);
+    plt.plot(ipromp.x, test_set_emg_norm_filtered[:,i], color='r', linewidth=3, label="EMGs Ground True");
+    ipromp.promps[i].plot_updated(ipromp.x, color='b', legend="the updated distribution");
 plt.figure(5)
 for i in range(7):
-    plt.subplot(711+i)
-    plt.plot(ipromp.x, test_set_joint_norm_filtered[:,i], color='b', linewidth=3)
-    ipromp.promps[8+i].plot_updated(ipromp.x, color='b', via_show=False)
+    plt.subplot(711+i);
+    plt.plot(ipromp.x, test_set_joint_norm_filtered[:,i], color='r', linewidth=3, label="Joints Ground True");
+    ipromp.promps[8+i].plot_updated(ipromp.x, color='b', via_show=False, legend="the updated distribution");
 
-ipromp.add_obs(t=0.00, obsy=test_set_norm_filtered[0,:], sigmay=0.1)
-ipromp.add_obs(t=0.08, obsy=test_set_norm_filtered[8,:], sigmay=0.1)
+ipromp.add_obs(t=0.00, obsy=test_set_norm_filtered[0,:], sigmay=250)
+ipromp.add_obs(t=0.08, obsy=test_set_norm_filtered[8,:], sigmay=250)
 prob = ipromp.prob_obs()
-print prob
+print('the probability of observation based on the prior is ', prob)
 
 plt.show()
