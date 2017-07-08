@@ -32,6 +32,9 @@ class NDProMP(object):
 
         self.mean_W_full_updated = np.array([])
         self.cov_W_full_updated = np.array([])
+
+        # the scaling factor to letting each traj have same duration
+        self.alpha_demo = []
         
     @property
     def x(self):
@@ -248,6 +251,9 @@ class ProMP(object):
         self.meanW_updated = None
         self.sigmaW_updated = None
 
+        # the scaling factor for letting each traj have same duration
+        self.alpha_demo = []
+
     def add_demonstration(self, demonstration):
         interpolate = interp1d(np.linspace(0, 1, len(demonstration)), demonstration, kind='cubic')
         stretched_demo = interpolate(self.x)
@@ -373,7 +379,7 @@ class ProMP(object):
         """
         mean = np.dot(self.Phi.T, self.meanW)
         x = self.x if x is None else x
-        # plt.plot(x, mean, color=color, label=legend, linewidth=3)
+        plt.plot(x, mean, color=color, label=legend, linewidth=3)
 #        std = self.get_std()
         std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
         plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.4)
@@ -406,7 +412,7 @@ class ProMP(object):
         if via_show == True:
             for viapoint_id, viapoint in enumerate(self.viapoints):
                 x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
-                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
+                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {}".format(viapoint_id), color=color)
             
             
 class IProMP(NDProMP):
@@ -473,7 +479,6 @@ class IProMP(NDProMP):
             self.promps[i].sigmaW_updated = new_cov_w_full[i * self.nrBasis:(1 + i) * self.nrBasis,
                                             i * self.nrBasis:(i + 1) * self.nrBasis]
 
-
         
     def generate_trajectory(self, randomness=1e-10):
         """
@@ -501,23 +506,40 @@ class IProMP(NDProMP):
         compute the pdf of observation sets
         :return: the total joint probability
         """
-        PhiT = self.promps[0].Phi.T
-        # here is a trick for construct the observation matrix
-        PhiT_full = scipy.linalg.block_diag(PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT)
-        # the obsvation distribution from weight distribution
-        mean = np.dot( PhiT_full, self.mean_W_full )
-        cov = np.dot( PhiT_full, np.dot(self.cov_W_full, PhiT_full.T))
-        # compute the pdf of obsy
+        # PhiT = self.promps[0].Phi.T
+        # # here is a trick for construct the observation matrix
+        # PhiT_full = scipy.linalg.block_diag(PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT)
+        # # the obsvation distribution from weight distribution
+        # mean = np.dot( PhiT_full, self.mean_W_full )
+        # cov = np.dot( PhiT_full, np.dot(self.cov_W_full, PhiT_full.T))
+        # # compute the pdf of obsy
+        # prob_full = 1.0
+        # for obs in self.obs:
+        #     # the mean for EMG singnal observation distribution
+        #     mean_t = mean.reshape(self.num_joints, self.num_samples).T[np.int(obs['t']*100),:]
+        #     mean_t = mean_t[0:8]
+        #     # the covariance for EMG singnal observation distribution
+        #     idx = np.arange(15)*101 + np.int(obs['t']*100)
+        #     cov_t = cov[idx,:][:,idx]
+        #     cov_t = cov_t[0:8,0:8]
+        #     # compute the prob of partial observation
+        #     prob = mvn.pdf(obs['obs'][0:8], mean_t, cov_t)
+        #     prob_full = prob_full*prob
+
         prob_full = 1.0
         for obs in self.obs:
-            # the mean for EMG singnal observation distribution
-            mean_t = mean.reshape(self.num_joints, self.num_samples).T[np.int(obs['t']*100),:]
-            mean_t = mean_t[0:8]
-            # the covariance for EMG singnal observation distribution
-            idx = np.arange(15)*101 + np.int(obs['t']*100)
-            cov_t = cov[idx,:][:,idx]
-            cov_t = cov_t[0:8,0:8]            
-            # compute the prob of partial observation
-            prob = mvn.pdf(obs['obs'][0:8], mean_t, cov_t)
-            prob_full = prob_full*prob
+            PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(np.int(obs['t']),
+                                                      (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
+            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
+            # here is a trick for construct the observation matrix
+            zero_entry = np.zeros([1, 11])
+            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+                                                zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry,
+                                                zero_entry)
+            mean_t = np.dot(PhiT_full, self.mean_W_full)[:,0]
+            cov_t = np.dot(PhiT_full, np.dot(self.cov_W_full, PhiT_full.T)) + obs['sigmay']*np.eye(self.num_joints)
+
+            prob = mvn.pdf(obs['obs'], mean_t, cov_t)
+            prob_full = prob_full * prob
+
         return prob_full
