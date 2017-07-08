@@ -401,7 +401,7 @@ class ProMP(object):
         if via_show == True:
             for viapoint_id, viapoint in enumerate(self.viapoints):
                 x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
-                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
+                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {}".format(viapoint_id), color=color)
             
             
 class IProMP(NDProMP):
