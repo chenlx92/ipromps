@@ -968,9 +968,9 @@ train_set_tape_hold_pose_norm_full = np.array([train_set_tape_hold_pose_norm00,t
 
 
 # create a 3 tasks iProMP
-ipromp_aluminum_hold = iprompslib_imu_emg_joint.IProMP(num_joints=19, nrBasis=31, sigma=0.05, num_samples=101)
-ipromp_spanner_handover = iprompslib_imu_emg_joint.IProMP(num_joints=19, nrBasis=31, sigma=0.05, num_samples=101)
-ipromp_tape_hold = iprompslib_imu_emg_joint.IProMP(num_joints=19, nrBasis=31, sigma=0.05, num_samples=101)
+ipromp_aluminum_hold = iprompslib_imu_emg_joint.IProMP(num_joints=19, nrBasis=11, sigma=0.05, num_samples=101)
+ipromp_spanner_handover = iprompslib_imu_emg_joint.IProMP(num_joints=19, nrBasis=11, sigma=0.05, num_samples=101)
+ipromp_tape_hold = iprompslib_imu_emg_joint.IProMP(num_joints=19, nrBasis=11, sigma=0.05, num_samples=101)
 
 # add demostration
 for idx in range(0, nrDemo):
@@ -1067,48 +1067,8 @@ elif idx_max_pro == 2:
 # plot everythings
 ########################################################
 ###################################################################################################
-# plot the prior distributioin
-# plot ipromp_aluminum_hold
-plt.figure(20)
-for i in range(4):
-    plt.subplot(411+i)
-    ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
-plt.figure(21)
-for i in range(8):
-    plt.subplot(421+i)
-    ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
-plt.figure(22)
-for i in range(7):
-    plt.subplot(711+i)
-    ipromp_aluminum_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
-# plot ipromp_spanner_handover
-plt.figure(23)
-for i in range(4):
-    plt.subplot(411+i)
-    ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g');
-plt.figure(24)
-for i in range(8):
-    plt.subplot(421+i)
-    ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
-plt.figure(25)
-for i in range(7):
-    plt.subplot(711+i)
-    ipromp_spanner_handover.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
-# plot ipromp_tape_hold
-plt.figure(26)
-for i in range(4):
-    plt.subplot(411+i)
-    ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
-plt.figure(27)
-for i in range(8):
-    plt.subplot(421+i)
-    ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
-plt.figure(28)
-for i in range(7):
-    plt.subplot(711+i)
-    ipromp_tape_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
 
-###################################################################################################
+
 ##################################################################################
 ##################################################################################
 # the data have been resampled successfully as above
@@ -1556,54 +1516,96 @@ for i in range(7):
 #    plt.plot(np.arange(0, 1.01, 0.01), train_set_tape_hold_pose_norm18[:, ch_ex])
 #    plt.plot(np.arange(0, 1.01, 0.01), train_set_tape_hold_pose_norm19[:, ch_ex])
 
-# plot the updated distributioin
-# plot ipromp_aluminum_hold
-plt.figure(20)
-for i in range(4):
-    plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
-    ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-plt.figure(21)
-for i in range(8):
-    plt.subplot(421+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
-    ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-plt.figure(22)
-for i in range(7):
-    plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
-    ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plot ipromp_spanner_handover
-plt.figure(23)
-for i in range(4):
-    plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
-    ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-plt.figure(24)
-for i in range(8):
-    plt.subplot(421+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
-    ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-plt.figure(25)
-for i in range(7):
-    plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
-    ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plot ipromp_tape_hold
-plt.figure(26)
-for i in range(4):
-    plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
-    ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-plt.figure(27)
-for i in range(8):
-    plt.subplot(421+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
-    ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-plt.figure(28)
-for i in range(7):
-    plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
-    ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
 
-plt.show()
+# # plot the prior distributioin
+# # plot ipromp_aluminum_hold
+# plt.figure(20)
+# for i in range(4):
+#     plt.subplot(411+i)
+#     ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
+# plt.figure(21)
+# for i in range(8):
+#     plt.subplot(421+i)
+#     ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
+# plt.figure(22)
+# for i in range(7):
+#     plt.subplot(711+i)
+#     ipromp_aluminum_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
+# # plot ipromp_spanner_handover
+# plt.figure(23)
+# for i in range(4):
+#     plt.subplot(411+i)
+#     ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g');
+# plt.figure(24)
+# for i in range(8):
+#     plt.subplot(421+i)
+#     ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
+# plt.figure(25)
+# for i in range(7):
+#     plt.subplot(711+i)
+#     ipromp_spanner_handover.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
+# # plot ipromp_tape_hold
+# plt.figure(26)
+# for i in range(4):
+#     plt.subplot(411+i)
+#     ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
+# plt.figure(27)
+# for i in range(8):
+#     plt.subplot(421+i)
+#     ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
+# plt.figure(28)
+# for i in range(7):
+#     plt.subplot(711+i)
+#     ipromp_tape_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
+#
+# # plot the updated distributioin
+# # plot ipromp_aluminum_hold
+# plt.figure(20)
+# for i in range(4):
+#     plt.subplot(411+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
+#     ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plt.figure(21)
+# for i in range(8):
+#     plt.subplot(421+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
+#     ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plt.figure(22)
+# for i in range(7):
+#     plt.subplot(711+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
+#     ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# # plot ipromp_spanner_handover
+# plt.figure(23)
+# for i in range(4):
+#     plt.subplot(411+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
+#     ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plt.figure(24)
+# for i in range(8):
+#     plt.subplot(421+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
+#     ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plt.figure(25)
+# for i in range(7):
+#     plt.subplot(711+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
+#     ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# # plot ipromp_tape_hold
+# plt.figure(26)
+# for i in range(4):
+#     plt.subplot(411+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
+#     ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plt.figure(27)
+# for i in range(8):
+#     plt.subplot(421+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
+#     ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plt.figure(28)
+# for i in range(7):
+#     plt.subplot(711+i)
+#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
+#     ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+#
+# plt.show()
