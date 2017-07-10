@@ -6,6 +6,7 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import scipy.linalg
 from scipy.stats import multivariate_normal as mvn
+import math
 
 class NDProMP(object):
     """
@@ -56,7 +57,8 @@ class NDProMP(object):
         
         self.demo_W_full = np.hstack([self.promps[0].W, self.promps[1].W, self.promps[2].W, self.promps[3].W, self.promps[4].W, 
                                       self.promps[5].W, self.promps[6].W, self.promps[7].W, self.promps[8].W, self.promps[9].W, 
-                                        self.promps[10].W,self.promps[11].W,self.promps[12].W, self.promps[13].W, self.promps[14].W])
+                                        self.promps[10].W,self.promps[11].W,self.promps[12].W, self.promps[13].W, self.promps[14].W,
+                                      self.promps[15].W, self.promps[16].W, self.promps[17].W, self.promps[18].W])
         
         self.mean_W_full = np.mean(self.demo_W_full,0)
         self.mean_W_full = self.mean_W_full.reshape([self.num_joints*self.nrBasis, 1])
@@ -383,9 +385,9 @@ class ProMP(object):
 #        std = self.get_std()
         std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
         plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.4)
-        for viapoint_id, viapoint in enumerate(self.viapoints):
-            x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
-            plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
+        # for viapoint_id, viapoint in enumerate(self.viapoints):
+        #     x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
+        #     plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
     
     def plot_unit(self, x=None, legend='', color='b'):
         """
@@ -419,15 +421,15 @@ class IProMP(NDProMP):
     """
     (n)-dimensional Interaction ProMP, derived from NDProMP
     """
-    def __init__(self, num_joints=15, nrBasis=11, sigma=0.05, num_samples=101):
+    def __init__(self, num_joints=19, nrBasis=11, sigma=0.05, num_samples=101):
         """
         construct function, call NDProMP construct function onlu
         """
-        NDProMP.__init__(self, num_joints=15, nrBasis=11, sigma=0.05, num_samples=101)
+        NDProMP.__init__(self, num_joints=num_joints, nrBasis=11, sigma=0.05, num_samples=101)
         self.obs = []
         
         
-    def add_viapoint(self, t, obsys, sigmay=1e-6):
+    def add_viapoint(self, t, obsys, sigmay):
         """
         Add a viapoint i.e. an observation at a specific time
         :param t: Time of observation
@@ -440,7 +442,6 @@ class IProMP(NDProMP):
         for joint_demo in range(self.num_joints):
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo], sigmay)
 
-        measurement_noise = np.eye(self.num_joints) * self.promps[0].viapoints[0]['sigmay']
         new_mean_w_full = self.mean_W_full
         new_cov_w_full = self.cov_W_full
         PhiT_full = np.array([])
@@ -451,9 +452,9 @@ class IProMP(NDProMP):
             PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
             # here is a trick for construct the observation matrix
             zero_entry = np.zeros([1, 11])
-            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
-                                                zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry,
-                                                zero_entry)
+            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+                                                PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+                                                zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry)
             # the observation of specific time
             y_observed = np.array(
                 [[self.promps[0].viapoints[num_viapoint]['obsy']], [self.promps[1].viapoints[num_viapoint]['obsy']],
@@ -463,10 +464,12 @@ class IProMP(NDProMP):
                  [self.promps[8].viapoints[num_viapoint]['obsy']], [self.promps[9].viapoints[num_viapoint]['obsy']],
                  [self.promps[10].viapoints[num_viapoint]['obsy']], [self.promps[11].viapoints[num_viapoint]['obsy']],
                  [self.promps[12].viapoints[num_viapoint]['obsy']], [self.promps[13].viapoints[num_viapoint]['obsy']],
-                 [self.promps[14].viapoints[num_viapoint]['obsy']]])
+                 [self.promps[14].viapoints[num_viapoint]['obsy']], [self.promps[15].viapoints[num_viapoint]['obsy']],
+                 [self.promps[16].viapoints[num_viapoint]['obsy']], [self.promps[17].viapoints[num_viapoint]['obsy']],
+                 [self.promps[18].viapoints[num_viapoint]['obsy']]])
 
             # update the distribution
-            aux = measurement_noise + np.dot(PhiT_full, np.dot(new_cov_w_full, PhiT_full.T))
+            aux = sigmay + np.dot(PhiT_full, np.dot(new_cov_w_full, PhiT_full.T))
             K = np.dot(np.dot(new_cov_w_full, PhiT_full.T), np.linalg.inv(aux))
             new_mean_w_full = new_mean_w_full + np.dot(K, y_observed - np.dot(PhiT_full, new_mean_w_full))
             new_cov_w_full = new_cov_w_full - np.dot(K, np.dot(PhiT_full, new_cov_w_full))
@@ -474,7 +477,7 @@ class IProMP(NDProMP):
         self.mean_W_full_updated = new_mean_w_full
         self.cov_W_full_updated = new_cov_w_full
         # set the theta of each channel
-        for i in range(15):
+        for i in range(19):
             self.promps[i].meanW_updated = new_mean_w_full.reshape([self.num_joints, self.nrBasis]).T[:, i]
             self.promps[i].sigmaW_updated = new_cov_w_full[i * self.nrBasis:(1 + i) * self.nrBasis,
                                             i * self.nrBasis:(i + 1) * self.nrBasis]
@@ -526,20 +529,23 @@ class IProMP(NDProMP):
         #     prob = mvn.pdf(obs['obs'][0:8], mean_t, cov_t)
         #     prob_full = prob_full*prob
 
-        prob_full = 1.0
+        prob_full = 0.0
         for obs in self.obs:
             PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(np.int(obs['t']),
                                                       (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
             PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
             # here is a trick for construct the observation matrix
             zero_entry = np.zeros([1, 11])
-            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+            PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+                                                PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
                                                 zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry,
                                                 zero_entry)
             mean_t = np.dot(PhiT_full, self.mean_W_full)[:,0]
-            cov_t = np.dot(PhiT_full, np.dot(self.cov_W_full, PhiT_full.T)) + obs['sigmay']*np.eye(self.num_joints)
+            cov_t = np.dot(PhiT_full, np.dot(self.cov_W_full, PhiT_full.T)) + obs['sigmay']
 
             prob = mvn.pdf(obs['obs'], mean_t, cov_t)
-            prob_full = prob_full * prob
+            log_pro = math.log(prob) if prob !=0.0 else -np.inf
+
+            prob_full = prob_full + log_pro
 
         return prob_full
