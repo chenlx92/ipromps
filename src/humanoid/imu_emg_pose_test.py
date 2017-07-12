@@ -12,8 +12,9 @@ import scipy.linalg
 # import rospy
 
 plt.close('all')    # close all windows
-len_normal = 101    # the len of normalized traj
+len_normal = 101    # the len of normalized traj, don't change it
 nrDemo = 20         # number of trajectoreis for training
+obs_ratio = 30
 
 
 ##################################################################################
@@ -1341,162 +1342,125 @@ for idx in range(0, nrDemo):
 
 # aluminum hold
 test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm20, train_set_aluminum_hold_emg_norm20))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm20;
 ##
 test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm21, train_set_aluminum_hold_emg_norm21))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm21;
 ##
 test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm22, train_set_aluminum_hold_emg_norm22))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm22;
 ##
 test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm23, train_set_aluminum_hold_emg_norm23))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm23;
 ##
 test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm24, train_set_aluminum_hold_emg_norm24))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm25, train_set_aluminum_hold_emg_norm25))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm26, train_set_aluminum_hold_emg_norm26))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm27, train_set_aluminum_hold_emg_norm27))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm28, train_set_aluminum_hold_emg_norm28))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm29, train_set_aluminum_hold_emg_norm29))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-#
-# spanner handover
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm20, train_set_spanner_handover_emg_norm20))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-#
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm21, train_set_spanner_handover_emg_norm21))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm22, train_set_spanner_handover_emg_norm22))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm23, train_set_spanner_handover_emg_norm23))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm24, train_set_spanner_handover_emg_norm24))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm25, train_set_spanner_handover_emg_norm25))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm26, train_set_spanner_handover_emg_norm26))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm27, train_set_spanner_handover_emg_norm27))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-#
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm28, train_set_spanner_handover_emg_norm28))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-##
-test_set_temp = np.hstack((train_set_spanner_handover_imu_norm29, train_set_spanner_handover_emg_norm29))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm24;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm25, train_set_aluminum_hold_emg_norm25))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm25;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm26, train_set_aluminum_hold_emg_norm26))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm26;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm27, train_set_aluminum_hold_emg_norm27))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm27;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm28, train_set_aluminum_hold_emg_norm28))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm28;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm29, train_set_aluminum_hold_emg_norm29))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm29;
+# #
+# # spanner handover
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm20, train_set_spanner_handover_emg_norm20))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm20;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm21, train_set_spanner_handover_emg_norm21))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm21;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm22, train_set_spanner_handover_emg_norm22))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm22;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm23, train_set_spanner_handover_emg_norm23))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm23;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm24, train_set_spanner_handover_emg_norm24))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm24;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm25, train_set_spanner_handover_emg_norm25))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm25;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm26, train_set_spanner_handover_emg_norm26))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm26;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm27, train_set_spanner_handover_emg_norm27))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm27;
+# #
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm28, train_set_spanner_handover_emg_norm28))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm28;
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm29, train_set_spanner_handover_emg_norm29))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm29;
 # ##
 #
 # # tape hold
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm20, train_set_tape_hold_emg_norm20))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm20;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm21, train_set_tape_hold_emg_norm21))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm21;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm22, train_set_tape_hold_emg_norm22))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm22;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm23, train_set_tape_hold_emg_norm23))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm23;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm24, train_set_tape_hold_emg_norm24))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm24;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm25, train_set_tape_hold_emg_norm25))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm25;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm26, train_set_tape_hold_emg_norm26))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm26;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm27, train_set_tape_hold_emg_norm27))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm27;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm28, train_set_tape_hold_emg_norm28))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm28;
 # ##
 # test_set_temp = np.hstack((train_set_tape_hold_imu_norm29, train_set_tape_hold_emg_norm29))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm29;
 # # ##
 # #
 
 # add via point as observation
-imu_meansurement_noise_cov = np.eye((4))*1000
+imu_meansurement_noise_cov = np.eye((4))*10
 emg_meansurement_noise_cov = np.eye((8))*250
-pose_meansurement_noise_cov = np.eye((7))*1.0
+pose_meansurement_noise_cov = np.eye((7))*0.005
 meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, emg_meansurement_noise_cov, pose_meansurement_noise_cov)
 
 #################################################################################################
-# add via points to update the distribution
+# add via/obsys points to update the distribution
 #################################################################################################
-ipromp_aluminum_hold.add_viapoint(0.00, test_set[0,:], meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_viapoint(0.05, test_set[5,:], meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_viapoint(0.10, test_set[10,:], meansurement_noise_cov_full)
-# ipromp_aluminum_hold.add_viapoint(0.15, test_set[15,:], meansurement_noise_cov_full)
-# ipromp_aluminum_hold.add_viapoint(0.20, test_set[20,:], meansurement_noise_cov_full)
-# ipromp_aluminum_hold.add_viapoint(0.25, test_set[25,:], meansurement_noise_cov_full)
-
-ipromp_spanner_handover.add_viapoint(0.00, test_set[0,:], meansurement_noise_cov_full)
-ipromp_spanner_handover.add_viapoint(0.05, test_set[5,:], meansurement_noise_cov_full)
-ipromp_spanner_handover.add_viapoint(0.10, test_set[10,:], meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_viapoint(0.15, test_set[15,:], meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_viapoint(0.20, test_set[20,:], meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_viapoint(0.25, test_set[25,:], meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_viapoint(0.30, test_set[30,:], meansurement_noise_cov_full)
-
-ipromp_tape_hold.add_viapoint(0.00, test_set[0,:], meansurement_noise_cov_full)
-ipromp_tape_hold.add_viapoint(0.05, test_set[5,:], meansurement_noise_cov_full)
-ipromp_tape_hold.add_viapoint(0.10, test_set[10,:], meansurement_noise_cov_full)
-# ipromp_tape_hold.add_viapoint(0.15, test_set[15,:], meansurement_noise_cov_full)
-# ipromp_tape_hold.add_viapoint(0.20, test_set[20,:], meansurement_noise_cov_full)
-# ipromp_tape_hold.add_viapoint(0.25, test_set[25,:], meansurement_noise_cov_full)
-# ipromp_tape_hold.add_viapoint(0.30, test_set[30,:], meansurement_noise_cov_full)
+for idx in range(obs_ratio):
+    ipromp_aluminum_hold.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
+    ipromp_spanner_handover.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
+    ipromp_tape_hold.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
 
 
 
-#################################################################################################
-## add observation
-#################################################################################################
-ipromp_aluminum_hold.add_obs(t=0.00, obsy=test_set[0,:], sigmay=meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_obs(t=0.05, obsy=test_set[5,:], sigmay=meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_obs(t=0.10, obsy=test_set[10,:], sigmay=meansurement_noise_cov_full)
-# ipromp_aluminum_hold.add_obs(t=0.15, obsy=test_set[15,:], sigmay=meansurement_noise_cov_full)
-# ipromp_aluminum_hold.add_obs(t=0.20, obsy=test_set[20,:], sigmay=meansurement_noise_cov_full)
-# ipromp_aluminum_hold.add_obs(t=0.25, obsy=test_set[25,:], sigmay=meansurement_noise_cov_full)
-# ipromp_aluminum_hold.add_obs(t=0.30, obsy=test_set[30,:], sigmay=meansurement_noise_cov_full)
+################################################################################################
+# likelihood of observation
+################################################################################################
 prob_aluminum_hold = ipromp_aluminum_hold.prob_obs()
 print('from obs, the log pro of aluminum_hold is', prob_aluminum_hold)
-ipromp_spanner_handover.add_obs(t=0.00, obsy=test_set[0,:], sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover.add_obs(t=0.05, obsy=test_set[5,:], sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover.add_obs(t=0.10, obsy=test_set[10,:], sigmay=meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_obs(t=0.15, obsy=test_set[15,:], sigmay=meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_obs(t=0.20, obsy=test_set[20,:], sigmay=meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_obs(t=0.25, obsy=test_set[25,:], sigmay=meansurement_noise_cov_full)
-# ipromp_spanner_handover.add_obs(t=0.30, obsy=test_set[30,:], sigmay=meansurement_noise_cov_full)
+##
 prob_spanner_handover = ipromp_spanner_handover.prob_obs()
 print('from obs, the log pro of spanner_handover is', prob_spanner_handover)
-ipromp_tape_hold.add_obs(t=0.00, obsy=test_set[0,:], sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold.add_obs(t=0.05, obsy=test_set[5,:], sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold.add_obs(t=0.10, obsy=test_set[10,:], sigmay=meansurement_noise_cov_full)
-# ipromp_tape_hold.add_obs(t=0.15, obsy=test_set[15,:], sigmay=meansurement_noise_cov_full)
-# ipromp_tape_hold.add_obs(t=0.20, obsy=test_set[20,:], sigmay=meansurement_noise_cov_full)
-# ipromp_tape_hold.add_obs(t=0.25, obsy=test_set[25,:], sigmay=meansurement_noise_cov_full)
-# ipromp_tape_hold.add_obs(t=0.30, obsy=test_set[30,:], sigmay=meansurement_noise_cov_full)
+##
 prob_tape_hold = ipromp_tape_hold.prob_obs()
 print('from obs, the log pro of tape_hold is', prob_tape_hold)
 
@@ -1507,6 +1471,10 @@ elif idx_max_pro == 1:
     print('the obs comes from spanner_handover')
 elif idx_max_pro == 2:
     print('the obs comes from tape_hold')
+
+################################################################################################
+# compute the position error
+################################################################################################
 
 
 
@@ -1966,93 +1934,93 @@ elif idx_max_pro == 2:
 
 # plot the prior distributioin
 # plot ipromp_aluminum_hold
-# plt.figure(20)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, imu');plt.legend()
-# plt.figure(21)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, emg');plt.legend()
-# plt.figure(22)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     ipromp_aluminum_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, pose');plt.legend()
-# # plot ipromp_spanner_handover
-# plt.figure(23)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, imu');plt.legend()
-# plt.figure(24)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, emg');plt.legend()
-# plt.figure(25)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     ipromp_spanner_handover.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, pose');plt.legend()
-# # plot ipromp_tape_hold
-# plt.figure(26)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, imu');plt.legend()
-# plt.figure(27)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, emg');plt.legend()
-# plt.figure(28)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     ipromp_tape_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, pose');plt.legend()
-#
-# # plot the updated distributioin
-# # plot ipromp_aluminum_hold
-# plt.figure(20)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
-#     ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
-# plt.figure(21)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
-#     ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
-# plt.figure(22)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+8+i], color='r', linewidth=3);
-#     ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# # plot ipromp_spanner_handover
-# plt.figure(23)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
-#     ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
-# plt.figure(24)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
-#     ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
-# plt.figure(25)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+8+i], color='r', linewidth=3);
-#     ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# # plot ipromp_tape_hold
-# plt.figure(26)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
-#     ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
-# plt.figure(27)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
-#     ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
-# plt.figure(28)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+8+i], color='r', linewidth=3);
-#     ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+plt.figure(20)
+for i in range(4):
+    plt.subplot(411+i)
+    ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, imu');plt.legend()
+plt.figure(21)
+for i in range(8):
+    plt.subplot(421+i)
+    ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, emg');plt.legend()
+plt.figure(22)
+for i in range(7):
+    plt.subplot(711+i)
+    ipromp_aluminum_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, pose');plt.legend()
+# plot ipromp_spanner_handover
+plt.figure(23)
+for i in range(4):
+    plt.subplot(411+i)
+    ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, imu');plt.legend()
+plt.figure(24)
+for i in range(8):
+    plt.subplot(421+i)
+    ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, emg');plt.legend()
+plt.figure(25)
+for i in range(7):
+    plt.subplot(711+i)
+    ipromp_spanner_handover.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, pose');plt.legend()
+# plot ipromp_tape_hold
+plt.figure(26)
+for i in range(4):
+    plt.subplot(411+i)
+    ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, imu');plt.legend()
+plt.figure(27)
+for i in range(8):
+    plt.subplot(421+i)
+    ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, emg');plt.legend()
+plt.figure(28)
+for i in range(7):
+    plt.subplot(711+i)
+    ipromp_tape_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, pose');plt.legend()
 
-# plt.show()
+# plot the updated distributioin
+# plot ipromp_aluminum_hold
+plt.figure(20)
+for i in range(4):
+    plt.subplot(411+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
+    ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(21)
+for i in range(8):
+    plt.subplot(421+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
+    ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(22)
+for i in range(7):
+    plt.subplot(711+i)
+    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3);
+    ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plot ipromp_spanner_handover
+plt.figure(23)
+for i in range(4):
+    plt.subplot(411+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
+    ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(24)
+for i in range(8):
+    plt.subplot(421+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
+    ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(25)
+for i in range(7):
+    plt.subplot(711+i)
+    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3);
+    ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plot ipromp_tape_hold
+plt.figure(26)
+for i in range(4):
+    plt.subplot(411+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
+    ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(27)
+for i in range(8):
+    plt.subplot(421+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
+    ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(28)
+for i in range(7):
+    plt.subplot(711+i)
+    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3);
+    ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+
+plt.show()

@@ -442,6 +442,8 @@ class IProMP(NDProMP):
         for joint_demo in range(self.num_joints):
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo], sigmay)
 
+        self.obs.append({"t": t, "obs": obsys, "sigmay": sigmay})
+
         new_mean_w_full = self.mean_W_full
         new_cov_w_full = self.cov_W_full
         PhiT_full = np.array([])
