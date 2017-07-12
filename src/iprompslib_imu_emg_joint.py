@@ -534,7 +534,6 @@ class IProMP(NDProMP):
             PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(np.int(obs['t']),
                                                       (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
             PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
-            # here is a trick for construct the observation matrix
             zero_entry = np.zeros([1, 11])
             PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
                                                 PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,

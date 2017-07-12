@@ -13,7 +13,7 @@ import scipy.linalg
 
 plt.close('all')    # close all windows
 len_normal = 101    # the len of normalized traj
-nrDemo = 20         # number of trajectoreis for training
+nrDemo = 10         # number of trajectoreis for training
 
 
 ##################################################################################
@@ -1368,26 +1368,26 @@ for idx in range(0, nrDemo):
 # test_set = np.hstack((test_set_aluminum_hold_imu_norm, np.zeros([len_normal, 7])))
 # test_set = np.hstack((test_set_tape_hold_imu_norm, np.zeros([len_normal, 7])))
 
-# spanner handover
+# # spanner handover
 test_set = np.hstack((train_set_spanner_handover_imu_norm21, np.zeros([len_normal, 7])))
 test_set = np.hstack((train_set_spanner_handover_imu_norm22, np.zeros([len_normal, 7])))
 test_set = np.hstack((train_set_spanner_handover_imu_norm23, np.zeros([len_normal, 7])))
 test_set = np.hstack((train_set_spanner_handover_imu_norm24, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_spanner_handover_imu_norm25, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_spanner_handover_imu_norm26, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_spanner_handover_imu_norm27, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_spanner_handover_imu_norm28, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_spanner_handover_imu_norm29, np.zeros([len_normal, 7])))
-# aluminum hold
-test_set = np.hstack((train_set_aluminum_hold_imu_norm21, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_aluminum_hold_imu_norm22, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_aluminum_hold_imu_norm23, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_aluminum_hold_imu_norm24, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_aluminum_hold_imu_norm25, np.zeros([len_normal, 7])))
-test_set = np.hstack((train_set_aluminum_hold_imu_norm26, np.zeros([len_normal, 7])))  ## fail
-test_set = np.hstack((train_set_aluminum_hold_imu_norm27, np.zeros([len_normal, 7])))  ## fail
-test_set = np.hstack((train_set_aluminum_hold_imu_norm28, np.zeros([len_normal, 7])))  ## fail
-test_set = np.hstack((train_set_aluminum_hold_imu_norm29, np.zeros([len_normal, 7])))  ## fail
+# test_set = np.hstack((train_set_spanner_handover_imu_norm25, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_spanner_handover_imu_norm26, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_spanner_handover_imu_norm27, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_spanner_handover_imu_norm28, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_spanner_handover_imu_norm29, np.zeros([len_normal, 7])))
+# # aluminum hold
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm21, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm22, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm23, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm24, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm25, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm26, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm27, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm28, np.zeros([len_normal, 7])))
+# test_set = np.hstack((train_set_aluminum_hold_imu_norm29, np.zeros([len_normal, 7])))
 # # tape hold
 # test_set = np.hstack((train_set_tape_hold_imu_norm21, np.zeros([len_normal, 7])))
 # test_set = np.hstack((train_set_tape_hold_imu_norm22, np.zeros([len_normal, 7])))
@@ -1927,63 +1927,63 @@ elif idx_max_pro == 2:
 plt.figure(20)
 for i in range(4):
     plt.subplot(411+i)
-    ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
+    ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, imu');plt.legend()
 plt.figure(21)
 for i in range(7):
     plt.subplot(711+i)
-    ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
+    ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, pose');plt.legend()
 # plot ipromp_spanner_handover
 plt.figure(23)
 for i in range(4):
     plt.subplot(411+i)
-    ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g');
+    ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, imu');plt.legend()
 plt.figure(24)
 for i in range(7):
     plt.subplot(711+i)
-    ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
+    ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, pose');plt.legend()
 # plot ipromp_tape_hold
 plt.figure(26)
 for i in range(4):
     plt.subplot(411+i)
-    ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
+    ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, imu');plt.legend()
 plt.figure(27)
 for i in range(7):
     plt.subplot(711+i)
-    ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
+    ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, pose');plt.legend()
 
 # plot the updated distributioin
 # plot ipromp_aluminum_hold
 plt.figure(20)
 for i in range(4):
     plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
     ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
 plt.figure(21)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
+    # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
     ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
 # plot ipromp_spanner_handover
 plt.figure(23)
 for i in range(4):
     plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
     ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
 plt.figure(24)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
+    # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
     ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
 # plot ipromp_tape_hold
 plt.figure(26)
 for i in range(4):
     plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
     ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
 plt.figure(27)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
+    # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
     ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
 
 plt.show()

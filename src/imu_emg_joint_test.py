@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Filename: ndpromp_joint_emg.py
+# Filename: imu_emg_joint_test.py
 
 from __future__ import print_function
 
@@ -13,7 +13,7 @@ import scipy.linalg
 
 plt.close('all')    # close all windows
 len_normal = 101    # the len of normalized traj
-nrDemo = 20         # number of trajectoreis for training
+nrDemo = 10         # number of trajectoreis for training
 
 
 ##################################################################################
@@ -42,6 +42,16 @@ train_set_aluminum_hold_emg_16_pd = pd.read_csv(dir_prefix + '2017-07-09-10-05-2
 train_set_aluminum_hold_emg_17_pd = pd.read_csv(dir_prefix + '2017-07-09-10-05-46-myo_raw_emg_pub.csv')
 train_set_aluminum_hold_emg_18_pd = pd.read_csv(dir_prefix + '2017-07-09-10-06-07-myo_raw_emg_pub.csv')
 train_set_aluminum_hold_emg_19_pd = pd.read_csv(dir_prefix + '2017-07-09-10-06-36-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_20_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-04-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_21_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-23-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_22_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-48-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_23_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-13-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_24_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-39-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_25_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-58-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_26_pd = pd.read_csv(dir_prefix + '2017-07-09-10-09-22-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_27_pd = pd.read_csv(dir_prefix + '2017-07-09-10-09-54-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_28_pd = pd.read_csv(dir_prefix + '2017-07-09-10-10-15-myo_raw_emg_pub.csv')
+train_set_aluminum_hold_emg_29_pd = pd.read_csv(dir_prefix + '2017-07-09-10-10-39-myo_raw_emg_pub.csv')
 test_set_aluminum_hold_emg_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-04-myo_raw_emg_pub.csv')
 # invert the object to float32 for easy computing
 train_set_aluminum_hold_emg_00 = np.float32(train_set_aluminum_hold_emg_00_pd.values[:,5:13])
@@ -64,6 +74,16 @@ train_set_aluminum_hold_emg_16 = np.float32(train_set_aluminum_hold_emg_16_pd.va
 train_set_aluminum_hold_emg_17 = np.float32(train_set_aluminum_hold_emg_17_pd.values[:,5:13])
 train_set_aluminum_hold_emg_18 = np.float32(train_set_aluminum_hold_emg_18_pd.values[:,5:13])
 train_set_aluminum_hold_emg_19 = np.float32(train_set_aluminum_hold_emg_19_pd.values[:,5:13])
+train_set_aluminum_hold_emg_20 = np.float32(train_set_aluminum_hold_emg_20_pd.values[:,5:13])
+train_set_aluminum_hold_emg_21 = np.float32(train_set_aluminum_hold_emg_21_pd.values[:,5:13])
+train_set_aluminum_hold_emg_22 = np.float32(train_set_aluminum_hold_emg_22_pd.values[:,5:13])
+train_set_aluminum_hold_emg_23 = np.float32(train_set_aluminum_hold_emg_23_pd.values[:,5:13])
+train_set_aluminum_hold_emg_24 = np.float32(train_set_aluminum_hold_emg_24_pd.values[:,5:13])
+train_set_aluminum_hold_emg_25 = np.float32(train_set_aluminum_hold_emg_25_pd.values[:,5:13])
+train_set_aluminum_hold_emg_26 = np.float32(train_set_aluminum_hold_emg_26_pd.values[:,5:13])
+train_set_aluminum_hold_emg_27 = np.float32(train_set_aluminum_hold_emg_27_pd.values[:,5:13])
+train_set_aluminum_hold_emg_28 = np.float32(train_set_aluminum_hold_emg_28_pd.values[:,5:13])
+train_set_aluminum_hold_emg_29 = np.float32(train_set_aluminum_hold_emg_29_pd.values[:,5:13])
 test_set_aluminum_hold_emg = np.float32(test_set_aluminum_hold_emg_pd.values[:,5:13])
 #########################################################################################################
 print('loading EMG data sets of spanner handover task')
@@ -89,6 +109,16 @@ train_set_spanner_handover_emg_16_pd = pd.read_csv(dir_prefix + '2017-07-09-09-3
 train_set_spanner_handover_emg_17_pd = pd.read_csv(dir_prefix + '2017-07-09-09-36-38-myo_raw_emg_pub.csv')
 train_set_spanner_handover_emg_18_pd = pd.read_csv(dir_prefix + '2017-07-09-09-36-58-myo_raw_emg_pub.csv')
 train_set_spanner_handover_emg_19_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-16-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_20_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-41-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_21_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-02-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_22_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-19-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_23_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-54-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_24_pd = pd.read_csv(dir_prefix + '2017-07-09-09-41-39-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_25_pd = pd.read_csv(dir_prefix + '2017-07-09-09-42-03-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_26_pd = pd.read_csv(dir_prefix + '2017-07-09-09-42-21-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_27_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-00-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_28_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-33-myo_raw_emg_pub.csv')
+train_set_spanner_handover_emg_29_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-52-myo_raw_emg_pub.csv')
 test_set_spanner_handover_emg_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-41-myo_raw_emg_pub.csv')
 # invert the object to float32 for easy computing
 train_set_spanner_handover_emg_00 = np.float32(train_set_spanner_handover_emg_00_pd.values[:,5:13])
@@ -111,6 +141,16 @@ train_set_spanner_handover_emg_16 = np.float32(train_set_spanner_handover_emg_16
 train_set_spanner_handover_emg_17 = np.float32(train_set_spanner_handover_emg_17_pd.values[:,5:13])
 train_set_spanner_handover_emg_18 = np.float32(train_set_spanner_handover_emg_18_pd.values[:,5:13])
 train_set_spanner_handover_emg_19 = np.float32(train_set_spanner_handover_emg_19_pd.values[:,5:13])
+train_set_spanner_handover_emg_20 = np.float32(train_set_spanner_handover_emg_20_pd.values[:,5:13])
+train_set_spanner_handover_emg_21 = np.float32(train_set_spanner_handover_emg_21_pd.values[:,5:13])
+train_set_spanner_handover_emg_22 = np.float32(train_set_spanner_handover_emg_22_pd.values[:,5:13])
+train_set_spanner_handover_emg_23 = np.float32(train_set_spanner_handover_emg_23_pd.values[:,5:13])
+train_set_spanner_handover_emg_24 = np.float32(train_set_spanner_handover_emg_24_pd.values[:,5:13])
+train_set_spanner_handover_emg_25 = np.float32(train_set_spanner_handover_emg_25_pd.values[:,5:13])
+train_set_spanner_handover_emg_26 = np.float32(train_set_spanner_handover_emg_26_pd.values[:,5:13])
+train_set_spanner_handover_emg_27 = np.float32(train_set_spanner_handover_emg_27_pd.values[:,5:13])
+train_set_spanner_handover_emg_28 = np.float32(train_set_spanner_handover_emg_28_pd.values[:,5:13])
+train_set_spanner_handover_emg_29 = np.float32(train_set_spanner_handover_emg_29_pd.values[:,5:13])
 test_set_spanner_handover_emg = np.float32(test_set_spanner_handover_emg_pd.values[:,5:13])
 #############################################################################################################
 print('loading EMG data sets of tape hold task')
@@ -136,6 +176,16 @@ train_set_tape_hold_emg_16_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-08-my
 train_set_tape_hold_emg_17_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-26-myo_raw_emg_pub.csv')
 train_set_tape_hold_emg_18_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-44-myo_raw_emg_pub.csv')
 train_set_tape_hold_emg_19_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-03-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_20_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-22-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_21_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-44-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_22_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-00-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_23_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-17-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_24_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-37-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_25_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-07-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_26_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-29-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_27_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-48-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_28_pd = pd.read_csv(dir_prefix + '2017-07-09-10-24-21-myo_raw_emg_pub.csv')
+train_set_tape_hold_emg_29_pd = pd.read_csv(dir_prefix + '2017-07-09-10-24-46-myo_raw_emg_pub.csv')
 test_set_tape_hold_emg_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-22-myo_raw_emg_pub.csv')
 # invert the object to float32 for easy computing
 train_set_tape_hold_emg_00 = np.float32(train_set_tape_hold_emg_00_pd.values[:,5:13])
@@ -158,6 +208,16 @@ train_set_tape_hold_emg_16 = np.float32(train_set_tape_hold_emg_16_pd.values[:,5
 train_set_tape_hold_emg_17 = np.float32(train_set_tape_hold_emg_17_pd.values[:,5:13])
 train_set_tape_hold_emg_18 = np.float32(train_set_tape_hold_emg_18_pd.values[:,5:13])
 train_set_tape_hold_emg_19 = np.float32(train_set_tape_hold_emg_19_pd.values[:,5:13])
+train_set_tape_hold_emg_20 = np.float32(train_set_tape_hold_emg_20_pd.values[:,5:13])
+train_set_tape_hold_emg_21 = np.float32(train_set_tape_hold_emg_21_pd.values[:,5:13])
+train_set_tape_hold_emg_22 = np.float32(train_set_tape_hold_emg_22_pd.values[:,5:13])
+train_set_tape_hold_emg_23 = np.float32(train_set_tape_hold_emg_23_pd.values[:,5:13])
+train_set_tape_hold_emg_24 = np.float32(train_set_tape_hold_emg_24_pd.values[:,5:13])
+train_set_tape_hold_emg_25 = np.float32(train_set_tape_hold_emg_25_pd.values[:,5:13])
+train_set_tape_hold_emg_26 = np.float32(train_set_tape_hold_emg_26_pd.values[:,5:13])
+train_set_tape_hold_emg_27 = np.float32(train_set_tape_hold_emg_27_pd.values[:,5:13])
+train_set_tape_hold_emg_28 = np.float32(train_set_tape_hold_emg_28_pd.values[:,5:13])
+train_set_tape_hold_emg_29 = np.float32(train_set_tape_hold_emg_29_pd.values[:,5:13])
 test_set_tape_hold_emg = np.float32(test_set_tape_hold_emg_pd.values[:,5:13])
 
 
@@ -187,6 +247,16 @@ train_set_aluminum_hold_imu_16_pd = pd.read_csv(dir_prefix + '2017-07-09-10-05-2
 train_set_aluminum_hold_imu_17_pd = pd.read_csv(dir_prefix + '2017-07-09-10-05-46-myo_raw_imu_pub (copy).csv')
 train_set_aluminum_hold_imu_18_pd = pd.read_csv(dir_prefix + '2017-07-09-10-06-07-myo_raw_imu_pub (copy).csv')
 train_set_aluminum_hold_imu_19_pd = pd.read_csv(dir_prefix + '2017-07-09-10-06-36-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_20_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-04-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_21_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-23-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_22_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-48-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_23_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-13-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_24_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-39-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_25_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-58-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_26_pd = pd.read_csv(dir_prefix + '2017-07-09-10-09-22-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_27_pd = pd.read_csv(dir_prefix + '2017-07-09-10-09-54-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_28_pd = pd.read_csv(dir_prefix + '2017-07-09-10-10-15-myo_raw_imu_pub (copy).csv')
+train_set_aluminum_hold_imu_29_pd = pd.read_csv(dir_prefix + '2017-07-09-10-10-39-myo_raw_imu_pub (copy).csv')
 test_set_aluminum_hold_imu_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-04-myo_raw_imu_pub (copy).csv')
 # invert the object to float32 for easy computing
 train_set_aluminum_hold_imu_00 = np.float32(train_set_aluminum_hold_imu_00_pd.values[:,:])
@@ -209,6 +279,16 @@ train_set_aluminum_hold_imu_16 = np.float32(train_set_aluminum_hold_imu_16_pd.va
 train_set_aluminum_hold_imu_17 = np.float32(train_set_aluminum_hold_imu_17_pd.values[:,:])
 train_set_aluminum_hold_imu_18 = np.float32(train_set_aluminum_hold_imu_18_pd.values[:,:])
 train_set_aluminum_hold_imu_19 = np.float32(train_set_aluminum_hold_imu_19_pd.values[:,:])
+train_set_aluminum_hold_imu_20 = np.float32(train_set_aluminum_hold_imu_20_pd.values[:,:])
+train_set_aluminum_hold_imu_21 = np.float32(train_set_aluminum_hold_imu_21_pd.values[:,:])
+train_set_aluminum_hold_imu_22 = np.float32(train_set_aluminum_hold_imu_22_pd.values[:,:])
+train_set_aluminum_hold_imu_23 = np.float32(train_set_aluminum_hold_imu_23_pd.values[:,:])
+train_set_aluminum_hold_imu_24 = np.float32(train_set_aluminum_hold_imu_24_pd.values[:,:])
+train_set_aluminum_hold_imu_25 = np.float32(train_set_aluminum_hold_imu_25_pd.values[:,:])
+train_set_aluminum_hold_imu_26 = np.float32(train_set_aluminum_hold_imu_26_pd.values[:,:])
+train_set_aluminum_hold_imu_27 = np.float32(train_set_aluminum_hold_imu_27_pd.values[:,:])
+train_set_aluminum_hold_imu_28 = np.float32(train_set_aluminum_hold_imu_28_pd.values[:,:])
+train_set_aluminum_hold_imu_29 = np.float32(train_set_aluminum_hold_imu_29_pd.values[:,:])
 test_set_aluminum_hold_imu = np.float32(test_set_aluminum_hold_imu_pd.values[:,:])
 #########################################################################################################
 print('loading IMU data sets of spanner handover task')
@@ -234,6 +314,16 @@ train_set_spanner_handover_imu_16_pd = pd.read_csv(dir_prefix + '2017-07-09-09-3
 train_set_spanner_handover_imu_17_pd = pd.read_csv(dir_prefix + '2017-07-09-09-36-38-myo_raw_imu_pub (copy).csv')
 train_set_spanner_handover_imu_18_pd = pd.read_csv(dir_prefix + '2017-07-09-09-36-58-myo_raw_imu_pub (copy).csv')
 train_set_spanner_handover_imu_19_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-16-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_20_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-41-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_21_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-02-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_22_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-19-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_23_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-54-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_24_pd = pd.read_csv(dir_prefix + '2017-07-09-09-41-39-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_25_pd = pd.read_csv(dir_prefix + '2017-07-09-09-42-03-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_26_pd = pd.read_csv(dir_prefix + '2017-07-09-09-42-21-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_27_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-00-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_28_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-33-myo_raw_imu_pub (copy).csv')
+train_set_spanner_handover_imu_29_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-52-myo_raw_imu_pub (copy).csv')
 test_set_spanner_handover_imu_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-41-myo_raw_imu_pub (copy).csv')
 # invert the object to float32 for easy computing
 train_set_spanner_handover_imu_00 = np.float32(train_set_spanner_handover_imu_00_pd.values[:,:])
@@ -256,6 +346,16 @@ train_set_spanner_handover_imu_16 = np.float32(train_set_spanner_handover_imu_16
 train_set_spanner_handover_imu_17 = np.float32(train_set_spanner_handover_imu_17_pd.values[:,:])
 train_set_spanner_handover_imu_18 = np.float32(train_set_spanner_handover_imu_18_pd.values[:,:])
 train_set_spanner_handover_imu_19 = np.float32(train_set_spanner_handover_imu_19_pd.values[:,:])
+train_set_spanner_handover_imu_20 = np.float32(train_set_spanner_handover_imu_20_pd.values[:,:])
+train_set_spanner_handover_imu_21 = np.float32(train_set_spanner_handover_imu_21_pd.values[:,:])
+train_set_spanner_handover_imu_22 = np.float32(train_set_spanner_handover_imu_22_pd.values[:,:])
+train_set_spanner_handover_imu_23 = np.float32(train_set_spanner_handover_imu_23_pd.values[:,:])
+train_set_spanner_handover_imu_24 = np.float32(train_set_spanner_handover_imu_24_pd.values[:,:])
+train_set_spanner_handover_imu_25 = np.float32(train_set_spanner_handover_imu_25_pd.values[:,:])
+train_set_spanner_handover_imu_26 = np.float32(train_set_spanner_handover_imu_26_pd.values[:,:])
+train_set_spanner_handover_imu_27 = np.float32(train_set_spanner_handover_imu_27_pd.values[:,:])
+train_set_spanner_handover_imu_28 = np.float32(train_set_spanner_handover_imu_28_pd.values[:,:])
+train_set_spanner_handover_imu_29 = np.float32(train_set_spanner_handover_imu_29_pd.values[:,:])
 test_set_spanner_handover_imu = np.float32(test_set_spanner_handover_imu_pd.values[:,:])
 #############################################################################################################
 print('loading IMU data sets of tape hold task')
@@ -281,6 +381,16 @@ train_set_tape_hold_imu_16_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-08-my
 train_set_tape_hold_imu_17_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-26-myo_raw_imu_pub (copy).csv')
 train_set_tape_hold_imu_18_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-44-myo_raw_imu_pub (copy).csv')
 train_set_tape_hold_imu_19_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-03-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_20_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-22-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_21_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-44-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_22_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-00-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_23_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-17-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_24_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-37-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_25_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-07-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_26_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-29-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_27_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-48-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_28_pd = pd.read_csv(dir_prefix + '2017-07-09-10-24-21-myo_raw_imu_pub (copy).csv')
+train_set_tape_hold_imu_29_pd = pd.read_csv(dir_prefix + '2017-07-09-10-24-46-myo_raw_imu_pub (copy).csv')
 test_set_tape_hold_imu_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-22-myo_raw_imu_pub (copy).csv')
 # invert the object to float32 for easy computing
 train_set_tape_hold_imu_00 = np.float32(train_set_tape_hold_imu_00_pd.values[:,:])
@@ -303,6 +413,16 @@ train_set_tape_hold_imu_16 = np.float32(train_set_tape_hold_imu_16_pd.values[:,:
 train_set_tape_hold_imu_17 = np.float32(train_set_tape_hold_imu_17_pd.values[:,:])
 train_set_tape_hold_imu_18 = np.float32(train_set_tape_hold_imu_18_pd.values[:,:])
 train_set_tape_hold_imu_19 = np.float32(train_set_tape_hold_imu_19_pd.values[:,:])
+train_set_tape_hold_imu_20 = np.float32(train_set_tape_hold_imu_20_pd.values[:,:])
+train_set_tape_hold_imu_21 = np.float32(train_set_tape_hold_imu_21_pd.values[:,:])
+train_set_tape_hold_imu_22 = np.float32(train_set_tape_hold_imu_22_pd.values[:,:])
+train_set_tape_hold_imu_23 = np.float32(train_set_tape_hold_imu_23_pd.values[:,:])
+train_set_tape_hold_imu_24 = np.float32(train_set_tape_hold_imu_24_pd.values[:,:])
+train_set_tape_hold_imu_25 = np.float32(train_set_tape_hold_imu_25_pd.values[:,:])
+train_set_tape_hold_imu_26 = np.float32(train_set_tape_hold_imu_26_pd.values[:,:])
+train_set_tape_hold_imu_27 = np.float32(train_set_tape_hold_imu_27_pd.values[:,:])
+train_set_tape_hold_imu_28 = np.float32(train_set_tape_hold_imu_28_pd.values[:,:])
+train_set_tape_hold_imu_29 = np.float32(train_set_tape_hold_imu_29_pd.values[:,:])
 test_set_tape_hold_imu = np.float32(test_set_tape_hold_imu_pd.values[:,:])
 
 
@@ -332,6 +452,16 @@ train_set_aluminum_hold_pose_16_pd = pd.read_csv(dir_prefix + '2017-07-09-10-05-
 train_set_aluminum_hold_pose_17_pd = pd.read_csv(dir_prefix + '2017-07-09-10-05-46-robot-limb-left-endpoint_state.csv')
 train_set_aluminum_hold_pose_18_pd = pd.read_csv(dir_prefix + '2017-07-09-10-06-07-robot-limb-left-endpoint_state.csv')
 train_set_aluminum_hold_pose_19_pd = pd.read_csv(dir_prefix + '2017-07-09-10-06-36-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_20_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-04-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_21_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-23-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_22_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-48-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_23_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-13-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_24_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-39-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_25_pd = pd.read_csv(dir_prefix + '2017-07-09-10-08-58-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_26_pd = pd.read_csv(dir_prefix + '2017-07-09-10-09-22-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_27_pd = pd.read_csv(dir_prefix + '2017-07-09-10-09-54-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_28_pd = pd.read_csv(dir_prefix + '2017-07-09-10-10-15-robot-limb-left-endpoint_state.csv')
+train_set_aluminum_hold_pose_29_pd = pd.read_csv(dir_prefix + '2017-07-09-10-10-39-robot-limb-left-endpoint_state.csv')
 test_set_aluminum_hold_pose_pd = pd.read_csv(dir_prefix + '2017-07-09-10-07-04-robot-limb-left-endpoint_state.csv')
 # invert the object to float32 for easy computing
 train_set_aluminum_hold_pose_00 = np.float32(train_set_aluminum_hold_pose_00_pd.values[:,5:12])
@@ -354,6 +484,16 @@ train_set_aluminum_hold_pose_16 = np.float32(train_set_aluminum_hold_pose_16_pd.
 train_set_aluminum_hold_pose_17 = np.float32(train_set_aluminum_hold_pose_17_pd.values[:,5:12])
 train_set_aluminum_hold_pose_18 = np.float32(train_set_aluminum_hold_pose_18_pd.values[:,5:12])
 train_set_aluminum_hold_pose_19 = np.float32(train_set_aluminum_hold_pose_19_pd.values[:,5:12])
+train_set_aluminum_hold_pose_20 = np.float32(train_set_aluminum_hold_pose_20_pd.values[:,5:12])
+train_set_aluminum_hold_pose_21 = np.float32(train_set_aluminum_hold_pose_21_pd.values[:,5:12])
+train_set_aluminum_hold_pose_22 = np.float32(train_set_aluminum_hold_pose_22_pd.values[:,5:12])
+train_set_aluminum_hold_pose_23 = np.float32(train_set_aluminum_hold_pose_23_pd.values[:,5:12])
+train_set_aluminum_hold_pose_24 = np.float32(train_set_aluminum_hold_pose_24_pd.values[:,5:12])
+train_set_aluminum_hold_pose_25 = np.float32(train_set_aluminum_hold_pose_25_pd.values[:,5:12])
+train_set_aluminum_hold_pose_26 = np.float32(train_set_aluminum_hold_pose_26_pd.values[:,5:12])
+train_set_aluminum_hold_pose_27 = np.float32(train_set_aluminum_hold_pose_27_pd.values[:,5:12])
+train_set_aluminum_hold_pose_28 = np.float32(train_set_aluminum_hold_pose_28_pd.values[:,5:12])
+train_set_aluminum_hold_pose_29 = np.float32(train_set_aluminum_hold_pose_29_pd.values[:,5:12])
 test_set_aluminum_hold_pose = np.float32(test_set_aluminum_hold_pose_pd.values[:,5:12])
 #########################################################################################################
 print('loading Pose data sets of spanner handover task')
@@ -379,6 +519,16 @@ train_set_spanner_handover_pose_16_pd = pd.read_csv(dir_prefix + '2017-07-09-09-
 train_set_spanner_handover_pose_17_pd = pd.read_csv(dir_prefix + '2017-07-09-09-36-38-robot-limb-left-endpoint_state.csv')
 train_set_spanner_handover_pose_18_pd = pd.read_csv(dir_prefix + '2017-07-09-09-36-58-robot-limb-left-endpoint_state.csv')
 train_set_spanner_handover_pose_19_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-16-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_20_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-41-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_21_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-02-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_22_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-19-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_23_pd = pd.read_csv(dir_prefix + '2017-07-09-09-38-54-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_24_pd = pd.read_csv(dir_prefix + '2017-07-09-09-41-39-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_25_pd = pd.read_csv(dir_prefix + '2017-07-09-09-42-03-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_26_pd = pd.read_csv(dir_prefix + '2017-07-09-09-42-21-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_27_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-00-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_28_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-33-robot-limb-left-endpoint_state.csv')
+train_set_spanner_handover_pose_29_pd = pd.read_csv(dir_prefix + '2017-07-09-09-43-52-robot-limb-left-endpoint_state.csv')
 test_set_spanner_handover_pose_pd = pd.read_csv(dir_prefix + '2017-07-09-09-37-41-robot-limb-left-endpoint_state.csv')
 # invert the object to float32 for easy computing
 train_set_spanner_handover_pose_00 = np.float32(train_set_spanner_handover_pose_00_pd.values[:,5:12])
@@ -401,6 +551,16 @@ train_set_spanner_handover_pose_16 = np.float32(train_set_spanner_handover_pose_
 train_set_spanner_handover_pose_17 = np.float32(train_set_spanner_handover_pose_17_pd.values[:,5:12])
 train_set_spanner_handover_pose_18 = np.float32(train_set_spanner_handover_pose_18_pd.values[:,5:12])
 train_set_spanner_handover_pose_19 = np.float32(train_set_spanner_handover_pose_19_pd.values[:,5:12])
+train_set_spanner_handover_pose_20 = np.float32(train_set_spanner_handover_pose_20_pd.values[:,5:12])
+train_set_spanner_handover_pose_21 = np.float32(train_set_spanner_handover_pose_21_pd.values[:,5:12])
+train_set_spanner_handover_pose_22 = np.float32(train_set_spanner_handover_pose_22_pd.values[:,5:12])
+train_set_spanner_handover_pose_23 = np.float32(train_set_spanner_handover_pose_23_pd.values[:,5:12])
+train_set_spanner_handover_pose_24 = np.float32(train_set_spanner_handover_pose_24_pd.values[:,5:12])
+train_set_spanner_handover_pose_25 = np.float32(train_set_spanner_handover_pose_25_pd.values[:,5:12])
+train_set_spanner_handover_pose_26 = np.float32(train_set_spanner_handover_pose_26_pd.values[:,5:12])
+train_set_spanner_handover_pose_27 = np.float32(train_set_spanner_handover_pose_27_pd.values[:,5:12])
+train_set_spanner_handover_pose_28 = np.float32(train_set_spanner_handover_pose_28_pd.values[:,5:12])
+train_set_spanner_handover_pose_29 = np.float32(train_set_spanner_handover_pose_29_pd.values[:,5:12])
 test_set_spanner_handover_pose = np.float32(test_set_spanner_handover_pose_pd.values[:,5:12])
 #############################################################################################################
 print('loading Pose data sets of tape hold task')
@@ -426,6 +586,16 @@ train_set_tape_hold_pose_16_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-08-r
 train_set_tape_hold_pose_17_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-26-robot-limb-left-endpoint_state.csv')
 train_set_tape_hold_pose_18_pd = pd.read_csv(dir_prefix + '2017-07-09-10-20-44-robot-limb-left-endpoint_state.csv')
 train_set_tape_hold_pose_19_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-03-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_20_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-22-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_21_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-44-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_22_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-00-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_23_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-17-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_24_pd = pd.read_csv(dir_prefix + '2017-07-09-10-22-37-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_25_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-07-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_26_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-29-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_27_pd = pd.read_csv(dir_prefix + '2017-07-09-10-23-48-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_28_pd = pd.read_csv(dir_prefix + '2017-07-09-10-24-21-robot-limb-left-endpoint_state.csv')
+train_set_tape_hold_pose_29_pd = pd.read_csv(dir_prefix + '2017-07-09-10-24-46-robot-limb-left-endpoint_state.csv')
 test_set_tape_hold_pose_pd = pd.read_csv(dir_prefix + '2017-07-09-10-21-22-robot-limb-left-endpoint_state.csv')
 # invert the object to float32 for easy computing
 train_set_tape_hold_pose_00 = np.float32(train_set_tape_hold_pose_00_pd.values[:,5:12])
@@ -448,6 +618,16 @@ train_set_tape_hold_pose_16 = np.float32(train_set_tape_hold_pose_16_pd.values[:
 train_set_tape_hold_pose_17 = np.float32(train_set_tape_hold_pose_17_pd.values[:,5:12])
 train_set_tape_hold_pose_18 = np.float32(train_set_tape_hold_pose_18_pd.values[:,5:12])
 train_set_tape_hold_pose_19 = np.float32(train_set_tape_hold_pose_19_pd.values[:,5:12])
+train_set_tape_hold_pose_20 = np.float32(train_set_tape_hold_pose_20_pd.values[:,5:12])
+train_set_tape_hold_pose_21 = np.float32(train_set_tape_hold_pose_21_pd.values[:,5:12])
+train_set_tape_hold_pose_22 = np.float32(train_set_tape_hold_pose_22_pd.values[:,5:12])
+train_set_tape_hold_pose_23 = np.float32(train_set_tape_hold_pose_23_pd.values[:,5:12])
+train_set_tape_hold_pose_24 = np.float32(train_set_tape_hold_pose_24_pd.values[:,5:12])
+train_set_tape_hold_pose_25 = np.float32(train_set_tape_hold_pose_25_pd.values[:,5:12])
+train_set_tape_hold_pose_26 = np.float32(train_set_tape_hold_pose_26_pd.values[:,5:12])
+train_set_tape_hold_pose_27 = np.float32(train_set_tape_hold_pose_27_pd.values[:,5:12])
+train_set_tape_hold_pose_28 = np.float32(train_set_tape_hold_pose_28_pd.values[:,5:12])
+train_set_tape_hold_pose_29 = np.float32(train_set_tape_hold_pose_29_pd.values[:,5:12])
 test_set_tape_hold_pose = np.float32(test_set_tape_hold_pose_pd.values[:,5:12])
 
 ######################################################
@@ -467,6 +647,8 @@ train_set_aluminum_hold_emg_norm00=np.array([]);train_set_aluminum_hold_emg_norm
 train_set_aluminum_hold_emg_norm05=np.array([]);train_set_aluminum_hold_emg_norm06=np.array([]);train_set_aluminum_hold_emg_norm07=np.array([]);train_set_aluminum_hold_emg_norm08=np.array([]);train_set_aluminum_hold_emg_norm09=np.array([]);
 train_set_aluminum_hold_emg_norm10=np.array([]);train_set_aluminum_hold_emg_norm11=np.array([]);train_set_aluminum_hold_emg_norm12=np.array([]);train_set_aluminum_hold_emg_norm13=np.array([]);train_set_aluminum_hold_emg_norm14=np.array([]);
 train_set_aluminum_hold_emg_norm15=np.array([]);train_set_aluminum_hold_emg_norm16=np.array([]);train_set_aluminum_hold_emg_norm17=np.array([]);train_set_aluminum_hold_emg_norm18=np.array([]);train_set_aluminum_hold_emg_norm19=np.array([]);
+train_set_aluminum_hold_emg_norm20=np.array([]);train_set_aluminum_hold_emg_norm21=np.array([]);train_set_aluminum_hold_emg_norm22=np.array([]);train_set_aluminum_hold_emg_norm23=np.array([]);train_set_aluminum_hold_emg_norm24=np.array([]);
+train_set_aluminum_hold_emg_norm25=np.array([]);train_set_aluminum_hold_emg_norm26=np.array([]);train_set_aluminum_hold_emg_norm27=np.array([]);train_set_aluminum_hold_emg_norm28=np.array([]);train_set_aluminum_hold_emg_norm29=np.array([]);
 test_set_aluminum_hold_emg_norm=np.array([]);
 for ch_ex in range(8):
     train_set_aluminum_hold_emg_norm00 = np.hstack(( train_set_aluminum_hold_emg_norm00, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_00)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_00),1.), train_set_aluminum_hold_emg_00[:,ch_ex]) ))
@@ -489,6 +671,16 @@ for ch_ex in range(8):
     train_set_aluminum_hold_emg_norm17 = np.hstack(( train_set_aluminum_hold_emg_norm17, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_17)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_17),1.), train_set_aluminum_hold_emg_17[:,ch_ex]) ))
     train_set_aluminum_hold_emg_norm18 = np.hstack(( train_set_aluminum_hold_emg_norm18, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_18)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_18),1.), train_set_aluminum_hold_emg_18[:,ch_ex]) ))
     train_set_aluminum_hold_emg_norm19 = np.hstack(( train_set_aluminum_hold_emg_norm19, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_19)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_19),1.), train_set_aluminum_hold_emg_19[:,ch_ex]) ))
+    train_set_aluminum_hold_emg_norm20 = np.hstack(( train_set_aluminum_hold_emg_norm20, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_20)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_20),1.), train_set_aluminum_hold_emg_20[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm21 = np.hstack(( train_set_aluminum_hold_emg_norm21, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_21)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_21),1.), train_set_aluminum_hold_emg_21[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm22 = np.hstack(( train_set_aluminum_hold_emg_norm22, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_22)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_22),1.), train_set_aluminum_hold_emg_22[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm23 = np.hstack(( train_set_aluminum_hold_emg_norm23, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_23)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_23),1.), train_set_aluminum_hold_emg_23[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm24 = np.hstack(( train_set_aluminum_hold_emg_norm24, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_24)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_24),1.), train_set_aluminum_hold_emg_24[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm25 = np.hstack(( train_set_aluminum_hold_emg_norm25, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_25)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_25),1.), train_set_aluminum_hold_emg_25[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm26 = np.hstack(( train_set_aluminum_hold_emg_norm26, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_26)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_26),1.), train_set_aluminum_hold_emg_26[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm27 = np.hstack(( train_set_aluminum_hold_emg_norm27, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_27)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_27),1.), train_set_aluminum_hold_emg_27[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm28 = np.hstack(( train_set_aluminum_hold_emg_norm28, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_28)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_28),1.), train_set_aluminum_hold_emg_28[:, ch_ex])))
+    train_set_aluminum_hold_emg_norm29 = np.hstack(( train_set_aluminum_hold_emg_norm29, np.interp(np.linspace(0, len(train_set_aluminum_hold_emg_29)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_emg_29),1.), train_set_aluminum_hold_emg_29[:, ch_ex])))
     test_set_aluminum_hold_emg_norm = np.hstack(( test_set_aluminum_hold_emg_norm, np.interp(np.linspace(0, len(test_set_aluminum_hold_emg)-1, len_normal), np.arange(0,len(test_set_aluminum_hold_emg),1.), test_set_aluminum_hold_emg[:,ch_ex]) ))
 train_set_aluminum_hold_emg_norm00 = train_set_aluminum_hold_emg_norm00.reshape(8,len_normal).T
 train_set_aluminum_hold_emg_norm01 = train_set_aluminum_hold_emg_norm01.reshape(8,len_normal).T
@@ -510,6 +702,16 @@ train_set_aluminum_hold_emg_norm16 = train_set_aluminum_hold_emg_norm16.reshape(
 train_set_aluminum_hold_emg_norm17 = train_set_aluminum_hold_emg_norm17.reshape(8,len_normal).T
 train_set_aluminum_hold_emg_norm18 = train_set_aluminum_hold_emg_norm18.reshape(8,len_normal).T
 train_set_aluminum_hold_emg_norm19 = train_set_aluminum_hold_emg_norm19.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm20 = train_set_aluminum_hold_emg_norm20.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm21 = train_set_aluminum_hold_emg_norm21.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm22 = train_set_aluminum_hold_emg_norm22.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm23 = train_set_aluminum_hold_emg_norm23.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm24 = train_set_aluminum_hold_emg_norm24.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm25 = train_set_aluminum_hold_emg_norm25.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm26 = train_set_aluminum_hold_emg_norm26.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm27 = train_set_aluminum_hold_emg_norm27.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm28 = train_set_aluminum_hold_emg_norm28.reshape(8,len_normal).T
+train_set_aluminum_hold_emg_norm29 = train_set_aluminum_hold_emg_norm29.reshape(8,len_normal).T
 test_set_aluminum_hold_emg_norm = test_set_aluminum_hold_emg_norm.reshape(8,len_normal).T
 train_set_aluminum_hold_emg_norm_full = np.array([train_set_aluminum_hold_emg_norm00,train_set_aluminum_hold_emg_norm01,train_set_aluminum_hold_emg_norm02,train_set_aluminum_hold_emg_norm03,train_set_aluminum_hold_emg_norm04,
                                     train_set_aluminum_hold_emg_norm05,train_set_aluminum_hold_emg_norm06,train_set_aluminum_hold_emg_norm07,train_set_aluminum_hold_emg_norm08,train_set_aluminum_hold_emg_norm09,
@@ -522,6 +724,8 @@ train_set_spanner_handover_emg_norm00=np.array([]);train_set_spanner_handover_em
 train_set_spanner_handover_emg_norm05=np.array([]);train_set_spanner_handover_emg_norm06=np.array([]);train_set_spanner_handover_emg_norm07=np.array([]);train_set_spanner_handover_emg_norm08=np.array([]);train_set_spanner_handover_emg_norm09=np.array([]);
 train_set_spanner_handover_emg_norm10=np.array([]);train_set_spanner_handover_emg_norm11=np.array([]);train_set_spanner_handover_emg_norm12=np.array([]);train_set_spanner_handover_emg_norm13=np.array([]);train_set_spanner_handover_emg_norm14=np.array([]);
 train_set_spanner_handover_emg_norm15=np.array([]);train_set_spanner_handover_emg_norm16=np.array([]);train_set_spanner_handover_emg_norm17=np.array([]);train_set_spanner_handover_emg_norm18=np.array([]);train_set_spanner_handover_emg_norm19=np.array([]);
+train_set_spanner_handover_emg_norm20=np.array([]);train_set_spanner_handover_emg_norm21=np.array([]);train_set_spanner_handover_emg_norm22=np.array([]);train_set_spanner_handover_emg_norm23=np.array([]);train_set_spanner_handover_emg_norm24=np.array([]);
+train_set_spanner_handover_emg_norm25=np.array([]);train_set_spanner_handover_emg_norm26=np.array([]);train_set_spanner_handover_emg_norm27=np.array([]);train_set_spanner_handover_emg_norm28=np.array([]);train_set_spanner_handover_emg_norm29=np.array([]);
 test_set_spanner_handover_emg_norm=np.array([]);
 for ch_ex in range(8):
     train_set_spanner_handover_emg_norm00 = np.hstack(( train_set_spanner_handover_emg_norm00, np.interp(np.linspace(0, len(train_set_spanner_handover_emg_00)-1, len_normal), np.arange(0,len(train_set_spanner_handover_emg_00),1.), train_set_spanner_handover_emg_00[:,ch_ex]) ))
@@ -544,6 +748,16 @@ for ch_ex in range(8):
     train_set_spanner_handover_emg_norm17 = np.hstack(( train_set_spanner_handover_emg_norm17, np.interp(np.linspace(0, len(train_set_spanner_handover_emg_17)-1, len_normal), np.arange(0,len(train_set_spanner_handover_emg_17),1.), train_set_spanner_handover_emg_17[:,ch_ex]) ))
     train_set_spanner_handover_emg_norm18 = np.hstack(( train_set_spanner_handover_emg_norm18, np.interp(np.linspace(0, len(train_set_spanner_handover_emg_18)-1, len_normal), np.arange(0,len(train_set_spanner_handover_emg_18),1.), train_set_spanner_handover_emg_18[:,ch_ex]) ))
     train_set_spanner_handover_emg_norm19 = np.hstack(( train_set_spanner_handover_emg_norm19, np.interp(np.linspace(0, len(train_set_spanner_handover_emg_19)-1, len_normal), np.arange(0,len(train_set_spanner_handover_emg_19),1.), train_set_spanner_handover_emg_19[:,ch_ex]) ))
+    train_set_spanner_handover_emg_norm20 = np.hstack((train_set_spanner_handover_emg_norm20, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_20) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_20), 1.), train_set_spanner_handover_emg_20[:, ch_ex])))
+    train_set_spanner_handover_emg_norm21 = np.hstack((train_set_spanner_handover_emg_norm21, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_21) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_21), 1.), train_set_spanner_handover_emg_21[:, ch_ex])))
+    train_set_spanner_handover_emg_norm22 = np.hstack((train_set_spanner_handover_emg_norm22, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_22) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_22), 1.), train_set_spanner_handover_emg_22[:, ch_ex])))
+    train_set_spanner_handover_emg_norm23 = np.hstack((train_set_spanner_handover_emg_norm23, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_23) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_23), 1.), train_set_spanner_handover_emg_23[:, ch_ex])))
+    train_set_spanner_handover_emg_norm24 = np.hstack((train_set_spanner_handover_emg_norm24, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_24) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_24), 1.), train_set_spanner_handover_emg_24[:, ch_ex])))
+    train_set_spanner_handover_emg_norm25 = np.hstack((train_set_spanner_handover_emg_norm25, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_25) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_25), 1.), train_set_spanner_handover_emg_25[:, ch_ex])))
+    train_set_spanner_handover_emg_norm26 = np.hstack((train_set_spanner_handover_emg_norm26, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_26) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_26), 1.), train_set_spanner_handover_emg_26[:, ch_ex])))
+    train_set_spanner_handover_emg_norm27 = np.hstack((train_set_spanner_handover_emg_norm27, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_27) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_27), 1.), train_set_spanner_handover_emg_27[:, ch_ex])))
+    train_set_spanner_handover_emg_norm28 = np.hstack((train_set_spanner_handover_emg_norm28, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_28) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_28), 1.), train_set_spanner_handover_emg_28[:, ch_ex])))
+    train_set_spanner_handover_emg_norm29 = np.hstack((train_set_spanner_handover_emg_norm29, np.interp( np.linspace(0, len(train_set_spanner_handover_emg_29) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_emg_29), 1.), train_set_spanner_handover_emg_29[:, ch_ex])))
     test_set_spanner_handover_emg_norm = np.hstack(( test_set_spanner_handover_emg_norm, np.interp(np.linspace(0, len(test_set_spanner_handover_emg)-1, len_normal), np.arange(0,len(test_set_spanner_handover_emg),1.), test_set_spanner_handover_emg[:,ch_ex]) ))
 train_set_spanner_handover_emg_norm00 = train_set_spanner_handover_emg_norm00.reshape(8,len_normal).T
 train_set_spanner_handover_emg_norm01 = train_set_spanner_handover_emg_norm01.reshape(8,len_normal).T
@@ -565,6 +779,16 @@ train_set_spanner_handover_emg_norm16 = train_set_spanner_handover_emg_norm16.re
 train_set_spanner_handover_emg_norm17 = train_set_spanner_handover_emg_norm17.reshape(8,len_normal).T
 train_set_spanner_handover_emg_norm18 = train_set_spanner_handover_emg_norm18.reshape(8,len_normal).T
 train_set_spanner_handover_emg_norm19 = train_set_spanner_handover_emg_norm19.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm20 = train_set_spanner_handover_emg_norm20.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm21 = train_set_spanner_handover_emg_norm21.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm22 = train_set_spanner_handover_emg_norm22.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm23 = train_set_spanner_handover_emg_norm23.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm24 = train_set_spanner_handover_emg_norm24.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm25 = train_set_spanner_handover_emg_norm25.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm26 = train_set_spanner_handover_emg_norm26.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm27 = train_set_spanner_handover_emg_norm27.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm28 = train_set_spanner_handover_emg_norm28.reshape(8,len_normal).T
+train_set_spanner_handover_emg_norm29 = train_set_spanner_handover_emg_norm29.reshape(8,len_normal).T
 test_set_spanner_handover_emg_norm = test_set_spanner_handover_emg_norm.reshape(8,len_normal).T
 train_set_spanner_handover_emg_norm_full = np.array([train_set_spanner_handover_emg_norm00,train_set_spanner_handover_emg_norm01,train_set_spanner_handover_emg_norm02,train_set_spanner_handover_emg_norm03,train_set_spanner_handover_emg_norm04,
                                     train_set_spanner_handover_emg_norm05,train_set_spanner_handover_emg_norm06,train_set_spanner_handover_emg_norm07,train_set_spanner_handover_emg_norm08,train_set_spanner_handover_emg_norm09,
@@ -577,6 +801,8 @@ train_set_tape_hold_emg_norm00=np.array([]);train_set_tape_hold_emg_norm01=np.ar
 train_set_tape_hold_emg_norm05=np.array([]);train_set_tape_hold_emg_norm06=np.array([]);train_set_tape_hold_emg_norm07=np.array([]);train_set_tape_hold_emg_norm08=np.array([]);train_set_tape_hold_emg_norm09=np.array([]);
 train_set_tape_hold_emg_norm10=np.array([]);train_set_tape_hold_emg_norm11=np.array([]);train_set_tape_hold_emg_norm12=np.array([]);train_set_tape_hold_emg_norm13=np.array([]);train_set_tape_hold_emg_norm14=np.array([]);
 train_set_tape_hold_emg_norm15=np.array([]);train_set_tape_hold_emg_norm16=np.array([]);train_set_tape_hold_emg_norm17=np.array([]);train_set_tape_hold_emg_norm18=np.array([]);train_set_tape_hold_emg_norm19=np.array([]);
+train_set_tape_hold_emg_norm20=np.array([]);train_set_tape_hold_emg_norm21=np.array([]);train_set_tape_hold_emg_norm22=np.array([]);train_set_tape_hold_emg_norm23=np.array([]);train_set_tape_hold_emg_norm24=np.array([]);
+train_set_tape_hold_emg_norm25=np.array([]);train_set_tape_hold_emg_norm26=np.array([]);train_set_tape_hold_emg_norm27=np.array([]);train_set_tape_hold_emg_norm28=np.array([]);train_set_tape_hold_emg_norm29=np.array([]);
 test_set_tape_hold_emg_norm=np.array([]);
 for ch_ex in range(8):
     train_set_tape_hold_emg_norm00 = np.hstack(( train_set_tape_hold_emg_norm00, np.interp(np.linspace(0, len(train_set_tape_hold_emg_00)-1, len_normal), np.arange(0,len(train_set_tape_hold_emg_00),1.), train_set_tape_hold_emg_00[:,ch_ex]) ))
@@ -599,6 +825,16 @@ for ch_ex in range(8):
     train_set_tape_hold_emg_norm17 = np.hstack(( train_set_tape_hold_emg_norm17, np.interp(np.linspace(0, len(train_set_tape_hold_emg_17)-1, len_normal), np.arange(0,len(train_set_tape_hold_emg_17),1.), train_set_tape_hold_emg_17[:,ch_ex]) ))
     train_set_tape_hold_emg_norm18 = np.hstack(( train_set_tape_hold_emg_norm18, np.interp(np.linspace(0, len(train_set_tape_hold_emg_18)-1, len_normal), np.arange(0,len(train_set_tape_hold_emg_18),1.), train_set_tape_hold_emg_18[:,ch_ex]) ))
     train_set_tape_hold_emg_norm19 = np.hstack(( train_set_tape_hold_emg_norm19, np.interp(np.linspace(0, len(train_set_tape_hold_emg_19)-1, len_normal), np.arange(0,len(train_set_tape_hold_emg_19),1.), train_set_tape_hold_emg_19[:,ch_ex]) ))
+    train_set_tape_hold_emg_norm20 = np.hstack((train_set_tape_hold_emg_norm20, np.interp( np.linspace(0, len(train_set_tape_hold_emg_20) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_20), 1.), train_set_tape_hold_emg_20[:, ch_ex])))
+    train_set_tape_hold_emg_norm21 = np.hstack((train_set_tape_hold_emg_norm21, np.interp( np.linspace(0, len(train_set_tape_hold_emg_21) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_21), 1.), train_set_tape_hold_emg_21[:, ch_ex])))
+    train_set_tape_hold_emg_norm22 = np.hstack((train_set_tape_hold_emg_norm22, np.interp( np.linspace(0, len(train_set_tape_hold_emg_22) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_22), 1.), train_set_tape_hold_emg_22[:, ch_ex])))
+    train_set_tape_hold_emg_norm23 = np.hstack((train_set_tape_hold_emg_norm23, np.interp( np.linspace(0, len(train_set_tape_hold_emg_23) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_23), 1.), train_set_tape_hold_emg_23[:, ch_ex])))
+    train_set_tape_hold_emg_norm24 = np.hstack((train_set_tape_hold_emg_norm24, np.interp( np.linspace(0, len(train_set_tape_hold_emg_24) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_24), 1.), train_set_tape_hold_emg_24[:, ch_ex])))
+    train_set_tape_hold_emg_norm25 = np.hstack((train_set_tape_hold_emg_norm25, np.interp( np.linspace(0, len(train_set_tape_hold_emg_25) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_25), 1.), train_set_tape_hold_emg_25[:, ch_ex])))
+    train_set_tape_hold_emg_norm26 = np.hstack((train_set_tape_hold_emg_norm26, np.interp( np.linspace(0, len(train_set_tape_hold_emg_26) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_26), 1.), train_set_tape_hold_emg_26[:, ch_ex])))
+    train_set_tape_hold_emg_norm27 = np.hstack((train_set_tape_hold_emg_norm27, np.interp( np.linspace(0, len(train_set_tape_hold_emg_27) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_27), 1.), train_set_tape_hold_emg_27[:, ch_ex])))
+    train_set_tape_hold_emg_norm28 = np.hstack((train_set_tape_hold_emg_norm28, np.interp( np.linspace(0, len(train_set_tape_hold_emg_28) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_28), 1.), train_set_tape_hold_emg_28[:, ch_ex])))
+    train_set_tape_hold_emg_norm29 = np.hstack((train_set_tape_hold_emg_norm29, np.interp( np.linspace(0, len(train_set_tape_hold_emg_29) - 1, len_normal), np.arange(0, len(train_set_tape_hold_emg_29), 1.), train_set_tape_hold_emg_29[:, ch_ex])))
     test_set_tape_hold_emg_norm = np.hstack(( test_set_tape_hold_emg_norm, np.interp(np.linspace(0, len(test_set_tape_hold_emg)-1, len_normal), np.arange(0,len(test_set_tape_hold_emg),1.), test_set_tape_hold_emg[:,ch_ex]) ))
 train_set_tape_hold_emg_norm00 = train_set_tape_hold_emg_norm00.reshape(8,len_normal).T
 train_set_tape_hold_emg_norm01 = train_set_tape_hold_emg_norm01.reshape(8,len_normal).T
@@ -620,6 +856,16 @@ train_set_tape_hold_emg_norm16 = train_set_tape_hold_emg_norm16.reshape(8,len_no
 train_set_tape_hold_emg_norm17 = train_set_tape_hold_emg_norm17.reshape(8,len_normal).T
 train_set_tape_hold_emg_norm18 = train_set_tape_hold_emg_norm18.reshape(8,len_normal).T
 train_set_tape_hold_emg_norm19 = train_set_tape_hold_emg_norm19.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm20 = train_set_tape_hold_emg_norm20.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm21 = train_set_tape_hold_emg_norm21.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm22 = train_set_tape_hold_emg_norm22.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm23 = train_set_tape_hold_emg_norm23.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm24 = train_set_tape_hold_emg_norm24.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm25 = train_set_tape_hold_emg_norm25.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm26 = train_set_tape_hold_emg_norm26.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm27 = train_set_tape_hold_emg_norm27.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm28 = train_set_tape_hold_emg_norm28.reshape(8,len_normal).T
+train_set_tape_hold_emg_norm29 = train_set_tape_hold_emg_norm29.reshape(8,len_normal).T
 test_set_tape_hold_emg_norm = test_set_tape_hold_emg_norm.reshape(8,len_normal).T
 train_set_tape_hold_emg_norm_full = np.array([train_set_tape_hold_emg_norm00,train_set_tape_hold_emg_norm01,train_set_tape_hold_emg_norm02,train_set_tape_hold_emg_norm03,train_set_tape_hold_emg_norm04,
                                     train_set_tape_hold_emg_norm05,train_set_tape_hold_emg_norm06,train_set_tape_hold_emg_norm07,train_set_tape_hold_emg_norm08,train_set_tape_hold_emg_norm09,
@@ -637,6 +883,8 @@ train_set_aluminum_hold_imu_norm00=np.array([]);train_set_aluminum_hold_imu_norm
 train_set_aluminum_hold_imu_norm05=np.array([]);train_set_aluminum_hold_imu_norm06=np.array([]);train_set_aluminum_hold_imu_norm07=np.array([]);train_set_aluminum_hold_imu_norm08=np.array([]);train_set_aluminum_hold_imu_norm09=np.array([]);
 train_set_aluminum_hold_imu_norm10=np.array([]);train_set_aluminum_hold_imu_norm11=np.array([]);train_set_aluminum_hold_imu_norm12=np.array([]);train_set_aluminum_hold_imu_norm13=np.array([]);train_set_aluminum_hold_imu_norm14=np.array([]);
 train_set_aluminum_hold_imu_norm15=np.array([]);train_set_aluminum_hold_imu_norm16=np.array([]);train_set_aluminum_hold_imu_norm17=np.array([]);train_set_aluminum_hold_imu_norm18=np.array([]);train_set_aluminum_hold_imu_norm19=np.array([]);
+train_set_aluminum_hold_imu_norm20=np.array([]);train_set_aluminum_hold_imu_norm21=np.array([]);train_set_aluminum_hold_imu_norm22=np.array([]);train_set_aluminum_hold_imu_norm23=np.array([]);train_set_aluminum_hold_imu_norm24=np.array([]);
+train_set_aluminum_hold_imu_norm25=np.array([]);train_set_aluminum_hold_imu_norm26=np.array([]);train_set_aluminum_hold_imu_norm27=np.array([]);train_set_aluminum_hold_imu_norm28=np.array([]);train_set_aluminum_hold_imu_norm29=np.array([]);
 test_set_aluminum_hold_imu_norm=np.array([]);
 for ch_ex in range(4):
     train_set_aluminum_hold_imu_norm00 = np.hstack(( train_set_aluminum_hold_imu_norm00, np.interp(np.linspace(0, len(train_set_aluminum_hold_imu_00)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_imu_00),1.), train_set_aluminum_hold_imu_00[:,ch_ex]) ))
@@ -659,6 +907,16 @@ for ch_ex in range(4):
     train_set_aluminum_hold_imu_norm17 = np.hstack(( train_set_aluminum_hold_imu_norm17, np.interp(np.linspace(0, len(train_set_aluminum_hold_imu_17)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_imu_17),1.), train_set_aluminum_hold_imu_17[:,ch_ex]) ))
     train_set_aluminum_hold_imu_norm18 = np.hstack(( train_set_aluminum_hold_imu_norm18, np.interp(np.linspace(0, len(train_set_aluminum_hold_imu_18)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_imu_18),1.), train_set_aluminum_hold_imu_18[:,ch_ex]) ))
     train_set_aluminum_hold_imu_norm19 = np.hstack(( train_set_aluminum_hold_imu_norm19, np.interp(np.linspace(0, len(train_set_aluminum_hold_imu_19)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_imu_19),1.), train_set_aluminum_hold_imu_19[:,ch_ex]) ))
+    train_set_aluminum_hold_imu_norm20 = np.hstack((train_set_aluminum_hold_imu_norm20, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_20) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_20), 1.), train_set_aluminum_hold_imu_20[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm21 = np.hstack((train_set_aluminum_hold_imu_norm21, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_21) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_21), 1.), train_set_aluminum_hold_imu_21[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm22 = np.hstack((train_set_aluminum_hold_imu_norm22, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_22) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_22), 1.), train_set_aluminum_hold_imu_22[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm23 = np.hstack((train_set_aluminum_hold_imu_norm23, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_23) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_23), 1.), train_set_aluminum_hold_imu_23[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm24 = np.hstack((train_set_aluminum_hold_imu_norm24, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_24) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_24), 1.), train_set_aluminum_hold_imu_24[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm25 = np.hstack((train_set_aluminum_hold_imu_norm25, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_25) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_25), 1.), train_set_aluminum_hold_imu_25[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm26 = np.hstack((train_set_aluminum_hold_imu_norm26, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_26) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_26), 1.), train_set_aluminum_hold_imu_26[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm27 = np.hstack((train_set_aluminum_hold_imu_norm27, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_27) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_27), 1.), train_set_aluminum_hold_imu_27[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm28 = np.hstack((train_set_aluminum_hold_imu_norm28, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_28) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_28), 1.), train_set_aluminum_hold_imu_28[:, ch_ex])))
+    train_set_aluminum_hold_imu_norm29 = np.hstack((train_set_aluminum_hold_imu_norm29, np.interp( np.linspace(0, len(train_set_aluminum_hold_imu_29) - 1, len_normal), np.arange(0, len(train_set_aluminum_hold_imu_29), 1.), train_set_aluminum_hold_imu_29[:, ch_ex])))
     test_set_aluminum_hold_imu_norm = np.hstack(( test_set_aluminum_hold_imu_norm, np.interp(np.linspace(0, len(test_set_aluminum_hold_imu)-1, len_normal), np.arange(0,len(test_set_aluminum_hold_imu),1.), test_set_aluminum_hold_imu[:,ch_ex]) ))
 train_set_aluminum_hold_imu_norm00 = train_set_aluminum_hold_imu_norm00.reshape(4,len_normal).T
 train_set_aluminum_hold_imu_norm01 = train_set_aluminum_hold_imu_norm01.reshape(4,len_normal).T
@@ -680,6 +938,16 @@ train_set_aluminum_hold_imu_norm16 = train_set_aluminum_hold_imu_norm16.reshape(
 train_set_aluminum_hold_imu_norm17 = train_set_aluminum_hold_imu_norm17.reshape(4,len_normal).T
 train_set_aluminum_hold_imu_norm18 = train_set_aluminum_hold_imu_norm18.reshape(4,len_normal).T
 train_set_aluminum_hold_imu_norm19 = train_set_aluminum_hold_imu_norm19.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm20 = train_set_aluminum_hold_imu_norm20.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm21 = train_set_aluminum_hold_imu_norm21.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm22 = train_set_aluminum_hold_imu_norm22.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm23 = train_set_aluminum_hold_imu_norm23.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm24 = train_set_aluminum_hold_imu_norm24.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm25 = train_set_aluminum_hold_imu_norm25.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm26 = train_set_aluminum_hold_imu_norm26.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm27 = train_set_aluminum_hold_imu_norm27.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm28 = train_set_aluminum_hold_imu_norm28.reshape(4,len_normal).T
+train_set_aluminum_hold_imu_norm29 = train_set_aluminum_hold_imu_norm29.reshape(4,len_normal).T
 test_set_aluminum_hold_imu_norm = test_set_aluminum_hold_imu_norm.reshape(4,len_normal).T
 train_set_aluminum_hold_imu_norm_full = np.array([train_set_aluminum_hold_imu_norm00,train_set_aluminum_hold_imu_norm01,train_set_aluminum_hold_imu_norm02,train_set_aluminum_hold_imu_norm03,train_set_aluminum_hold_imu_norm04,
                                     train_set_aluminum_hold_imu_norm05,train_set_aluminum_hold_imu_norm06,train_set_aluminum_hold_imu_norm07,train_set_aluminum_hold_imu_norm08,train_set_aluminum_hold_imu_norm09,
@@ -692,6 +960,8 @@ train_set_spanner_handover_imu_norm00=np.array([]);train_set_spanner_handover_im
 train_set_spanner_handover_imu_norm05=np.array([]);train_set_spanner_handover_imu_norm06=np.array([]);train_set_spanner_handover_imu_norm07=np.array([]);train_set_spanner_handover_imu_norm08=np.array([]);train_set_spanner_handover_imu_norm09=np.array([]);
 train_set_spanner_handover_imu_norm10=np.array([]);train_set_spanner_handover_imu_norm11=np.array([]);train_set_spanner_handover_imu_norm12=np.array([]);train_set_spanner_handover_imu_norm13=np.array([]);train_set_spanner_handover_imu_norm14=np.array([]);
 train_set_spanner_handover_imu_norm15=np.array([]);train_set_spanner_handover_imu_norm16=np.array([]);train_set_spanner_handover_imu_norm17=np.array([]);train_set_spanner_handover_imu_norm18=np.array([]);train_set_spanner_handover_imu_norm19=np.array([]);
+train_set_spanner_handover_imu_norm20=np.array([]);train_set_spanner_handover_imu_norm21=np.array([]);train_set_spanner_handover_imu_norm22=np.array([]);train_set_spanner_handover_imu_norm23=np.array([]);train_set_spanner_handover_imu_norm24=np.array([]);
+train_set_spanner_handover_imu_norm25=np.array([]);train_set_spanner_handover_imu_norm26=np.array([]);train_set_spanner_handover_imu_norm27=np.array([]);train_set_spanner_handover_imu_norm28=np.array([]);train_set_spanner_handover_imu_norm29=np.array([]);
 test_set_spanner_handover_imu_norm=np.array([]);
 for ch_ex in range(4):
     train_set_spanner_handover_imu_norm00 = np.hstack(( train_set_spanner_handover_imu_norm00, np.interp(np.linspace(0, len(train_set_spanner_handover_imu_00)-1, len_normal), np.arange(0,len(train_set_spanner_handover_imu_00),1.), train_set_spanner_handover_imu_00[:,ch_ex]) ))
@@ -714,6 +984,16 @@ for ch_ex in range(4):
     train_set_spanner_handover_imu_norm17 = np.hstack(( train_set_spanner_handover_imu_norm17, np.interp(np.linspace(0, len(train_set_spanner_handover_imu_17)-1, len_normal), np.arange(0,len(train_set_spanner_handover_imu_17),1.), train_set_spanner_handover_imu_17[:,ch_ex]) ))
     train_set_spanner_handover_imu_norm18 = np.hstack(( train_set_spanner_handover_imu_norm18, np.interp(np.linspace(0, len(train_set_spanner_handover_imu_18)-1, len_normal), np.arange(0,len(train_set_spanner_handover_imu_18),1.), train_set_spanner_handover_imu_18[:,ch_ex]) ))
     train_set_spanner_handover_imu_norm19 = np.hstack(( train_set_spanner_handover_imu_norm19, np.interp(np.linspace(0, len(train_set_spanner_handover_imu_19)-1, len_normal), np.arange(0,len(train_set_spanner_handover_imu_19),1.), train_set_spanner_handover_imu_19[:,ch_ex]) ))
+    train_set_spanner_handover_imu_norm20 = np.hstack((train_set_spanner_handover_imu_norm20, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_20) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_20), 1.), train_set_spanner_handover_imu_20[:, ch_ex])))
+    train_set_spanner_handover_imu_norm21 = np.hstack((train_set_spanner_handover_imu_norm21, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_21) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_21), 1.), train_set_spanner_handover_imu_21[:, ch_ex])))
+    train_set_spanner_handover_imu_norm22 = np.hstack((train_set_spanner_handover_imu_norm22, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_22) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_22), 1.), train_set_spanner_handover_imu_22[:, ch_ex])))
+    train_set_spanner_handover_imu_norm23 = np.hstack((train_set_spanner_handover_imu_norm23, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_23) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_23), 1.), train_set_spanner_handover_imu_23[:, ch_ex])))
+    train_set_spanner_handover_imu_norm24 = np.hstack((train_set_spanner_handover_imu_norm24, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_24) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_24), 1.), train_set_spanner_handover_imu_24[:, ch_ex])))
+    train_set_spanner_handover_imu_norm25 = np.hstack((train_set_spanner_handover_imu_norm25, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_25) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_25), 1.), train_set_spanner_handover_imu_25[:, ch_ex])))
+    train_set_spanner_handover_imu_norm26 = np.hstack((train_set_spanner_handover_imu_norm26, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_26) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_26), 1.), train_set_spanner_handover_imu_26[:, ch_ex])))
+    train_set_spanner_handover_imu_norm27 = np.hstack((train_set_spanner_handover_imu_norm27, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_27) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_27), 1.), train_set_spanner_handover_imu_27[:, ch_ex])))
+    train_set_spanner_handover_imu_norm28 = np.hstack((train_set_spanner_handover_imu_norm28, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_28) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_28), 1.), train_set_spanner_handover_imu_28[:, ch_ex])))
+    train_set_spanner_handover_imu_norm29 = np.hstack((train_set_spanner_handover_imu_norm29, np.interp( np.linspace(0, len(train_set_spanner_handover_imu_29) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_imu_29), 1.), train_set_spanner_handover_imu_29[:, ch_ex])))
     test_set_spanner_handover_imu_norm = np.hstack(( test_set_spanner_handover_imu_norm, np.interp(np.linspace(0, len(test_set_spanner_handover_imu)-1, len_normal), np.arange(0,len(test_set_spanner_handover_imu),1.), test_set_spanner_handover_imu[:,ch_ex]) ))
 train_set_spanner_handover_imu_norm00 = train_set_spanner_handover_imu_norm00.reshape(4,len_normal).T
 train_set_spanner_handover_imu_norm01 = train_set_spanner_handover_imu_norm01.reshape(4,len_normal).T
@@ -735,6 +1015,16 @@ train_set_spanner_handover_imu_norm16 = train_set_spanner_handover_imu_norm16.re
 train_set_spanner_handover_imu_norm17 = train_set_spanner_handover_imu_norm17.reshape(4,len_normal).T
 train_set_spanner_handover_imu_norm18 = train_set_spanner_handover_imu_norm18.reshape(4,len_normal).T
 train_set_spanner_handover_imu_norm19 = train_set_spanner_handover_imu_norm19.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm20 = train_set_spanner_handover_imu_norm20.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm21 = train_set_spanner_handover_imu_norm21.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm22 = train_set_spanner_handover_imu_norm22.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm23 = train_set_spanner_handover_imu_norm23.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm24 = train_set_spanner_handover_imu_norm24.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm25 = train_set_spanner_handover_imu_norm25.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm26 = train_set_spanner_handover_imu_norm26.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm27 = train_set_spanner_handover_imu_norm27.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm28 = train_set_spanner_handover_imu_norm28.reshape(4,len_normal).T
+train_set_spanner_handover_imu_norm29 = train_set_spanner_handover_imu_norm29.reshape(4,len_normal).T
 test_set_spanner_handover_imu_norm = test_set_spanner_handover_imu_norm.reshape(4,len_normal).T
 train_set_spanner_handover_imu_norm_full = np.array([train_set_spanner_handover_imu_norm00,train_set_spanner_handover_imu_norm01,train_set_spanner_handover_imu_norm02,train_set_spanner_handover_imu_norm03,train_set_spanner_handover_imu_norm04,
                                     train_set_spanner_handover_imu_norm05,train_set_spanner_handover_imu_norm06,train_set_spanner_handover_imu_norm07,train_set_spanner_handover_imu_norm08,train_set_spanner_handover_imu_norm09,
@@ -747,6 +1037,8 @@ train_set_tape_hold_imu_norm00=np.array([]);train_set_tape_hold_imu_norm01=np.ar
 train_set_tape_hold_imu_norm05=np.array([]);train_set_tape_hold_imu_norm06=np.array([]);train_set_tape_hold_imu_norm07=np.array([]);train_set_tape_hold_imu_norm08=np.array([]);train_set_tape_hold_imu_norm09=np.array([]);
 train_set_tape_hold_imu_norm10=np.array([]);train_set_tape_hold_imu_norm11=np.array([]);train_set_tape_hold_imu_norm12=np.array([]);train_set_tape_hold_imu_norm13=np.array([]);train_set_tape_hold_imu_norm14=np.array([]);
 train_set_tape_hold_imu_norm15=np.array([]);train_set_tape_hold_imu_norm16=np.array([]);train_set_tape_hold_imu_norm17=np.array([]);train_set_tape_hold_imu_norm18=np.array([]);train_set_tape_hold_imu_norm19=np.array([]);
+train_set_tape_hold_imu_norm20=np.array([]);train_set_tape_hold_imu_norm21=np.array([]);train_set_tape_hold_imu_norm22=np.array([]);train_set_tape_hold_imu_norm23=np.array([]);train_set_tape_hold_imu_norm24=np.array([]);
+train_set_tape_hold_imu_norm25=np.array([]);train_set_tape_hold_imu_norm26=np.array([]);train_set_tape_hold_imu_norm27=np.array([]);train_set_tape_hold_imu_norm28=np.array([]);train_set_tape_hold_imu_norm29=np.array([]);
 test_set_tape_hold_imu_norm=np.array([]);
 for ch_ex in range(4):
     train_set_tape_hold_imu_norm00 = np.hstack(( train_set_tape_hold_imu_norm00, np.interp(np.linspace(0, len(train_set_tape_hold_imu_00)-1, len_normal), np.arange(0,len(train_set_tape_hold_imu_00),1.), train_set_tape_hold_imu_00[:,ch_ex]) ))
@@ -769,6 +1061,16 @@ for ch_ex in range(4):
     train_set_tape_hold_imu_norm17 = np.hstack(( train_set_tape_hold_imu_norm17, np.interp(np.linspace(0, len(train_set_tape_hold_imu_17)-1, len_normal), np.arange(0,len(train_set_tape_hold_imu_17),1.), train_set_tape_hold_imu_17[:,ch_ex]) ))
     train_set_tape_hold_imu_norm18 = np.hstack(( train_set_tape_hold_imu_norm18, np.interp(np.linspace(0, len(train_set_tape_hold_imu_18)-1, len_normal), np.arange(0,len(train_set_tape_hold_imu_18),1.), train_set_tape_hold_imu_18[:,ch_ex]) ))
     train_set_tape_hold_imu_norm19 = np.hstack(( train_set_tape_hold_imu_norm19, np.interp(np.linspace(0, len(train_set_tape_hold_imu_19)-1, len_normal), np.arange(0,len(train_set_tape_hold_imu_19),1.), train_set_tape_hold_imu_19[:,ch_ex]) ))
+    train_set_tape_hold_imu_norm20 = np.hstack((train_set_tape_hold_imu_norm20, np.interp( np.linspace(0, len(train_set_tape_hold_imu_20) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_20), 1.), train_set_tape_hold_imu_20[:, ch_ex])))
+    train_set_tape_hold_imu_norm21 = np.hstack((train_set_tape_hold_imu_norm21, np.interp( np.linspace(0, len(train_set_tape_hold_imu_21) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_21), 1.), train_set_tape_hold_imu_21[:, ch_ex])))
+    train_set_tape_hold_imu_norm22 = np.hstack((train_set_tape_hold_imu_norm22, np.interp( np.linspace(0, len(train_set_tape_hold_imu_22) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_22), 1.), train_set_tape_hold_imu_22[:, ch_ex])))
+    train_set_tape_hold_imu_norm23 = np.hstack((train_set_tape_hold_imu_norm23, np.interp( np.linspace(0, len(train_set_tape_hold_imu_23) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_23), 1.), train_set_tape_hold_imu_23[:, ch_ex])))
+    train_set_tape_hold_imu_norm24 = np.hstack((train_set_tape_hold_imu_norm24, np.interp( np.linspace(0, len(train_set_tape_hold_imu_24) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_24), 1.), train_set_tape_hold_imu_24[:, ch_ex])))
+    train_set_tape_hold_imu_norm25 = np.hstack((train_set_tape_hold_imu_norm25, np.interp( np.linspace(0, len(train_set_tape_hold_imu_25) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_25), 1.), train_set_tape_hold_imu_25[:, ch_ex])))
+    train_set_tape_hold_imu_norm26 = np.hstack((train_set_tape_hold_imu_norm26, np.interp( np.linspace(0, len(train_set_tape_hold_imu_26) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_26), 1.), train_set_tape_hold_imu_26[:, ch_ex])))
+    train_set_tape_hold_imu_norm27 = np.hstack((train_set_tape_hold_imu_norm27, np.interp( np.linspace(0, len(train_set_tape_hold_imu_27) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_27), 1.), train_set_tape_hold_imu_27[:, ch_ex])))
+    train_set_tape_hold_imu_norm28 = np.hstack((train_set_tape_hold_imu_norm28, np.interp( np.linspace(0, len(train_set_tape_hold_imu_28) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_28), 1.), train_set_tape_hold_imu_28[:, ch_ex])))
+    train_set_tape_hold_imu_norm29 = np.hstack((train_set_tape_hold_imu_norm29, np.interp( np.linspace(0, len(train_set_tape_hold_imu_29) - 1, len_normal), np.arange(0, len(train_set_tape_hold_imu_29), 1.), train_set_tape_hold_imu_29[:, ch_ex])))
     test_set_tape_hold_imu_norm = np.hstack(( test_set_tape_hold_imu_norm, np.interp(np.linspace(0, len(test_set_tape_hold_imu)-1, len_normal), np.arange(0,len(test_set_tape_hold_imu),1.), test_set_tape_hold_imu[:,ch_ex]) ))
 train_set_tape_hold_imu_norm00 = train_set_tape_hold_imu_norm00.reshape(4,len_normal).T
 train_set_tape_hold_imu_norm01 = train_set_tape_hold_imu_norm01.reshape(4,len_normal).T
@@ -790,6 +1092,16 @@ train_set_tape_hold_imu_norm16 = train_set_tape_hold_imu_norm16.reshape(4,len_no
 train_set_tape_hold_imu_norm17 = train_set_tape_hold_imu_norm17.reshape(4,len_normal).T
 train_set_tape_hold_imu_norm18 = train_set_tape_hold_imu_norm18.reshape(4,len_normal).T
 train_set_tape_hold_imu_norm19 = train_set_tape_hold_imu_norm19.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm20 = train_set_tape_hold_imu_norm20.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm21 = train_set_tape_hold_imu_norm21.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm22 = train_set_tape_hold_imu_norm22.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm23 = train_set_tape_hold_imu_norm23.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm24 = train_set_tape_hold_imu_norm24.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm25 = train_set_tape_hold_imu_norm25.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm26 = train_set_tape_hold_imu_norm26.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm27 = train_set_tape_hold_imu_norm27.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm28 = train_set_tape_hold_imu_norm28.reshape(4,len_normal).T
+train_set_tape_hold_imu_norm29 = train_set_tape_hold_imu_norm29.reshape(4,len_normal).T
 test_set_tape_hold_imu_norm = test_set_tape_hold_imu_norm.reshape(4,len_normal).T
 train_set_tape_hold_imu_norm_full = np.array([train_set_tape_hold_imu_norm00,train_set_tape_hold_imu_norm01,train_set_tape_hold_imu_norm02,train_set_tape_hold_imu_norm03,train_set_tape_hold_imu_norm04,
                                     train_set_tape_hold_imu_norm05,train_set_tape_hold_imu_norm06,train_set_tape_hold_imu_norm07,train_set_tape_hold_imu_norm08,train_set_tape_hold_imu_norm09,
@@ -806,6 +1118,8 @@ train_set_aluminum_hold_pose_norm00=np.array([]);train_set_aluminum_hold_pose_no
 train_set_aluminum_hold_pose_norm05=np.array([]);train_set_aluminum_hold_pose_norm06=np.array([]);train_set_aluminum_hold_pose_norm07=np.array([]);train_set_aluminum_hold_pose_norm08=np.array([]);train_set_aluminum_hold_pose_norm09=np.array([]);
 train_set_aluminum_hold_pose_norm10=np.array([]);train_set_aluminum_hold_pose_norm11=np.array([]);train_set_aluminum_hold_pose_norm12=np.array([]);train_set_aluminum_hold_pose_norm13=np.array([]);train_set_aluminum_hold_pose_norm14=np.array([]);
 train_set_aluminum_hold_pose_norm15=np.array([]);train_set_aluminum_hold_pose_norm16=np.array([]);train_set_aluminum_hold_pose_norm17=np.array([]);train_set_aluminum_hold_pose_norm18=np.array([]);train_set_aluminum_hold_pose_norm19=np.array([]);
+train_set_aluminum_hold_pose_norm20=np.array([]);train_set_aluminum_hold_pose_norm21=np.array([]);train_set_aluminum_hold_pose_norm22=np.array([]);train_set_aluminum_hold_pose_norm23=np.array([]);train_set_aluminum_hold_pose_norm24=np.array([]);
+train_set_aluminum_hold_pose_norm25=np.array([]);train_set_aluminum_hold_pose_norm26=np.array([]);train_set_aluminum_hold_pose_norm27=np.array([]);train_set_aluminum_hold_pose_norm28=np.array([]);train_set_aluminum_hold_pose_norm29=np.array([]);
 test_set_aluminum_hold_pose_norm=np.array([]);
 for ch_ex in range(7):
     train_set_aluminum_hold_pose_norm00 = np.hstack(( train_set_aluminum_hold_pose_norm00, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_00)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_00),1.), train_set_aluminum_hold_pose_00[:,ch_ex]) ))
@@ -828,6 +1142,16 @@ for ch_ex in range(7):
     train_set_aluminum_hold_pose_norm17 = np.hstack(( train_set_aluminum_hold_pose_norm17, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_17)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_17),1.), train_set_aluminum_hold_pose_17[:,ch_ex]) ))
     train_set_aluminum_hold_pose_norm18 = np.hstack(( train_set_aluminum_hold_pose_norm18, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_18)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_18),1.), train_set_aluminum_hold_pose_18[:,ch_ex]) ))
     train_set_aluminum_hold_pose_norm19 = np.hstack(( train_set_aluminum_hold_pose_norm19, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_19)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_19),1.), train_set_aluminum_hold_pose_19[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm20 = np.hstack(( train_set_aluminum_hold_pose_norm20, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_20)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_20),1.), train_set_aluminum_hold_pose_20[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm21 = np.hstack(( train_set_aluminum_hold_pose_norm21, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_21)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_21),1.), train_set_aluminum_hold_pose_21[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm22 = np.hstack(( train_set_aluminum_hold_pose_norm22, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_22)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_22),1.), train_set_aluminum_hold_pose_22[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm23 = np.hstack(( train_set_aluminum_hold_pose_norm23, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_23)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_23),1.), train_set_aluminum_hold_pose_23[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm24 = np.hstack(( train_set_aluminum_hold_pose_norm24, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_24)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_24),1.), train_set_aluminum_hold_pose_24[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm25 = np.hstack(( train_set_aluminum_hold_pose_norm25, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_25)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_25),1.), train_set_aluminum_hold_pose_25[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm26 = np.hstack(( train_set_aluminum_hold_pose_norm26, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_26)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_26),1.), train_set_aluminum_hold_pose_26[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm27 = np.hstack(( train_set_aluminum_hold_pose_norm27, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_27)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_27),1.), train_set_aluminum_hold_pose_27[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm28 = np.hstack(( train_set_aluminum_hold_pose_norm28, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_28)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_28),1.), train_set_aluminum_hold_pose_28[:,ch_ex]) ))
+    train_set_aluminum_hold_pose_norm29 = np.hstack(( train_set_aluminum_hold_pose_norm29, np.interp(np.linspace(0, len(train_set_aluminum_hold_pose_29)-1, len_normal), np.arange(0,len(train_set_aluminum_hold_pose_29),1.), train_set_aluminum_hold_pose_29[:,ch_ex]) ))
     test_set_aluminum_hold_pose_norm = np.hstack(( test_set_aluminum_hold_pose_norm, np.interp(np.linspace(0, len(test_set_aluminum_hold_pose)-1, len_normal), np.arange(0,len(test_set_aluminum_hold_pose),1.), test_set_aluminum_hold_pose[:,ch_ex]) ))
 train_set_aluminum_hold_pose_norm00 = train_set_aluminum_hold_pose_norm00.reshape(7,len_normal).T
 train_set_aluminum_hold_pose_norm01 = train_set_aluminum_hold_pose_norm01.reshape(7,len_normal).T
@@ -849,6 +1173,16 @@ train_set_aluminum_hold_pose_norm16 = train_set_aluminum_hold_pose_norm16.reshap
 train_set_aluminum_hold_pose_norm17 = train_set_aluminum_hold_pose_norm17.reshape(7,len_normal).T
 train_set_aluminum_hold_pose_norm18 = train_set_aluminum_hold_pose_norm18.reshape(7,len_normal).T
 train_set_aluminum_hold_pose_norm19 = train_set_aluminum_hold_pose_norm19.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm20 = train_set_aluminum_hold_pose_norm20.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm21 = train_set_aluminum_hold_pose_norm21.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm22 = train_set_aluminum_hold_pose_norm22.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm23 = train_set_aluminum_hold_pose_norm23.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm24 = train_set_aluminum_hold_pose_norm24.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm25 = train_set_aluminum_hold_pose_norm25.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm26 = train_set_aluminum_hold_pose_norm26.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm27 = train_set_aluminum_hold_pose_norm27.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm28 = train_set_aluminum_hold_pose_norm28.reshape(7,len_normal).T
+train_set_aluminum_hold_pose_norm29 = train_set_aluminum_hold_pose_norm29.reshape(7,len_normal).T
 test_set_aluminum_hold_pose_norm = test_set_aluminum_hold_pose_norm.reshape(7,len_normal).T
 train_set_aluminum_hold_pose_norm_full = np.array([train_set_aluminum_hold_pose_norm00,train_set_aluminum_hold_pose_norm01,train_set_aluminum_hold_pose_norm02,train_set_aluminum_hold_pose_norm03,train_set_aluminum_hold_pose_norm04,
                                     train_set_aluminum_hold_pose_norm05,train_set_aluminum_hold_pose_norm06,train_set_aluminum_hold_pose_norm07,train_set_aluminum_hold_pose_norm08,train_set_aluminum_hold_pose_norm09,
@@ -861,6 +1195,8 @@ train_set_spanner_handover_pose_norm00=np.array([]);train_set_spanner_handover_p
 train_set_spanner_handover_pose_norm05=np.array([]);train_set_spanner_handover_pose_norm06=np.array([]);train_set_spanner_handover_pose_norm07=np.array([]);train_set_spanner_handover_pose_norm08=np.array([]);train_set_spanner_handover_pose_norm09=np.array([]);
 train_set_spanner_handover_pose_norm10=np.array([]);train_set_spanner_handover_pose_norm11=np.array([]);train_set_spanner_handover_pose_norm12=np.array([]);train_set_spanner_handover_pose_norm13=np.array([]);train_set_spanner_handover_pose_norm14=np.array([]);
 train_set_spanner_handover_pose_norm15=np.array([]);train_set_spanner_handover_pose_norm16=np.array([]);train_set_spanner_handover_pose_norm17=np.array([]);train_set_spanner_handover_pose_norm18=np.array([]);train_set_spanner_handover_pose_norm19=np.array([]);
+train_set_spanner_handover_pose_norm20=np.array([]);train_set_spanner_handover_pose_norm21=np.array([]);train_set_spanner_handover_pose_norm22=np.array([]);train_set_spanner_handover_pose_norm23=np.array([]);train_set_spanner_handover_pose_norm24=np.array([]);
+train_set_spanner_handover_pose_norm25=np.array([]);train_set_spanner_handover_pose_norm26=np.array([]);train_set_spanner_handover_pose_norm27=np.array([]);train_set_spanner_handover_pose_norm28=np.array([]);train_set_spanner_handover_pose_norm29=np.array([]);
 test_set_spanner_handover_pose_norm=np.array([]);
 for ch_ex in range(7):
     train_set_spanner_handover_pose_norm00 = np.hstack(( train_set_spanner_handover_pose_norm00, np.interp(np.linspace(0, len(train_set_spanner_handover_pose_00)-1, len_normal), np.arange(0,len(train_set_spanner_handover_pose_00),1.), train_set_spanner_handover_pose_00[:,ch_ex]) ))
@@ -883,6 +1219,16 @@ for ch_ex in range(7):
     train_set_spanner_handover_pose_norm17 = np.hstack(( train_set_spanner_handover_pose_norm17, np.interp(np.linspace(0, len(train_set_spanner_handover_pose_17)-1, len_normal), np.arange(0,len(train_set_spanner_handover_pose_17),1.), train_set_spanner_handover_pose_17[:,ch_ex]) ))
     train_set_spanner_handover_pose_norm18 = np.hstack(( train_set_spanner_handover_pose_norm18, np.interp(np.linspace(0, len(train_set_spanner_handover_pose_18)-1, len_normal), np.arange(0,len(train_set_spanner_handover_pose_18),1.), train_set_spanner_handover_pose_18[:,ch_ex]) ))
     train_set_spanner_handover_pose_norm19 = np.hstack(( train_set_spanner_handover_pose_norm19, np.interp(np.linspace(0, len(train_set_spanner_handover_pose_19)-1, len_normal), np.arange(0,len(train_set_spanner_handover_pose_19),1.), train_set_spanner_handover_pose_19[:,ch_ex]) ))
+    train_set_spanner_handover_pose_norm20 = np.hstack((train_set_spanner_handover_pose_norm20, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_20) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_20), 1.), train_set_spanner_handover_pose_20[:, ch_ex])))
+    train_set_spanner_handover_pose_norm21 = np.hstack((train_set_spanner_handover_pose_norm21, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_21) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_21), 1.), train_set_spanner_handover_pose_21[:, ch_ex])))
+    train_set_spanner_handover_pose_norm22 = np.hstack((train_set_spanner_handover_pose_norm22, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_22) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_22), 1.), train_set_spanner_handover_pose_22[:, ch_ex])))
+    train_set_spanner_handover_pose_norm23 = np.hstack((train_set_spanner_handover_pose_norm23, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_23) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_23), 1.), train_set_spanner_handover_pose_23[:, ch_ex])))
+    train_set_spanner_handover_pose_norm24 = np.hstack((train_set_spanner_handover_pose_norm24, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_24) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_24), 1.), train_set_spanner_handover_pose_24[:, ch_ex])))
+    train_set_spanner_handover_pose_norm25 = np.hstack((train_set_spanner_handover_pose_norm25, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_25) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_25), 1.), train_set_spanner_handover_pose_25[:, ch_ex])))
+    train_set_spanner_handover_pose_norm26 = np.hstack((train_set_spanner_handover_pose_norm26, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_26) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_26), 1.), train_set_spanner_handover_pose_26[:, ch_ex])))
+    train_set_spanner_handover_pose_norm27 = np.hstack((train_set_spanner_handover_pose_norm27, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_27) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_27), 1.), train_set_spanner_handover_pose_27[:, ch_ex])))
+    train_set_spanner_handover_pose_norm28 = np.hstack((train_set_spanner_handover_pose_norm28, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_28) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_28), 1.), train_set_spanner_handover_pose_28[:, ch_ex])))
+    train_set_spanner_handover_pose_norm29 = np.hstack((train_set_spanner_handover_pose_norm29, np.interp( np.linspace(0, len(train_set_spanner_handover_pose_29) - 1, len_normal), np.arange(0, len(train_set_spanner_handover_pose_29), 1.), train_set_spanner_handover_pose_29[:, ch_ex])))
     test_set_spanner_handover_pose_norm = np.hstack(( test_set_spanner_handover_pose_norm, np.interp(np.linspace(0, len(test_set_spanner_handover_pose)-1, len_normal), np.arange(0,len(test_set_spanner_handover_pose),1.), test_set_spanner_handover_pose[:,ch_ex]) ))
 train_set_spanner_handover_pose_norm00 = train_set_spanner_handover_pose_norm00.reshape(7,len_normal).T
 train_set_spanner_handover_pose_norm01 = train_set_spanner_handover_pose_norm01.reshape(7,len_normal).T
@@ -904,6 +1250,16 @@ train_set_spanner_handover_pose_norm16 = train_set_spanner_handover_pose_norm16.
 train_set_spanner_handover_pose_norm17 = train_set_spanner_handover_pose_norm17.reshape(7,len_normal).T
 train_set_spanner_handover_pose_norm18 = train_set_spanner_handover_pose_norm18.reshape(7,len_normal).T
 train_set_spanner_handover_pose_norm19 = train_set_spanner_handover_pose_norm19.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm20 = train_set_spanner_handover_pose_norm20.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm21 = train_set_spanner_handover_pose_norm21.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm22 = train_set_spanner_handover_pose_norm22.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm23 = train_set_spanner_handover_pose_norm23.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm24 = train_set_spanner_handover_pose_norm24.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm25 = train_set_spanner_handover_pose_norm25.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm26 = train_set_spanner_handover_pose_norm26.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm27 = train_set_spanner_handover_pose_norm27.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm28 = train_set_spanner_handover_pose_norm28.reshape(7,len_normal).T
+train_set_spanner_handover_pose_norm29 = train_set_spanner_handover_pose_norm29.reshape(7,len_normal).T
 test_set_spanner_handover_pose_norm = test_set_spanner_handover_pose_norm.reshape(7,len_normal).T
 train_set_spanner_handover_pose_norm_full = np.array([train_set_spanner_handover_pose_norm00,train_set_spanner_handover_pose_norm01,train_set_spanner_handover_pose_norm02,train_set_spanner_handover_pose_norm03,train_set_spanner_handover_pose_norm04,
                                     train_set_spanner_handover_pose_norm05,train_set_spanner_handover_pose_norm06,train_set_spanner_handover_pose_norm07,train_set_spanner_handover_pose_norm08,train_set_spanner_handover_pose_norm09,
@@ -916,6 +1272,8 @@ train_set_tape_hold_pose_norm00=np.array([]);train_set_tape_hold_pose_norm01=np.
 train_set_tape_hold_pose_norm05=np.array([]);train_set_tape_hold_pose_norm06=np.array([]);train_set_tape_hold_pose_norm07=np.array([]);train_set_tape_hold_pose_norm08=np.array([]);train_set_tape_hold_pose_norm09=np.array([]);
 train_set_tape_hold_pose_norm10=np.array([]);train_set_tape_hold_pose_norm11=np.array([]);train_set_tape_hold_pose_norm12=np.array([]);train_set_tape_hold_pose_norm13=np.array([]);train_set_tape_hold_pose_norm14=np.array([]);
 train_set_tape_hold_pose_norm15=np.array([]);train_set_tape_hold_pose_norm16=np.array([]);train_set_tape_hold_pose_norm17=np.array([]);train_set_tape_hold_pose_norm18=np.array([]);train_set_tape_hold_pose_norm19=np.array([]);
+train_set_tape_hold_pose_norm20=np.array([]);train_set_tape_hold_pose_norm21=np.array([]);train_set_tape_hold_pose_norm22=np.array([]);train_set_tape_hold_pose_norm23=np.array([]);train_set_tape_hold_pose_norm24=np.array([]);
+train_set_tape_hold_pose_norm25=np.array([]);train_set_tape_hold_pose_norm26=np.array([]);train_set_tape_hold_pose_norm27=np.array([]);train_set_tape_hold_pose_norm28=np.array([]);train_set_tape_hold_pose_norm29=np.array([]);
 test_set_tape_hold_pose_norm=np.array([]);
 for ch_ex in range(7):
     train_set_tape_hold_pose_norm00 = np.hstack(( train_set_tape_hold_pose_norm00, np.interp(np.linspace(0, len(train_set_tape_hold_pose_00)-1, len_normal), np.arange(0,len(train_set_tape_hold_pose_00),1.), train_set_tape_hold_pose_00[:,ch_ex]) ))
@@ -938,6 +1296,16 @@ for ch_ex in range(7):
     train_set_tape_hold_pose_norm17 = np.hstack(( train_set_tape_hold_pose_norm17, np.interp(np.linspace(0, len(train_set_tape_hold_pose_17)-1, len_normal), np.arange(0,len(train_set_tape_hold_pose_17),1.), train_set_tape_hold_pose_17[:,ch_ex]) ))
     train_set_tape_hold_pose_norm18 = np.hstack(( train_set_tape_hold_pose_norm18, np.interp(np.linspace(0, len(train_set_tape_hold_pose_18)-1, len_normal), np.arange(0,len(train_set_tape_hold_pose_18),1.), train_set_tape_hold_pose_18[:,ch_ex]) ))
     train_set_tape_hold_pose_norm19 = np.hstack(( train_set_tape_hold_pose_norm19, np.interp(np.linspace(0, len(train_set_tape_hold_pose_19)-1, len_normal), np.arange(0,len(train_set_tape_hold_pose_19),1.), train_set_tape_hold_pose_19[:,ch_ex]) ))
+    train_set_tape_hold_pose_norm20 = np.hstack((train_set_tape_hold_pose_norm20, np.interp( np.linspace(0, len(train_set_tape_hold_pose_20) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_20), 1.), train_set_tape_hold_pose_20[:, ch_ex])))
+    train_set_tape_hold_pose_norm21 = np.hstack((train_set_tape_hold_pose_norm21, np.interp( np.linspace(0, len(train_set_tape_hold_pose_21) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_21), 1.), train_set_tape_hold_pose_21[:, ch_ex])))
+    train_set_tape_hold_pose_norm22 = np.hstack((train_set_tape_hold_pose_norm22, np.interp( np.linspace(0, len(train_set_tape_hold_pose_22) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_22), 1.), train_set_tape_hold_pose_22[:, ch_ex])))
+    train_set_tape_hold_pose_norm23 = np.hstack((train_set_tape_hold_pose_norm23, np.interp( np.linspace(0, len(train_set_tape_hold_pose_23) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_23), 1.), train_set_tape_hold_pose_23[:, ch_ex])))
+    train_set_tape_hold_pose_norm24 = np.hstack((train_set_tape_hold_pose_norm24, np.interp( np.linspace(0, len(train_set_tape_hold_pose_24) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_24), 1.), train_set_tape_hold_pose_24[:, ch_ex])))
+    train_set_tape_hold_pose_norm25 = np.hstack((train_set_tape_hold_pose_norm25, np.interp( np.linspace(0, len(train_set_tape_hold_pose_25) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_25), 1.), train_set_tape_hold_pose_25[:, ch_ex])))
+    train_set_tape_hold_pose_norm26 = np.hstack((train_set_tape_hold_pose_norm26, np.interp( np.linspace(0, len(train_set_tape_hold_pose_26) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_26), 1.), train_set_tape_hold_pose_26[:, ch_ex])))
+    train_set_tape_hold_pose_norm27 = np.hstack((train_set_tape_hold_pose_norm27, np.interp( np.linspace(0, len(train_set_tape_hold_pose_27) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_27), 1.), train_set_tape_hold_pose_27[:, ch_ex])))
+    train_set_tape_hold_pose_norm28 = np.hstack((train_set_tape_hold_pose_norm28, np.interp( np.linspace(0, len(train_set_tape_hold_pose_28) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_28), 1.), train_set_tape_hold_pose_28[:, ch_ex])))
+    train_set_tape_hold_pose_norm29 = np.hstack((train_set_tape_hold_pose_norm29, np.interp( np.linspace(0, len(train_set_tape_hold_pose_29) - 1, len_normal), np.arange(0, len(train_set_tape_hold_pose_29), 1.), train_set_tape_hold_pose_29[:, ch_ex])))
     test_set_tape_hold_pose_norm = np.hstack(( test_set_tape_hold_pose_norm, np.interp(np.linspace(0, len(test_set_tape_hold_pose)-1, len_normal), np.arange(0,len(test_set_tape_hold_pose),1.), test_set_tape_hold_pose[:,ch_ex]) ))
 train_set_tape_hold_pose_norm00 = train_set_tape_hold_pose_norm00.reshape(7,len_normal).T
 train_set_tape_hold_pose_norm01 = train_set_tape_hold_pose_norm01.reshape(7,len_normal).T
@@ -959,6 +1327,16 @@ train_set_tape_hold_pose_norm16 = train_set_tape_hold_pose_norm16.reshape(7,len_
 train_set_tape_hold_pose_norm17 = train_set_tape_hold_pose_norm17.reshape(7,len_normal).T
 train_set_tape_hold_pose_norm18 = train_set_tape_hold_pose_norm18.reshape(7,len_normal).T
 train_set_tape_hold_pose_norm19 = train_set_tape_hold_pose_norm19.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm20 = train_set_tape_hold_pose_norm20.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm21 = train_set_tape_hold_pose_norm21.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm22 = train_set_tape_hold_pose_norm22.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm23 = train_set_tape_hold_pose_norm23.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm24 = train_set_tape_hold_pose_norm24.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm25 = train_set_tape_hold_pose_norm25.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm26 = train_set_tape_hold_pose_norm26.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm27 = train_set_tape_hold_pose_norm27.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm28 = train_set_tape_hold_pose_norm28.reshape(7,len_normal).T
+train_set_tape_hold_pose_norm29 = train_set_tape_hold_pose_norm29.reshape(7,len_normal).T
 test_set_tape_hold_pose_norm = test_set_tape_hold_pose_norm.reshape(7,len_normal).T
 train_set_tape_hold_pose_norm_full = np.array([train_set_tape_hold_pose_norm00,train_set_tape_hold_pose_norm01,train_set_tape_hold_pose_norm02,train_set_tape_hold_pose_norm03,train_set_tape_hold_pose_norm04,
                                     train_set_tape_hold_pose_norm05,train_set_tape_hold_pose_norm06,train_set_tape_hold_pose_norm07,train_set_tape_hold_pose_norm08,train_set_tape_hold_pose_norm09,
@@ -988,13 +1366,93 @@ for idx in range(0, nrDemo):
     ipromp_tape_hold.add_demonstration(demo_temp)
 
 
-# stack emg and joint data as a new matrix
-# test_set_temp = np.hstack((test_set_spanner_handover_imu_norm, test_set_spanner_handover_emg_norm))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-# test_set_temp = np.hstack((test_set_aluminum_hold_imu_norm, test_set_aluminum_hold_emg_norm))
-# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
-test_set_temp = np.hstack((test_set_tape_hold_imu_norm, test_set_tape_hold_emg_norm))
+# aluminum hold
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm21, train_set_aluminum_hold_emg_norm21))
 test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm22, train_set_aluminum_hold_emg_norm22))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm23, train_set_aluminum_hold_emg_norm23))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm24, train_set_aluminum_hold_emg_norm24))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm25, train_set_aluminum_hold_emg_norm25))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm26, train_set_aluminum_hold_emg_norm26))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm27, train_set_aluminum_hold_emg_norm27))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm28, train_set_aluminum_hold_emg_norm28))
+test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm29, train_set_aluminum_hold_emg_norm29))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+##
+
+# # spanner handover
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm21, train_set_spanner_handover_emg_norm21))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm22, train_set_spanner_handover_emg_norm22))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm23, train_set_spanner_handover_emg_norm23))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm24, train_set_spanner_handover_emg_norm24))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm25, train_set_spanner_handover_emg_norm25))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm26, train_set_spanner_handover_emg_norm26))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm27, train_set_spanner_handover_emg_norm27))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm28, train_set_spanner_handover_emg_norm28))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_spanner_handover_imu_norm29, train_set_spanner_handover_emg_norm29))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+#
+# # tape hold
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm21, train_set_tape_hold_emg_norm21))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm22, train_set_tape_hold_emg_norm22))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm23, train_set_tape_hold_emg_norm23))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm24, train_set_tape_hold_emg_norm24))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm25, train_set_tape_hold_emg_norm25))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm26, train_set_tape_hold_emg_norm26))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm27, train_set_tape_hold_emg_norm27))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm28, train_set_tape_hold_emg_norm28))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# ##
+# test_set_temp = np.hstack((train_set_tape_hold_imu_norm29, train_set_tape_hold_emg_norm29))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
+# # ##
+
 
 # add via point as observation
 imu_meansurement_noise_cov = np.eye((4))*1000
@@ -1007,24 +1465,24 @@ meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov
 #################################################################################################
 ipromp_aluminum_hold.add_viapoint(0.00, test_set[0,:], meansurement_noise_cov_full)
 ipromp_aluminum_hold.add_viapoint(0.06, test_set[6,:], meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_viapoint(0.18, test_set[18,:], meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_viapoint(0.28, test_set[28,:], meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_viapoint(0.40, test_set[40,:], meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_viapoint(0.50, test_set[50,:], meansurement_noise_cov_full)
+ipromp_aluminum_hold.add_viapoint(0.12, test_set[12,:], meansurement_noise_cov_full)
+# ipromp_aluminum_hold.add_viapoint(0.18, test_set[18,:], meansurement_noise_cov_full)
+# ipromp_aluminum_hold.add_viapoint(0.24, test_set[24,:], meansurement_noise_cov_full)
+# ipromp_aluminum_hold.add_viapoint(0.30, test_set[30,:], meansurement_noise_cov_full)
 
 ipromp_spanner_handover.add_viapoint(0.00, test_set[0,:], meansurement_noise_cov_full)
 ipromp_spanner_handover.add_viapoint(0.06, test_set[6,:], meansurement_noise_cov_full)
-ipromp_spanner_handover.add_viapoint(0.18, test_set[18,:], meansurement_noise_cov_full)
-ipromp_spanner_handover.add_viapoint(0.28, test_set[28,:], meansurement_noise_cov_full)
-ipromp_spanner_handover.add_viapoint(0.40, test_set[40,:], meansurement_noise_cov_full)
-ipromp_spanner_handover.add_viapoint(0.50, test_set[50,:], meansurement_noise_cov_full)
+ipromp_spanner_handover.add_viapoint(0.12, test_set[12,:], meansurement_noise_cov_full)
+# ipromp_spanner_handover.add_viapoint(0.18, test_set[18,:], meansurement_noise_cov_full)
+# ipromp_spanner_handover.add_viapoint(0.24, test_set[24,:], meansurement_noise_cov_full)
+# ipromp_spanner_handover.add_viapoint(0.30, test_set[30,:], meansurement_noise_cov_full)
 
 ipromp_tape_hold.add_viapoint(0.00, test_set[0,:], meansurement_noise_cov_full)
 ipromp_tape_hold.add_viapoint(0.06, test_set[6,:], meansurement_noise_cov_full)
-ipromp_tape_hold.add_viapoint(0.18, test_set[18,:], meansurement_noise_cov_full)
-ipromp_tape_hold.add_viapoint(0.28, test_set[28,:], meansurement_noise_cov_full)
-ipromp_tape_hold.add_viapoint(0.40, test_set[40,:], meansurement_noise_cov_full)
-ipromp_tape_hold.add_viapoint(0.50, test_set[50,:], meansurement_noise_cov_full)
+ipromp_tape_hold.add_viapoint(0.12, test_set[12,:], meansurement_noise_cov_full)
+# ipromp_tape_hold.add_viapoint(0.18, test_set[18,:], meansurement_noise_cov_full)
+# ipromp_tape_hold.add_viapoint(0.24, test_set[24,:], meansurement_noise_cov_full)
+# ipromp_tape_hold.add_viapoint(0.30, test_set[30,:], meansurement_noise_cov_full)
 
 
 
@@ -1032,24 +1490,27 @@ ipromp_tape_hold.add_viapoint(0.50, test_set[50,:], meansurement_noise_cov_full)
 ## add observation
 #################################################################################################
 ipromp_aluminum_hold.add_obs(t=0.00, obsy=test_set[0,:], sigmay=meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_obs(t=0.10, obsy=test_set[1,:], sigmay=meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_obs(t=0.20, obsy=test_set[2,:], sigmay=meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_obs(t=0.30, obsy=test_set[3,:], sigmay=meansurement_noise_cov_full)
-ipromp_aluminum_hold.add_obs(t=0.40, obsy=test_set[4,:], sigmay=meansurement_noise_cov_full)
+ipromp_aluminum_hold.add_obs(t=0.06, obsy=test_set[6,:], sigmay=meansurement_noise_cov_full)
+ipromp_aluminum_hold.add_obs(t=0.12, obsy=test_set[12,:], sigmay=meansurement_noise_cov_full)
+# ipromp_aluminum_hold.add_obs(t=0.18, obsy=test_set[18,:], sigmay=meansurement_noise_cov_full)
+# ipromp_aluminum_hold.add_obs(t=0.24, obsy=test_set[24,:], sigmay=meansurement_noise_cov_full)
+# ipromp_aluminum_hold.add_obs(t=0.30, obsy=test_set[30,:], sigmay=meansurement_noise_cov_full)
 prob_aluminum_hold = ipromp_aluminum_hold.prob_obs()
 print('from obs, the log pro of aluminum_hold is', prob_aluminum_hold)
 ipromp_spanner_handover.add_obs(t=0.00, obsy=test_set[0,:], sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover.add_obs(t=0.10, obsy=test_set[1,:], sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover.add_obs(t=0.20, obsy=test_set[2,:], sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover.add_obs(t=0.30, obsy=test_set[3,:], sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover.add_obs(t=0.40, obsy=test_set[4,:], sigmay=meansurement_noise_cov_full)
+ipromp_spanner_handover.add_obs(t=0.06, obsy=test_set[6,:], sigmay=meansurement_noise_cov_full)
+ipromp_spanner_handover.add_obs(t=0.12, obsy=test_set[12,:], sigmay=meansurement_noise_cov_full)
+# ipromp_spanner_handover.add_obs(t=0.18, obsy=test_set[18,:], sigmay=meansurement_noise_cov_full)
+# ipromp_spanner_handover.add_obs(t=0.24, obsy=test_set[24,:], sigmay=meansurement_noise_cov_full)
+# ipromp_spanner_handover.add_obs(t=0.30, obsy=test_set[30,:], sigmay=meansurement_noise_cov_full)
 prob_spanner_handover = ipromp_spanner_handover.prob_obs()
 print('from obs, the log pro of spanner_handover is', prob_spanner_handover)
 ipromp_tape_hold.add_obs(t=0.00, obsy=test_set[0,:], sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold.add_obs(t=0.10, obsy=test_set[1,:], sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold.add_obs(t=0.20, obsy=test_set[2,:], sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold.add_obs(t=0.30, obsy=test_set[3,:], sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold.add_obs(t=0.40, obsy=test_set[4,:], sigmay=meansurement_noise_cov_full)
+ipromp_tape_hold.add_obs(t=0.06, obsy=test_set[6,:], sigmay=meansurement_noise_cov_full)
+ipromp_tape_hold.add_obs(t=0.12, obsy=test_set[12,:], sigmay=meansurement_noise_cov_full)
+# ipromp_tape_hold.add_obs(t=0.18, obsy=test_set[18,:], sigmay=meansurement_noise_cov_full)
+# ipromp_tape_hold.add_obs(t=0.24, obsy=test_set[24,:], sigmay=meansurement_noise_cov_full)
+# ipromp_tape_hold.add_obs(t=0.30, obsy=test_set[30,:], sigmay=meansurement_noise_cov_full)
 prob_tape_hold = ipromp_tape_hold.prob_obs()
 print('from obs, the log pro of tape_hold is', prob_tape_hold)
 
@@ -1517,95 +1978,95 @@ elif idx_max_pro == 2:
 #    plt.plot(np.arange(0, 1.01, 0.01), train_set_tape_hold_pose_norm19[:, ch_ex])
 
 
-# # plot the prior distributioin
-# # plot ipromp_aluminum_hold
-# plt.figure(20)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
-# plt.figure(21)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
-# plt.figure(22)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     ipromp_aluminum_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
-# # plot ipromp_spanner_handover
-# plt.figure(23)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g');
-# plt.figure(24)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
-# plt.figure(25)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     ipromp_spanner_handover.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
-# # plot ipromp_tape_hold
-# plt.figure(26)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g');
-# plt.figure(27)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g');
-# plt.figure(28)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     ipromp_tape_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g');
-#
-# # plot the updated distributioin
-# # plot ipromp_aluminum_hold
-# plt.figure(20)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
-#     ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plt.figure(21)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
-#     ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plt.figure(22)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
-#     ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# # plot ipromp_spanner_handover
-# plt.figure(23)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
-#     ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plt.figure(24)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
-#     ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plt.figure(25)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
-#     ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# # plot ipromp_tape_hold
-# plt.figure(26)
-# for i in range(4):
-#     plt.subplot(411+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_imu_norm[:, i], color='r', linewidth=3);
-#     ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plt.figure(27)
-# for i in range(8):
-#     plt.subplot(421+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_emg_norm[:, i], color='r', linewidth=3);
-#     ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-# plt.figure(28)
-# for i in range(7):
-#     plt.subplot(711+i)
-#     plt.plot(ipromp_aluminum_hold.x, test_set_tape_hold_pose_norm[:, i], color='r', linewidth=3);
-#     ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
-#
+# plot the prior distributioin
+# plot ipromp_aluminum_hold
+plt.figure(20)
+for i in range(4):
+    plt.subplot(411+i)
+    ipromp_aluminum_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, imu');plt.legend()
+plt.figure(21)
+for i in range(8):
+    plt.subplot(421+i)
+    ipromp_aluminum_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, emg');plt.legend()
+plt.figure(22)
+for i in range(7):
+    plt.subplot(711+i)
+    ipromp_aluminum_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='alumnium hold model, pose');plt.legend()
+# plot ipromp_spanner_handover
+plt.figure(23)
+for i in range(4):
+    plt.subplot(411+i)
+    ipromp_spanner_handover.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, imu');plt.legend()
+plt.figure(24)
+for i in range(8):
+    plt.subplot(421+i)
+    ipromp_spanner_handover.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, emg');plt.legend()
+plt.figure(25)
+for i in range(7):
+    plt.subplot(711+i)
+    ipromp_spanner_handover.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='spanner handover model, pose');plt.legend()
+# plot ipromp_tape_hold
+plt.figure(26)
+for i in range(4):
+    plt.subplot(411+i)
+    ipromp_tape_hold.promps[i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, imu');plt.legend()
+plt.figure(27)
+for i in range(8):
+    plt.subplot(421+i)
+    ipromp_tape_hold.promps[4+i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, emg');plt.legend()
+plt.figure(28)
+for i in range(7):
+    plt.subplot(711+i)
+    ipromp_tape_hold.promps[4+8+i].plot(np.arange(0,1.01,0.01), color='g', legend='tape hold model, pose');plt.legend()
+
+# plot the updated distributioin
+# plot ipromp_aluminum_hold
+plt.figure(20)
+for i in range(4):
+    plt.subplot(411+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
+    ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(21)
+for i in range(8):
+    plt.subplot(421+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
+    ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(22)
+for i in range(7):
+    plt.subplot(711+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+8+i], color='r', linewidth=3);
+    ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plot ipromp_spanner_handover
+plt.figure(23)
+for i in range(4):
+    plt.subplot(411+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
+    ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(24)
+for i in range(8):
+    plt.subplot(421+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
+    ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(25)
+for i in range(7):
+    plt.subplot(711+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+8+i], color='r', linewidth=3);
+    ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+# plot ipromp_tape_hold
+plt.figure(26)
+for i in range(4):
+    plt.subplot(411+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
+    ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(27)
+for i in range(8):
+    plt.subplot(421+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
+    ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+plt.figure(28)
+for i in range(7):
+    plt.subplot(711+i)
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+8+i], color='r', linewidth=3);
+    ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+
 # plt.show()
