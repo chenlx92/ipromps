@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Filename: imu_emg_pose_test.py
+# Filename: imu_emg_pose_test_compact.py
 
 from __future__ import print_function
 
@@ -119,9 +119,9 @@ elif idx_max_pro == 2:
     print('the obs comes from tape_hold')
 
 
-#############################
+#################################
 # compute the position error
-#############################
+#################################
 position_error = None
 # if idx_max_pro == 0:
 predict_robot_response = ipromp_aluminum_hold.generate_trajectory()
@@ -137,9 +137,9 @@ position_error = np.linalg.norm(predict_robot_response[-1, 12:15] - robot_respon
 print('if tape_hold, the obs position error is', position_error)
 
 
-# #############################
+# #################################
 # # the KL divergence of IMU
-# #############################
+# #################################
 # mean_a_imu = ipromp_aluminum_hold.mean_W_full[0:44]
 # cov_a_imu = ipromp_aluminum_hold.cov_W_full[0:44,0:44]
 # mean_s_imu = ipromp_spanner_handover.mean_W_full[0:44]
@@ -157,9 +157,9 @@ print('if tape_hold, the obs position error is', position_error)
 #                         np.dot((mean_s_imu_emg-mean_a_imu_emg).T, np.dot(np.linalg.inv(cov_s_imu_emg), (mean_s_imu_emg - mean_a_imu_emg)))
 
 
-#############################
+#################################
 # plot raw data
-#############################
+#################################
 if b_plot_raw_dateset == True:
     ## plot the aluminum hold task raw data
     plt.figure(0)
@@ -211,9 +211,9 @@ if b_plot_raw_dateset == True:
            plt.plot(range(len(dataset_tape_hold[idx]["pose"][:, ch_ex])), dataset_tape_hold[idx]["pose"][:, ch_ex])
 
 
-#############################
+#################################
 # plot the prior distributioin
-#############################
+#################################
 if b_plot_prior_distribution == True:
     # plot ipromp_aluminum_hold
     plt.figure(50)
@@ -256,9 +256,9 @@ if b_plot_prior_distribution == True:
         ipromp_tape_hold.promps[4+8+i].plot(color='g', legend='tape hold model, pose');plt.legend()
 
 
-#############################
+#################################
 # plot the updated distributioin
-#############################
+#################################
 if b_plot_update_distribution == True:
     # plot ipromp_aluminum_hold
     plt.figure(50)

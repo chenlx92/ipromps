@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Filename: imu_emg_pose_test.py
+# Filename: load_data.py
 
 from __future__ import print_function
 
