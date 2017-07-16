@@ -36,6 +36,8 @@ class NDProMP(object):
 
         # the scaling factor to letting each traj have same duration
         self.alpha_demo = []
+        self.alpha_mean = []
+        self.alpha_cov = []
         
     @property
     def x(self):
@@ -220,7 +222,19 @@ class NDProMP(object):
         std1 = 2 * np.sqrt(np.diag(np.dot(self.promps[1].Phi.T, np.dot(self.promps[1].sigmaW_updated, self.promps[1].Phi))))
         plt.fill_between(x, mean1-std1, mean1 + std1, color='b', alpha=0.4)
         
-        
+    def add_alpha(self, alpha):
+        """
+        Add a phase to the trajectory
+        Observations and corresponding basis activations
+        :param t: timestamp of viapoint
+        :param obsy: observed value at time t
+        :param sigmay: observation variance (constraint strength)
+        :return:
+        """
+        self.alpha_demo.append(alpha)
+        self.alpha_mean = np.mean(self.alpha_demo)
+        self.alpha_cov = np.cov(self.alpha_demo) if len(self.alpha_demo)>1 else None
+
         
 class ProMP(object):
     """
@@ -442,7 +456,6 @@ class IProMP(NDProMP):
             raise ValueError("The given viapoint has {} joints while num_joints={}".format(len(obsys), self.num_joints))
         for joint_demo in range(self.num_joints):
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo], sigmay)
-
         self.obs.append({"t": t, "obs": obsys, "sigmay": sigmay})
 
         new_mean_w_full = self.mean_W_full
@@ -458,10 +471,6 @@ class IProMP(NDProMP):
             PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
                                                 PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
                                                 zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry)
-            # PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
-            #                                     zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry,
-            #                                     zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry,
-            #                                     zero_entry)
             # the observation of specific time
             y_observed = np.array(
                 [[self.promps[0].viapoints[num_viapoint]['obsy']], [self.promps[1].viapoints[num_viapoint]['obsy']],
@@ -486,8 +495,7 @@ class IProMP(NDProMP):
         # set the theta of each channel
         for i in range(19):
             self.promps[i].meanW_updated = new_mean_w_full.reshape([self.num_joints, self.nrBasis]).T[:, i]
-            self.promps[i].sigmaW_updated = new_cov_w_full[i * self.nrBasis:(1 + i) * self.nrBasis,
-                                            i * self.nrBasis:(i + 1) * self.nrBasis]
+            self.promps[i].sigmaW_updated = new_cov_w_full[i * self.nrBasis:(1 + i) * self.nrBasis, i * self.nrBasis:(i + 1) * self.nrBasis]
 
         
     def generate_trajectory(self, randomness=1e-10):
