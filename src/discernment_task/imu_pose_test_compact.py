@@ -174,30 +174,29 @@ if b_plot_prior_distribution == True:
     plt.figure(50)
     for i in range(4):
         plt.subplot(411+i)
-        ipromp_aluminum_hold.promps[i].plot(ipromp_aluminum_hold.x, color='g', legend='alumnium hold model, imu');plt.legend()
-    plt.figure(51)
+        ipromp_aluminum_hold.promps[i].plot(color='g', legend='alumnium hold model, imu');plt.legend()
     plt.figure(52)
     for i in range(7):
         plt.subplot(711+i)
-        ipromp_aluminum_hold.promps[4+i].plot(ipromp_aluminum_hold.x, color='g', legend='alumnium hold model, pose');plt.legend()
+        ipromp_aluminum_hold.promps[4+i].plot(color='g', legend='alumnium hold model, pose');plt.legend()
     # plot ipromp_spanner_handover
     plt.figure(60)
     for i in range(4):
         plt.subplot(411+i)
-        ipromp_spanner_handover.promps[i].plot(ipromp_spanner_handover.x, color='g', legend='spanner handover model, imu');plt.legend()
+        ipromp_spanner_handover.promps[i].plot(color='g', legend='spanner handover model, imu');plt.legend()
     plt.figure(62)
     for i in range(7):
         plt.subplot(711+i)
-        ipromp_spanner_handover.promps[4+i].plot(ipromp_spanner_handover.x, color='g', legend='spanner handover model, pose');plt.legend()
+        ipromp_spanner_handover.promps[4+i].plot(color='g', legend='spanner handover model, pose');plt.legend()
     # plot ipromp_tape_hold
     plt.figure(70)
     for i in range(4):
         plt.subplot(411+i)
-        ipromp_tape_hold.promps[i].plot(ipromp_tape_hold.x, color='g', legend='tape hold model, imu');plt.legend()
+        ipromp_tape_hold.promps[i].plot(color='g', legend='tape hold model, imu');plt.legend()
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
-        ipromp_tape_hold.promps[4+i].plot(ipromp_tape_hold.x, color='g', legend='tape hold model, pose');plt.legend()
+        ipromp_tape_hold.promps[4+i].plot(color='g', legend='tape hold model, pose');plt.legend()
 
 
 #############################
@@ -209,36 +208,33 @@ if b_plot_update_distribution == True:
     for i in range(4):
         plt.subplot(411+i)
         plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
-    plt.figure(51)
+        ipromp_aluminum_hold.promps[i].plot_updated(color='b', legend='updated distribution', via_show=True); plt.legend();
     plt.figure(52)
     for i in range(7):
         plt.subplot(711+i)
         plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=False); plt.legend();
+        ipromp_aluminum_hold.promps[4+i].plot_updated(color='b', legend='updated distribution', via_show=False); plt.legend();
     # plot ipromp_spanner_handover
     plt.figure(60)
     for i in range(4):
         plt.subplot(411+i)
         plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
-    plt.figure(61)
+        ipromp_spanner_handover.promps[i].plot_updated(color='b', legend='updated distribution', via_show=True); plt.legend();
     plt.figure(62)
     for i in range(7):
         plt.subplot(711+i)
         plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=False); plt.legend();
+        ipromp_spanner_handover.promps[4+i].plot_updated(color='b', legend='updated distribution', via_show=False); plt.legend();
     # plot ipromp_tape_hold
     plt.figure(70)
     for i in range(4):
         plt.subplot(411+i)
         plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
-    plt.figure(71)
+        ipromp_tape_hold.promps[i].plot_updated(color='b', legend='updated distribution', via_show=True); plt.legend();
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
         plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=False); plt.legend();
+        ipromp_tape_hold.promps[4+i].plot_updated(color='b', legend='updated distribution', via_show=False); plt.legend();
 
 plt.show()

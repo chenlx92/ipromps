@@ -421,6 +421,7 @@ class ProMP(object):
         """
         mean0 = np.dot(self.Phi.T, self.meanW_updated)
         std0 = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_updated, self.Phi))))
+        x = self.x if x is None else x
         plt.plot(x, mean0, linestyle='--', color=color, label=legend, linewidth=5)
         plt.fill_between(x, mean0 - std0, mean0 + std0, color=color, alpha=0.4)
 
