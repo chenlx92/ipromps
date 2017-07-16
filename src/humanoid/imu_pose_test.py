@@ -14,7 +14,8 @@ import scipy.linalg
 plt.close('all')    # close all windows
 len_normal = 101    # the len of normalized traj, don't change it
 nrDemo = 20         # number of trajectoreis for training
-obs_ratio =30
+obs_ratio = 40
+
 
 
 ##################################################################################
@@ -1348,31 +1349,31 @@ test_set = np.hstack((train_set_aluminum_hold_imu_norm26, np.zeros([len_normal, 
 test_set = np.hstack((train_set_aluminum_hold_imu_norm27, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm27;
 test_set = np.hstack((train_set_aluminum_hold_imu_norm28, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm28;
 test_set = np.hstack((train_set_aluminum_hold_imu_norm29, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm29;
-# spanner handover
-test_set = np.hstack((train_set_spanner_handover_imu_norm20, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm20;
-test_set = np.hstack((train_set_spanner_handover_imu_norm21, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm21;
-test_set = np.hstack((train_set_spanner_handover_imu_norm22, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm22;
-test_set = np.hstack((train_set_spanner_handover_imu_norm23, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm23;
-test_set = np.hstack((train_set_spanner_handover_imu_norm24, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm24;
-test_set = np.hstack((train_set_spanner_handover_imu_norm25, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm25;
-test_set = np.hstack((train_set_spanner_handover_imu_norm26, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm26;
-test_set = np.hstack((train_set_spanner_handover_imu_norm27, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm27;
-test_set = np.hstack((train_set_spanner_handover_imu_norm28, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm28;
-test_set = np.hstack((train_set_spanner_handover_imu_norm29, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm29;
-# # tape hold
-test_set = np.hstack((train_set_tape_hold_imu_norm20, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm20;
-test_set = np.hstack((train_set_tape_hold_imu_norm21, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm21;
-test_set = np.hstack((train_set_tape_hold_imu_norm22, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm22;
-test_set = np.hstack((train_set_tape_hold_imu_norm23, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm23;
-test_set = np.hstack((train_set_tape_hold_imu_norm24, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm24;
-test_set = np.hstack((train_set_tape_hold_imu_norm25, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm25;
-test_set = np.hstack((train_set_tape_hold_imu_norm26, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm26;
+# # spanner handover
+# test_set = np.hstack((train_set_spanner_handover_imu_norm20, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm20;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm21, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm21;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm22, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm22;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm23, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm23;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm24, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm24;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm25, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm25;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm26, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm26;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm27, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm27;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm28, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm28;
+# test_set = np.hstack((train_set_spanner_handover_imu_norm29, np.zeros([len_normal, 7]))); robot_response = train_set_spanner_handover_pose_norm29;
+# # # tape hold
+# test_set = np.hstack((train_set_tape_hold_imu_norm20, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm20;
+# test_set = np.hstack((train_set_tape_hold_imu_norm21, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm21;
+# test_set = np.hstack((train_set_tape_hold_imu_norm22, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm22;
+# test_set = np.hstack((train_set_tape_hold_imu_norm23, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm23;
+# test_set = np.hstack((train_set_tape_hold_imu_norm24, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm24;
+# test_set = np.hstack((train_set_tape_hold_imu_norm25, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm25;
+# test_set = np.hstack((train_set_tape_hold_imu_norm26, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm26;
 # test_set = np.hstack((train_set_tape_hold_imu_norm27, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm27;
 # test_set = np.hstack((train_set_tape_hold_imu_norm28, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm28;
 # test_set = np.hstack((train_set_tape_hold_imu_norm29, np.zeros([len_normal, 7]))); robot_response = train_set_tape_hold_pose_norm29;
 
 # add via point as observation
-imu_meansurement_noise_cov = np.eye((4))*10
+imu_meansurement_noise_cov = np.eye((4))*10000
 pose_meansurement_noise_cov = np.eye((7))*0.01
 meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, pose_meansurement_noise_cov)
 
@@ -1384,6 +1385,10 @@ for idx in range(obs_ratio):
     ipromp_spanner_handover.add_viapoint(0.01*idx, test_set[idx,:], meansurement_noise_cov_full)
     ipromp_tape_hold.add_viapoint(0.01*idx, test_set[idx,:], meansurement_noise_cov_full)
 
+
+##### the model info
+print('the number of demonstration is ',nrDemo)
+print('the number of observation is ', obs_ratio/100.0)
 
 #################################################################################################
 ## likelihood of observation
@@ -1404,6 +1409,24 @@ elif idx_max_pro == 1:
     print('the obs comes from spanner_handover')
 elif idx_max_pro == 2:
     print('the obs comes from tape_hold')
+
+
+################################################################################################
+# compute the position error
+################################################################################################
+position_error = None
+# if idx_max_pro == 0:
+predict_robot_response = ipromp_aluminum_hold.generate_trajectory()
+position_error = np.linalg.norm(predict_robot_response[-1,4:7]-robot_response[-1,0:3])
+print('if aluminum_hold, the obs position error is', position_error)
+# elif idx_max_pro == 1:
+predict_robot_response = ipromp_spanner_handover.generate_trajectory()
+position_error = np.linalg.norm(predict_robot_response[-1, 4:7] - robot_response[-1,0:3])
+print('if spanner_handover, the obs position error is', position_error)
+# elif idx_max_pro == 2:
+predict_robot_response = ipromp_tape_hold.generate_trajectory()
+position_error = np.linalg.norm(predict_robot_response[-1, 4:7] - robot_response[-1,0:3])
+print('if tape_hold, the obs position error is', position_error)
 
 
 

@@ -9,12 +9,14 @@ import matplotlib.pyplot as plt
 # import scipy.signal as signal
 import iprompslib_imu_emg_pose
 import scipy.linalg
+# from scipy.stats import entropy
 # import rospy
+import math
 
 plt.close('all')    # close all windows
 len_normal = 101    # the len of normalized traj, don't change it
 nrDemo = 20         # number of trajectoreis for training
-obs_ratio = 30
+obs_ratio = 40
 
 
 ##################################################################################
@@ -1343,18 +1345,18 @@ for idx in range(0, nrDemo):
 # aluminum hold
 test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm20, train_set_aluminum_hold_emg_norm20))
 test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm20;
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm21, train_set_aluminum_hold_emg_norm21))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm21;
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm22, train_set_aluminum_hold_emg_norm22))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm22;
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm23, train_set_aluminum_hold_emg_norm23))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm23;
-##
-test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm24, train_set_aluminum_hold_emg_norm24))
-test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm24;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm21, train_set_aluminum_hold_emg_norm21))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm21;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm22, train_set_aluminum_hold_emg_norm22))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm22;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm23, train_set_aluminum_hold_emg_norm23))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm23;
+# ##
+# test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm24, train_set_aluminum_hold_emg_norm24))
+# test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm24;
 # ##
 # test_set_temp = np.hstack((train_set_aluminum_hold_imu_norm25, train_set_aluminum_hold_emg_norm25))
 # test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response = train_set_aluminum_hold_pose_norm25;
@@ -1437,9 +1439,9 @@ test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7]))); robot_response
 # #
 
 # add via point as observation
-imu_meansurement_noise_cov = np.eye((4))*10
+imu_meansurement_noise_cov = np.eye((4))*10000
 emg_meansurement_noise_cov = np.eye((8))*250
-pose_meansurement_noise_cov = np.eye((7))*0.005
+pose_meansurement_noise_cov = np.eye((7))*0.01
 meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, emg_meansurement_noise_cov, pose_meansurement_noise_cov)
 
 #################################################################################################
@@ -1451,6 +1453,9 @@ for idx in range(obs_ratio):
     ipromp_tape_hold.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
 
 
+##### the model info
+print('the number of demonstration is ',nrDemo)
+print('the number of observation is ', obs_ratio/100.0)
 
 ################################################################################################
 # likelihood of observation
@@ -1475,8 +1480,39 @@ elif idx_max_pro == 2:
 ################################################################################################
 # compute the position error
 ################################################################################################
+position_error = None
+# if idx_max_pro == 0:
+predict_robot_response = ipromp_aluminum_hold.generate_trajectory()
+position_error = np.linalg.norm(predict_robot_response[-1,12:15]-robot_response[-1,0:3])
+print('if aluminum_hold, the obs position error is', position_error)
+# elif idx_max_pro == 1:
+predict_robot_response = ipromp_spanner_handover.generate_trajectory()
+position_error = np.linalg.norm(predict_robot_response[-1, 12:15] - robot_response[-1,0:3])
+print('if spanner_handover, the obs position error is', position_error)
+# elif idx_max_pro == 2:
+predict_robot_response = ipromp_tape_hold.generate_trajectory()
+position_error = np.linalg.norm(predict_robot_response[-1, 12:15] - robot_response[-1,0:3])
+print('if tape_hold, the obs position error is', position_error)
 
 
+# ################################################################################################
+# # the KL divergence of IMU
+# ################################################################################################
+mean_a_imu = ipromp_aluminum_hold.mean_W_full[0:44]
+cov_a_imu = ipromp_aluminum_hold.cov_W_full[0:44,0:44]
+mean_s_imu = ipromp_spanner_handover.mean_W_full[0:44]
+cov_s_imu = ipromp_spanner_handover.cov_W_full[0:44,0:44]
+kl_divergence_imu_a_s = math.log(np.linalg.det(cov_s_imu)/np.linalg.det(cov_a_imu)) - 44 \
+                        + np.trace(np.dot(np.linalg.inv(cov_s_imu), cov_a_imu)) + \
+                        np.dot((mean_s_imu-mean_a_imu).T, np.dot(np.linalg.inv(cov_s_imu), (mean_s_imu-mean_a_imu)))
+
+mean_a_imu_emg = ipromp_aluminum_hold.mean_W_full[0:132]
+cov_a_imu_emg = ipromp_aluminum_hold.cov_W_full[0:132,0:132]
+mean_s_imu_emg = ipromp_spanner_handover.mean_W_full[0:132]
+cov_s_imu_emg = ipromp_spanner_handover.cov_W_full[0:132,0:132]
+kl_divergence_imu_emg_a_s = math.log(np.linalg.det(cov_s_imu_emg)/np.linalg.det(cov_a_imu_emg)) - 132\
+                        + np.trace(np.dot(np.linalg.inv(cov_s_imu_emg), cov_a_imu_emg)) + \
+                        np.dot((mean_s_imu_emg-mean_a_imu_emg).T, np.dot(np.linalg.inv(cov_s_imu_emg), (mean_s_imu_emg - mean_a_imu_emg)))
 
 ########################################################
 # plot everythings
@@ -1493,29 +1529,29 @@ elif idx_max_pro == 2:
 # #########################################
 # # plot raw data
 # #########################################
-# plt.figure(0)
-# for ch_ex in range(8):
-#    plt.subplot(421+ch_ex)
-#    plt.plot(range(len(train_set_aluminum_hold_emg_00)), train_set_aluminum_hold_emg_00[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_01)), train_set_aluminum_hold_emg_01[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_02)), train_set_aluminum_hold_emg_02[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_03)), train_set_aluminum_hold_emg_03[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_04)), train_set_aluminum_hold_emg_04[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_05)), train_set_aluminum_hold_emg_05[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_06)), train_set_aluminum_hold_emg_06[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_07)), train_set_aluminum_hold_emg_07[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_08)), train_set_aluminum_hold_emg_08[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_09)), train_set_aluminum_hold_emg_09[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_10)), train_set_aluminum_hold_emg_10[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_11)), train_set_aluminum_hold_emg_11[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_12)), train_set_aluminum_hold_emg_12[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_13)), train_set_aluminum_hold_emg_13[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_14)), train_set_aluminum_hold_emg_14[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_15)), train_set_aluminum_hold_emg_15[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_16)), train_set_aluminum_hold_emg_16[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_17)), train_set_aluminum_hold_emg_17[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_18)), train_set_aluminum_hold_emg_18[:,ch_ex])
-#    plt.plot(range(len(train_set_aluminum_hold_emg_19)), train_set_aluminum_hold_emg_19[:,ch_ex])
+plt.figure(0)
+for ch_ex in range(8):
+   plt.subplot(421+ch_ex)
+   plt.plot(range(len(train_set_aluminum_hold_emg_00)), train_set_aluminum_hold_emg_00[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_01)), train_set_aluminum_hold_emg_01[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_02)), train_set_aluminum_hold_emg_02[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_03)), train_set_aluminum_hold_emg_03[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_04)), train_set_aluminum_hold_emg_04[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_05)), train_set_aluminum_hold_emg_05[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_06)), train_set_aluminum_hold_emg_06[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_07)), train_set_aluminum_hold_emg_07[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_08)), train_set_aluminum_hold_emg_08[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_09)), train_set_aluminum_hold_emg_09[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_10)), train_set_aluminum_hold_emg_10[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_11)), train_set_aluminum_hold_emg_11[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_12)), train_set_aluminum_hold_emg_12[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_13)), train_set_aluminum_hold_emg_13[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_14)), train_set_aluminum_hold_emg_14[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_15)), train_set_aluminum_hold_emg_15[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_16)), train_set_aluminum_hold_emg_16[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_17)), train_set_aluminum_hold_emg_17[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_18)), train_set_aluminum_hold_emg_18[:,ch_ex])
+   plt.plot(range(len(train_set_aluminum_hold_emg_19)), train_set_aluminum_hold_emg_19[:,ch_ex])
 # plt.figure(1)
 # for ch_ex in range(8):
 #    plt.subplot(421+ch_ex)
@@ -1978,49 +2014,49 @@ for i in range(7):
 plt.figure(20)
 for i in range(4):
     plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
-    ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
+    ipromp_aluminum_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
 plt.figure(21)
 for i in range(8):
     plt.subplot(421+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
-    ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend();
+    ipromp_aluminum_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
 plt.figure(22)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3);
-    ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
+    ipromp_aluminum_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=False); plt.legend();
 # plot ipromp_spanner_handover
 plt.figure(23)
 for i in range(4):
     plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
-    ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
+    ipromp_spanner_handover.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
 plt.figure(24)
 for i in range(8):
     plt.subplot(421+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
-    ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
+    ipromp_spanner_handover.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
 plt.figure(25)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3);
-    ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
+    ipromp_spanner_handover.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=False); plt.legend();
 # plot ipromp_tape_hold
 plt.figure(26)
 for i in range(4):
     plt.subplot(411+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3);
-    ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
+    ipromp_tape_hold.promps[i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
 plt.figure(27)
 for i in range(8):
     plt.subplot(421+i)
-    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3);
-    ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=True);
+    plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
+    ipromp_tape_hold.promps[4+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=True); plt.legend();
 plt.figure(28)
 for i in range(7):
     plt.subplot(711+i)
-    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3);
-    ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', via_show=False);
+    plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
+    ipromp_tape_hold.promps[4+8+i].plot_updated(np.arange(0,1.01,0.01), color='b', legend='updated distribution', via_show=False); plt.legend();
 
 plt.show()

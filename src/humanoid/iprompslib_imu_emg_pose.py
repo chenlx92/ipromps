@@ -414,7 +414,8 @@ class ProMP(object):
         if via_show == True:
             for viapoint_id, viapoint in enumerate(self.viapoints):
                 x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
-                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {}".format(viapoint_id), color=color)
+                # plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Observation {}".format(viapoint_id), color=color)
+                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, color=color)
             
             
 class IProMP(NDProMP):
@@ -457,6 +458,10 @@ class IProMP(NDProMP):
             PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
                                                 PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
                                                 zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry)
+            # PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+            #                                     zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry,
+            #                                     zero_entry, zero_entry, zero_entry, zero_entry, zero_entry, zero_entry,
+            #                                     zero_entry)
             # the observation of specific time
             y_observed = np.array(
                 [[self.promps[0].viapoints[num_viapoint]['obsy']], [self.promps[1].viapoints[num_viapoint]['obsy']],
