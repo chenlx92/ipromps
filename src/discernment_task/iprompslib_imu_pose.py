@@ -520,26 +520,6 @@ class IProMP(NDProMP):
         compute the pdf of observation sets
         :return: the total joint probability
         """
-        # PhiT = self.promps[0].Phi.T
-        # # here is a trick for construct the observation matrix
-        # PhiT_full = scipy.linalg.block_diag(PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT)
-        # # the obsvation distribution from weight distribution
-        # mean = np.dot( PhiT_full, self.mean_W_full )
-        # cov = np.dot( PhiT_full, np.dot(self.cov_W_full, PhiT_full.T))
-        # # compute the pdf of obsy
-        # prob_full = 1.0
-        # for obs in self.obs:
-        #     # the mean for EMG singnal observation distribution
-        #     mean_t = mean.reshape(self.num_joints, self.num_samples).T[np.int(obs['t']*100),:]
-        #     mean_t = mean_t[0:8]
-        #     # the covariance for EMG singnal observation distribution
-        #     idx = np.arange(15)*101 + np.int(obs['t']*100)
-        #     cov_t = cov[idx,:][:,idx]
-        #     cov_t = cov_t[0:8,0:8]
-        #     # compute the prob of partial observation
-        #     prob = mvn.pdf(obs['obs'][0:8], mean_t, cov_t)
-        #     prob_full = prob_full*prob
-
         prob_full = 0.0
         for obs in self.obs:
             PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(np.int(obs['t']),

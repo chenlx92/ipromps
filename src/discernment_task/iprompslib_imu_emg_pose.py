@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import scipy.linalg
 from scipy.stats import multivariate_normal as mvn
 import math
+import scipy.stats as stats
+from scipy.interpolate import griddata
 
 class NDProMP(object):
     """
@@ -33,11 +35,6 @@ class NDProMP(object):
 
         self.mean_W_full_updated = np.array([])
         self.cov_W_full_updated = np.array([])
-
-        # the scaling factor to letting each traj have same duration
-        self.alpha_demo = []
-        self.alpha_mean = []
-        self.alpha_cov = []
         
     @property
     def x(self):
@@ -161,7 +158,7 @@ class NDProMP(object):
         
         for num_viapoint in range( len(self.promps[0].viapoints) ):
             PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(self.promps[0].viapoints[num_viapoint]['t'], (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
-            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points            
+            # PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
             # here is a trick for construct the observation matrix            
             PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, 
                                                 PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T)
@@ -221,19 +218,6 @@ class NDProMP(object):
         mean1 = np.dot(self.promps[1].Phi.T, self.promps[1].meanW_updated)
         std1 = 2 * np.sqrt(np.diag(np.dot(self.promps[1].Phi.T, np.dot(self.promps[1].sigmaW_updated, self.promps[1].Phi))))
         plt.fill_between(x, mean1-std1, mean1 + std1, color='b', alpha=0.4)
-        
-    def add_alpha(self, alpha):
-        """
-        Add a phase to the trajectory
-        Observations and corresponding basis activations
-        :param t: timestamp of viapoint
-        :param obsy: observed value at time t
-        :param sigmay: observation variance (constraint strength)
-        :return:
-        """
-        self.alpha_demo.append(alpha)
-        self.alpha_mean = np.mean(self.alpha_demo)
-        self.alpha_cov = np.cov(self.alpha_demo) if len(self.alpha_demo)>1 else None
 
         
 class ProMP(object):
@@ -374,7 +358,7 @@ class ProMP(object):
 
         for viapoint in self.viapoints:
             PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.C, np.tile(viapoint['t'], (11, 1)).T)).T ** 2 / (self.sigma ** 2)))
-            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
+            # PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
             
             # Conditioning
             aux = viapoint['sigmay'] + np.dot(np.dot(PhiT.T, newSigma), PhiT)
@@ -395,10 +379,10 @@ class ProMP(object):
         """
         mean = np.dot(self.Phi.T, self.meanW)
         x = self.x if x is None else x
-        plt.plot(x, mean, color=color, label=legend, linewidth=3)
+        # plt.plot(x, mean, color=color, label=legend, linewidth=3, alpha=0.4)
 #        std = self.get_std()
         std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
-        plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.4)
+        plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.6)
         # for viapoint_id, viapoint in enumerate(self.viapoints):
         #     x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
         #     plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, label="Via {} {}".format(viapoint_id, legend), color=color)
@@ -409,7 +393,7 @@ class ProMP(object):
         """
         mean = np.dot(self.Phi.T, self.meanW_via)
         x = self.x if x is None else x
-        plt.plot(x, mean, color=color, label=legend)
+        # plt.plot(x, mean, color=color, label=legend)
         std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_via, self.Phi))))
         plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.4)
        # for viapoint_id, viapoint in enumerate(self.viapoints):
@@ -441,8 +425,13 @@ class IProMP(NDProMP):
         """
         construct function, call NDProMP construct function onlu
         """
-        NDProMP.__init__(self, num_joints=num_joints, nrBasis=11, sigma=0.05, num_samples=101)
+        NDProMP.__init__(self, num_joints=num_joints, nrBasis=nrBasis, sigma=sigma, num_samples=num_samples)
         self.obs = []
+
+        # the scaling factor to letting each traj have same duration
+        self.alpha_demo = []
+        self.alpha_mean = []
+        self.alpha_std = []
         
         
     def add_viapoint(self, t, obsys, sigmay):
@@ -464,9 +453,8 @@ class IProMP(NDProMP):
         PhiT_full = np.array([])
         for num_viapoint in range(len(self.promps[0].viapoints)):
             PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C,
-                                              np.tile(self.promps[0].viapoints[num_viapoint]['t'],
-                                                      (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
-            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
+                          np.tile(self.promps[0].viapoints[num_viapoint]['t'], (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
+            # PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
             # here is a trick for construct the observation matrix
             zero_entry = np.zeros([1, 11])
             PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
@@ -525,31 +513,13 @@ class IProMP(NDProMP):
         compute the pdf of observation sets
         :return: the total joint probability
         """
-        # PhiT = self.promps[0].Phi.T
-        # # here is a trick for construct the observation matrix
-        # PhiT_full = scipy.linalg.block_diag(PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT, PhiT)
-        # # the obsvation distribution from weight distribution
-        # mean = np.dot( PhiT_full, self.mean_W_full )
-        # cov = np.dot( PhiT_full, np.dot(self.cov_W_full, PhiT_full.T))
-        # # compute the pdf of obsy
-        # prob_full = 1.0
-        # for obs in self.obs:
-        #     # the mean for EMG singnal observation distribution
-        #     mean_t = mean.reshape(self.num_joints, self.num_samples).T[np.int(obs['t']*100),:]
-        #     mean_t = mean_t[0:8]
-        #     # the covariance for EMG singnal observation distribution
-        #     idx = np.arange(15)*101 + np.int(obs['t']*100)
-        #     cov_t = cov[idx,:][:,idx]
-        #     cov_t = cov_t[0:8,0:8]
-        #     # compute the prob of partial observation
-        #     prob = mvn.pdf(obs['obs'][0:8], mean_t, cov_t)
-        #     prob_full = prob_full*prob
-
         prob_full = 0.0
         for obs in self.obs:
-            PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(np.int(obs['t']),
-                                                      (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
-            PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
+            # PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(np.int(obs['t']),
+            #                                           (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
+            PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(obs['t'],
+                                  (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
+            # PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
             zero_entry = np.zeros([1, 11])
             PhiT_full = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
                                                 PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
@@ -560,7 +530,70 @@ class IProMP(NDProMP):
 
             prob = mvn.pdf(obs['obs'], mean_t, cov_t)
             log_pro = math.log(prob) if prob !=0.0 else -np.inf
-
             prob_full = prob_full + log_pro
-
         return prob_full
+
+
+    def add_alpha(self, alpha):
+        """
+        Add a phase to the trajectory
+        Observations and corresponding basis activations
+        :param t: timestamp of viapoint
+        :param obsy: observed value at time t
+        :param sigmay: observation variance (constraint strength)
+        :return:
+        """
+        self.alpha_demo.append(alpha)
+        self.alpha_mean = np.mean(self.alpha_demo)
+        self.alpha_std = np.std(self.alpha_demo)
+
+    def alpha_candidate(self, num):
+        """
+        compute the alpha candidate by unit sampling
+        Observations and corresponding basis activations
+        :param num: the num of alpha candidate
+        :return: the list of alpha candidate
+        """
+        alpha_candidate = np.linspace(self.alpha_mean-2*self.alpha_std, self.alpha_mean+2*self.alpha_std, num)
+        candidate_pdf = stats.norm.pdf(alpha_candidate, self.alpha_mean, self.alpha_std)
+        alpha_gen = {'candidate': alpha_candidate, 'prob': candidate_pdf}
+        return alpha_gen
+
+    def alpha_log_likelihood(self, alpha_candidate, obs, rate, sigmay):
+        prob_full = 0.0
+        for obs_idx in range(len(obs)):
+            # PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(np.int(obs_idx/50.0/alpha_candidate),
+            #         (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
+            PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.promps[0].C, np.tile(obs_idx / rate / alpha_candidate,
+                           (self.nrBasis, 1)).T)).T ** 2 / (self.promps[0].sigma ** 2)))
+            # PhiT = PhiT / sum(PhiT)  # basis functions at observed time points
+            zero_term = np.zeros((1,len(PhiT)))
+            A = scipy.linalg.block_diag(PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+                                        PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T, PhiT.T,
+                                        zero_term, zero_term, zero_term, zero_term, zero_term, zero_term, zero_term)
+            mean_t = np.dot(A, self.mean_W_full)[:,0]
+            cov_t = np.dot(np.dot(A, self.cov_W_full),  A.T) + sigmay
+
+            prob = mvn.pdf(obs[obs_idx], mean_t, cov_t)
+            log_prob = math.log(prob) if prob !=0.0 else -np.inf
+            prob_full = prob_full + log_prob
+        return prob_full
+
+    def alpha_estimate(self, alpha_candidate, obs, rate, sigmay):
+        pp_list = []
+        for idx in range(len(alpha_candidate['candidate'])):
+            lh = self.alpha_log_likelihood(alpha_candidate['candidate'][idx], obs, rate, sigmay)
+            pp = math.log(alpha_candidate['prob'][idx]) + lh
+            pp_list.append(pp)
+        id_max = np.argmax(pp_list)
+        return  id_max
+
+    def gen_predict_traj(self, alpha, rate):
+        traj = self.generate_trajectory()
+        points = self.x
+        grid = np.linspace(0, 1.0, np.int(alpha * rate))
+        predict_traj = griddata(points, traj, grid, method='linear')
+        id_predict_traj = np.linspace(0.0, alpha, len(grid))
+
+        return id_predict_traj, predict_traj
+
