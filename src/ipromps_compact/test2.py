@@ -55,19 +55,15 @@ dataset_tape_hold_norm = joblib.load('./pkl/dataset_tape_hold_norm.pkl')
 #################################
 # Interaction ProMPs train
 #################################
+# the measurement noise cov matrix
+imu_meansurement_noise_cov = np.eye((4)) * imu_noise
+pose_meansurement_noise_cov = np.eye((7)) * pose_noise
+meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, pose_meansurement_noise_cov)
 # create a 3 tasks iProMP
-ipromp_aluminum_hold = ipromps_lib.NDProMP(num_joints=11, num_basis=num_basis, sigma_basis=0.05, num_samples=101)
-ipromp_spanner_handover = ipromps_lib.NDProMP(num_joints=11, num_basis=num_basis, sigma_basis=0.05, num_samples=101)
-ipromp_tape_hold = ipromps_lib.NDProMP(num_joints=11, num_basis=num_basis, sigma_basis=0.05, num_samples=101)
+ipromp_tape_hold = ipromps_lib.NDProMP(num_joints=11, num_basis=num_basis, sigma_basis=0.05, num_samples=101, sigmay=meansurement_noise_cov_full)
 
 # add demostration
 for idx in range(0, num_demos):
-    # add demonstration of aluminum_hold
-    demo_temp = np.hstack([dataset_aluminum_hold_norm[idx]["imu"]/sf_imu, dataset_aluminum_hold_norm[idx]["pose"]/sf_pose])
-    ipromp_aluminum_hold.add_demonstration(demo_temp)
-    # add demonstration of spanner_handover
-    demo_temp = np.hstack([dataset_spanner_handover_norm[idx]["imu"]/sf_imu, dataset_spanner_handover_norm[idx]["pose"]/sf_pose])
-    ipromp_spanner_handover.add_demonstration(demo_temp)
     # add demonstration of tape_hold
     demo_temp = np.hstack([dataset_tape_hold_norm[idx]["imu"]/sf_imu, dataset_tape_hold_norm[idx]["pose"]/sf_pose])
     ipromp_tape_hold.add_demonstration(demo_temp)
@@ -84,126 +80,57 @@ selected_testset = dataset_tape_hold_norm[1]
 test_set = np.hstack((selected_testset["imu"]/sf_imu, selected_testset["pose"]/sf_pose))
 robot_response = selected_testset["pose"]/sf_pose
 
-# add via point as observation
-imu_meansurement_noise_cov = np.eye((4)) * imu_noise
-pose_meansurement_noise_cov = np.eye((7)) * pose_noise
-meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, pose_meansurement_noise_cov)
-
 # add via points to update the distribution
 for idx in range(obs_ratio):
-    ipromp_aluminum_hold.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
-    ipromp_spanner_handover.add_viapoint(0.01*idx, test_set[idx,:], meansurement_noise_cov_full)
-    ipromp_tape_hold.add_viapoint(0.01*idx, test_set[idx,:], meansurement_noise_cov_full)
+    ipromp_tape_hold.add_viapoint(0.01*idx, test_set[idx,:])
 
 
 #################################
 # plot raw data
 #################################
 if b_plot_raw_dateset == True:
-    ## plot the aluminum hold task raw data
-    plt.figure(0)
-    for ch_ex in range(4):
-       plt.subplot(411+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]["imu"][:, ch_ex])), dataset_aluminum_hold[idx]["imu"][:, ch_ex]); plt.axis('off')
-    plt.figure(2)
-    for ch_ex in range(7):
-       plt.subplot(711+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]["pose"][:, ch_ex])), dataset_aluminum_hold[idx]["pose"][:, ch_ex]); plt.axis('off')
-    ## plot the spanner handover task raw data
-    plt.figure(10)
-    for ch_ex in range(4):
-       plt.subplot(411 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]["imu"][:, ch_ex])), dataset_spanner_handover[idx]["imu"][:, ch_ex]); plt.axis('off')
-    plt.figure(12)
-    for ch_ex in range(7):
-       plt.subplot(711 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]["pose"][:, ch_ex])), dataset_spanner_handover[idx]["pose"][:, ch_ex]); plt.axis('off')
     ## plot the tape hold task raw data
     plt.figure(20)
     for ch_ex in range(4):
        plt.subplot(411 + ch_ex)
        for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]["imu"][:, ch_ex])), dataset_tape_hold[idx]["imu"][:, ch_ex]); plt.axis('off')
+           plt.plot(range(len(dataset_tape_hold[idx]["imu"][:, ch_ex])), dataset_tape_hold[idx]["imu"][:, ch_ex]); pltaxix = 1
     plt.figure(22)
     for ch_ex in range(7):
        plt.subplot(711 + ch_ex)
        for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]["pose"][:, ch_ex])), dataset_tape_hold[idx]["pose"][:, ch_ex]); plt.axis('off')
+           plt.plot(range(len(dataset_tape_hold[idx]["pose"][:, ch_ex])), dataset_tape_hold[idx]["pose"][:, ch_ex]); pltaxix = 1
 
 
 #################################
 # plot the prior distributioin
 #################################
 if b_plot_prior_distribution == True:
-    # plot ipromp_aluminum_hold
-    plt.figure(50)
-    for i in range(4):
-        plt.subplot(411+i)
-        ipromp_aluminum_hold.promps[i].plot_prior(color='b', legend='alumnium hold model, imu'); plt.axis('off')
-    plt.figure(52)
-    for i in range(7):
-        plt.subplot(711+i)
-        ipromp_aluminum_hold.promps[4+i].plot_prior(color='b', legend='alumnium hold model, pose'); plt.axis('off')
-    # plot ipromp_spanner_handover
-    plt.figure(60)
-    for i in range(4):
-        plt.subplot(411+i)
-        ipromp_spanner_handover.promps[i].plot_prior(color='b', legend='spanner handover model, imu'); plt.axis('off')
-    plt.figure(62)
-    for i in range(7):
-        plt.subplot(711+i)
-        ipromp_spanner_handover.promps[4+i].plot_prior(color='b', legend='spanner handover model, pose'); plt.axis('off')
     # plot ipromp_tape_hold
     plt.figure(70)
     for i in range(4):
         plt.subplot(411+i)
-        ipromp_tape_hold.promps[i].plot_prior(color='b', legend='tape hold model, imu'); plt.axis('off')
+        ipromp_tape_hold.promps[i].plot_prior(color='b', legend='tape hold model, imu'); pltaxix = 1
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
-        ipromp_tape_hold.promps[4+i].plot_prior(color='b', legend='tape hold model, pose'); plt.axis('off')
+        ipromp_tape_hold.promps[4+i].plot_prior(color='b', legend='tape hold model, pose'); pltaxix = 1
 
 
 #################################
 # plot the updated distributioin
 #################################
 if b_plot_update_distribution == True:
-    # plot ipromp_aluminum_hold
-    plt.figure(50)
-    for i in range(4):
-        plt.subplot(411+i)
-        plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[i].plot_updated(color='r', legend='updated distribution', via_show=True); plt.legend();
-    plt.figure(52)
-    for i in range(7):
-        plt.subplot(711+i)
-        plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[4+i].plot_updated(color='r', legend='updated distribution', via_show=False); plt.legend();
-    # plot ipromp_spanner_handover
-    plt.figure(60)
-    for i in range(4):
-        plt.subplot(411+i)
-        plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[i].plot_updated(color='r', legend='updated distribution', via_show=True); plt.legend();
-    plt.figure(62)
-    for i in range(7):
-        plt.subplot(711+i)
-        plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[4+i].plot_updated(color='r', legend='updated distribution', via_show=False); plt.legend();
     # plot ipromp_tape_hold
     plt.figure(70)
     for i in range(4):
         plt.subplot(411+i)
-        plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[i].plot_updated(color='r', legend='updated distribution', via_show=True); plt.legend();
+        plt.plot(ipromp_tape_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
+        ipromp_tape_hold.promps[i].plot_updated(color='r', legend='updated distribution', via_show=True); legend = 0;
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
-        plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[4+i].plot_updated(color='r', legend='updated distribution', via_show=False); plt.legend();
+        plt.plot(ipromp_tape_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
+        ipromp_tape_hold.promps[4+i].plot_updated(color='r', legend='updated distribution', via_show=True); legend = 0;
 
 plt.show()

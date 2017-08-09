@@ -44,8 +44,8 @@ sf_pose = 0.1
 
 # plot options
 b_plot_raw_dateset = False
-b_plot_norm_dateset = True
-b_plot_prior_distribution = True
+b_plot_norm_dateset = False
+b_plot_prior_distribution = False
 b_plot_update_distribution = False
 b_plot_phase_distribution = False
 
@@ -68,10 +68,15 @@ dataset_tape_hold_norm = joblib.load('./pkl/dataset_tape_hold_norm.pkl')
 #################################
 # Interaction ProMPs train
 #################################
+# the measurement noise cov matrix
+imu_meansurement_noise_cov = np.eye((4)) * imu_noise
+emg_meansurement_noise_cov = np.eye((8)) * emg_noise
+pose_meansurement_noise_cov = np.eye((7)) * pose_noise
+meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, emg_meansurement_noise_cov, pose_meansurement_noise_cov)
 # create a 3 tasks iProMP
-ipromp_aluminum_hold = ipromps_lib.IProMP(num_joints=19, num_basis=11, sigma_basis=0.05, num_samples=101, num_obs_joints=12)
-ipromp_spanner_handover = ipromps_lib.IProMP(num_joints=19, num_basis=11, sigma_basis=0.05, num_samples=101, num_obs_joints=12)
-ipromp_tape_hold = ipromps_lib.IProMP(num_joints=19, num_basis=11, sigma_basis=0.05, num_samples=101, num_obs_joints=12)
+ipromp_aluminum_hold = ipromps_lib.IProMP(num_joints=19, num_basis=11, sigma_basis=0.05, num_samples=101, num_obs_joints=12, sigmay=meansurement_noise_cov_full)
+ipromp_spanner_handover = ipromps_lib.IProMP(num_joints=19, num_basis=11, sigma_basis=0.05, num_samples=101, num_obs_joints=12, sigmay=meansurement_noise_cov_full)
+ipromp_tape_hold = ipromps_lib.IProMP(num_joints=19, num_basis=11, sigma_basis=0.05, num_samples=101, num_obs_joints=12, sigmay=meansurement_noise_cov_full)
 
 # add demostration
 for idx in range(num_demos):
@@ -114,17 +119,11 @@ test_set_temp = np.hstack((selected_testset["imu"]/sf_imu, selected_testset["emg
 test_set = np.hstack((test_set_temp, np.zeros([len_normal, 7])))
 robot_response = selected_testset["pose"]/sf_pose
 
-# the measurement noise cov matrix
-imu_meansurement_noise_cov = np.eye((4)) * imu_noise
-emg_meansurement_noise_cov = np.eye((8)) * emg_noise
-pose_meansurement_noise_cov = np.eye((7)) * pose_noise
-meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, emg_meansurement_noise_cov, pose_meansurement_noise_cov)
-
 # add via/obsys points to update the distribution
 for idx in range(obs_ratio):
-    ipromp_aluminum_hold.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
-    ipromp_spanner_handover.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
-    ipromp_tape_hold.add_viapoint(0.01*idx, test_set[idx, :], meansurement_noise_cov_full)
+    ipromp_aluminum_hold.add_viapoint(0.01*idx, test_set[idx, :])
+    ipromp_spanner_handover.add_viapoint(0.01*idx, test_set[idx, :])
+    ipromp_tape_hold.add_viapoint(0.01*idx, test_set[idx, :])
 
 # the model info
 # print('the number of demonstration is ',num_demos)
@@ -438,13 +437,13 @@ if b_plot_update_distribution == True:
     plt.figure(71)
     for i in range(8):
         plt.subplot(421+i)
-        # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
+        # plt.plot(ipromp_tape_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_tape_hold.promps[4+i].plot_updated(color='g', legend='updated distribution', via_show=True); plt.legend();
     pl.savefig('./fig/tape_hold_emg_post.eps', format='eps');pl.savefig('./fig/tape_hold_emg_post.pdf', format='pdf')
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
-        # plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
+        # plt.plot(ipromp_tape_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_tape_hold.promps[4+8+i].plot_updated(color='g', legend='updated distribution', via_show=False); plt.legend();
     pl.savefig('./fig/tape_hold_pose_post.eps', format='eps');pl.savefig('./fig/tape_hold_pose_post.pdf', format='pdf')
 
