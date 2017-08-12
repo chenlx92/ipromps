@@ -13,17 +13,22 @@ import math
 from sklearn.externals import joblib
 import sys
 
-# init
 plt.close('all')    # close all windows
-len_normal = 101    # the len of normalized traj, don't change it
 
 # model parameter
+len_normal = 101    # the len of normalized traj, don't change it
 num_demos = 10         # number of trajectoreis for training
 obs_ratio = 10
+num_joints=11
+num_basis=31
+sigma_basis=0.05
+num_samples=101
+num_obs_joints=4
 # measurement noise
 imu_noise = 1
 emg_noise = 2
 pose_noise = 1
+# phase estimation para
 num_alpha_candidate = 10
 states_refresh_rate = 50.0
 nominal_duration = 1.0
@@ -35,7 +40,7 @@ sf_pose = 0.1
 # plot options
 b_plot_raw_dateset = False
 b_plot_prior_distribution = True
-b_plot_update_distribution = True
+b_plot_update_distribution = False
 b_plot_phase_distribution = False
 
 
@@ -59,13 +64,19 @@ dataset_tape_hold_norm = joblib.load('./pkl/dataset_tape_hold_norm.pkl')
 # Interaction ProMPs train
 #################################
 # the measurement noise cov matrix
-imu_meansurement_noise_cov = np.eye((4)) * imu_noise
-pose_meansurement_noise_cov = np.eye((7)) * pose_noise
+imu_meansurement_noise_cov = np.eye(4) * imu_noise
+pose_meansurement_noise_cov = np.eye(7) * pose_noise
 meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, pose_meansurement_noise_cov)
 # create a 3 tasks iProMP
-ipromp_aluminum_hold = ipromps_lib.IProMP(num_joints=11, num_basis=31, sigma_basis=0.05, num_samples=101, num_obs_joints=4, sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover = ipromps_lib.IProMP(num_joints=11, num_basis=31, sigma_basis=0.05, num_samples=101, num_obs_joints=4, sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold = ipromps_lib.IProMP(num_joints=11, num_basis=31, sigma_basis=0.05, num_samples=101, num_obs_joints=4, sigmay=meansurement_noise_cov_full)
+ipromp_aluminum_hold = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
+                                          num_samples=num_samples, num_obs_joints=num_obs_joints,
+                                          sigmay=meansurement_noise_cov_full)
+ipromp_spanner_handover = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
+                                             num_samples=num_samples, num_obs_joints=num_obs_joints,
+                                             sigmay=meansurement_noise_cov_full)
+ipromp_tape_hold = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
+                                      num_samples=num_samples, num_obs_joints=num_obs_joints,
+                                      sigmay=meansurement_noise_cov_full)
 
 # add demostration
 for idx in range(0, num_demos):
@@ -227,33 +238,33 @@ if b_plot_update_distribution == True:
     for i in range(4):
         plt.subplot(411+i)
         plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[i].plot_updated(color='g', legend='updated distribution', via_show=True); plt.legend();
+        ipromp_aluminum_hold.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
     plt.figure(52)
     for i in range(7):
         plt.subplot(711+i)
         plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[4+i].plot_updated(color='g', legend='updated distribution', via_show=True); plt.legend();
+        ipromp_aluminum_hold.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
     # plot ipromp_spanner_handover
     plt.figure(60)
     for i in range(4):
         plt.subplot(411+i)
         plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[i].plot_updated(color='g', legend='updated distribution', via_show=True); plt.legend();
+        ipromp_spanner_handover.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
     plt.figure(62)
     for i in range(7):
         plt.subplot(711+i)
         plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[4+i].plot_updated(color='g', legend='updated distribution', via_show=True); plt.legend();
+        ipromp_spanner_handover.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
     # plot ipromp_tape_hold
     plt.figure(70)
     for i in range(4):
         plt.subplot(411+i)
         plt.plot(ipromp_tape_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[i].plot_updated(color='g', legend='updated distribution', via_show=True); plt.legend();
+        ipromp_tape_hold.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
         plt.plot(ipromp_tape_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[4+i].plot_updated(color='g', legend='updated distribution', via_show=True); plt.legend();
+        ipromp_tape_hold.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
 
 plt.show()

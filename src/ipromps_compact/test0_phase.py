@@ -31,12 +31,12 @@ plt.close('all')    # close all windows
 
 # parameter of model
 num_demos = 20         # number of trajectoreis for training
-obs_ratio = 10
+obs_duration = 0.08
 num_joints=19
 num_basis=31
 sigma_basis=0.05
 num_samples=101
-num_obs_joints=4
+num_obs_joints=12
 # measurement noise
 imu_noise = 1.0
 emg_noise = 2.0
@@ -57,7 +57,6 @@ b_plot_norm_dateset = False
 b_plot_prior_distribution = False
 b_plot_update_distribution = False
 b_plot_phase_distribution = True
-
 
 
 #################################
@@ -112,13 +111,14 @@ for idx in range(num_demos):
 
 # model the phase distribution
 for i in range(num_demos):
-    alpha = (len(dataset_aluminum_hold[i]['imu']) - 1) / states_refresh_rate / num_samples
+    # aluminum_hold
+    alpha = (len(dataset_aluminum_hold[i]['imu']) - 1) / states_refresh_rate / nominal_duration
     ipromp_aluminum_hold.add_alpha(alpha)
-    ##
-    alpha = (len(dataset_spanner_handover[i]['imu']) - 1) / states_refresh_rate / num_samples
+    # spanner_handover
+    alpha = (len(dataset_spanner_handover[i]['imu']) - 1) / states_refresh_rate / nominal_duration
     ipromp_spanner_handover.add_alpha(alpha)
-    ##
-    alpha = (len(dataset_tape_hold[i]['imu']) - 1) / states_refresh_rate / num_samples
+    # tape_hold
+    alpha = (len(dataset_tape_hold[i]['imu']) - 1) / states_refresh_rate / nominal_duration
     ipromp_tape_hold.add_alpha(alpha)
 
 
@@ -127,18 +127,29 @@ for i in range(num_demos):
 ################################
 # select the testset
 selected_testset = None
-selected_testset = dataset_aluminum_hold_norm[idx_demo] if task_id==0 else selected_testset
-selected_testset = dataset_spanner_handover_norm[idx_demo] if task_id==1 else selected_testset
-selected_testset = dataset_tape_hold_norm[idx_demo] if task_id==2 else selected_testset
+selected_testset = dataset_aluminum_hold[idx_demo] if task_id==0 else selected_testset
+selected_testset = dataset_spanner_handover[idx_demo] if task_id==1 else selected_testset
+selected_testset = dataset_tape_hold[idx_demo] if task_id==2 else selected_testset
 # construct the test set
-test_set = np.hstack((selected_testset['imu']/sf_imu, selected_testset['emg']/sf_emg, np.zeros([num_samples, 7])))
+test_set = np.hstack((selected_testset['imu'][0:140,:]/sf_imu, selected_testset['emg'][0:140,:]/sf_emg, np.zeros([140, 7])))
 robot_response = selected_testset['pose']/sf_pose
 
+# compute the best fit alpha for each task
+# aluminum_hold
+candidate_aluminum_hold = ipromp_aluminum_hold.alpha_candidate(num_alpha_candidate)
+idx_alpha_aluminum_hold = ipromp_aluminum_hold.estimate_alpha(candidate_aluminum_hold, test_set[0:int(obs_duration*states_refresh_rate),:], states_refresh_rate)
+# spanner_handover
+candidate_spanner_handover = ipromp_spanner_handover.alpha_candidate(num_alpha_candidate)
+idx_alpha_spanner_handover = ipromp_spanner_handover.estimate_alpha(candidate_spanner_handover, test_set[0:int(obs_duration/states_refresh_rate),:], states_refresh_rate)
+# tape_hold
+candidate_tape_hold = ipromp_tape_hold.alpha_candidate(num_alpha_candidate)
+idx_alpha_tape_hold = ipromp_tape_hold.estimate_alpha(candidate_tape_hold, test_set[0:int(obs_duration/states_refresh_rate),:], states_refresh_rate)
+
 # add via points to update the distribution
-for idx in range(obs_ratio):
-    ipromp_aluminum_hold.add_viapoint(nominal_interval*idx, test_set[idx, :])
-    ipromp_spanner_handover.add_viapoint(nominal_interval*idx, test_set[idx, :])
-    ipromp_tape_hold.add_viapoint(nominal_interval*idx, test_set[idx, :])
+for idx in range(int(obs_duration/states_refresh_rate)):
+    ipromp_aluminum_hold.add_viapoint(idx/states_refresh_rate/alpha, test_set[idx, :])
+    ipromp_spanner_handover.add_viapoint(idx/states_refresh_rate/alpha, test_set[idx, :])
+    ipromp_tape_hold.add_viapoint(idx/states_refresh_rate/alpha, test_set[idx, :])
 
 # the model info
 # print('the number of demonstration is ',num_demos)
@@ -167,42 +178,6 @@ else:
 #     print('the obs comes from tape_hold')
 
 
-#################################
-# compute the position error
-#################################
-# position_error = None
-# # if idx_max_pro == 0:
-# predict_robot_response = ipromp_aluminum_hold.generate_trajectory()
-# position_error = np.linalg.norm(predict_robot_response[-1,12:15]-robot_response[-1,0:3])
-# print('if aluminum_hold, the obs position error is', position_error)
-# # elif idx_max_pro == 1:
-# predict_robot_response = ipromp_spanner_handover.generate_trajectory()
-# position_error = np.linalg.norm(predict_robot_response[-1, 12:15] - robot_response[-1,0:3])
-# print('if spanner_handover, the obs position error is', position_error)
-# # elif idx_max_pro == 2:
-# predict_robot_response = ipromp_tape_hold.generate_trajectory()
-# position_error = np.linalg.norm(predict_robot_response[-1, 12:15] - robot_response[-1,0:3])
-# print('if tape_hold, the obs position error is', position_error)
-
-
-# #################################
-# # the KL divergence of IMU
-# #################################
-# mean_a_imu = ipromp_aluminum_hold.mean_W_full[0:44]
-# cov_a_imu = ipromp_aluminum_hold.cov_W_full[0:44,0:44]
-# mean_s_imu = ipromp_spanner_handover.mean_W_full[0:44]
-# cov_s_imu = ipromp_spanner_handover.cov_W_full[0:44,0:44]
-# kl_divergence_imu_a_s = math.log(np.linalg.det(cov_s_imu)/np.linalg.det(cov_a_imu)) - 44 \
-#                         + np.trace(np.dot(np.linalg.inv(cov_s_imu), cov_a_imu)) + \
-#                         np.dot((mean_s_imu-mean_a_imu).T, np.dot(np.linalg.inv(cov_s_imu), (mean_s_imu-mean_a_imu)))
-#
-# mean_a_imu_emg = ipromp_aluminum_hold.mean_W_full[0:132]
-# cov_a_imu_emg = ipromp_aluminum_hold.cov_W_full[0:132,0:132]
-# mean_s_imu_emg = ipromp_spanner_handover.mean_W_full[0:132]
-# cov_s_imu_emg = ipromp_spanner_handover.cov_W_full[0:132,0:132]
-# kl_divergence_imu_emg_a_s = math.log(np.linalg.det(cov_s_imu_emg)/np.linalg.det(cov_a_imu_emg)) - 132\
-#                         + np.trace(np.dot(np.linalg.inv(cov_s_imu_emg), cov_a_imu_emg)) + \
-#                         np.dot((mean_s_imu_emg-mean_a_imu_emg).T, np.dot(np.linalg.inv(cov_s_imu_emg), (mean_s_imu_emg - mean_a_imu_emg)))
 
 
 #################################
