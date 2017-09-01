@@ -25,20 +25,20 @@ class ProMP(object):
         self.Phi = np.exp(-.5*(np.array(map(lambda x: x-self.C, np.tile(self.x, (self.num_basis, 1)).T)).T**2 / (self.sigma_basis**2)))
         self.viapoints = []     # the via point list
         self.sigmay = sigmay    # the measurement noise cov mat for updated distribution
-        self.W = np.array([])   # the weight for each demo
+        self.W = np.array([], float)   # the weight for each demo
         self.Y = np.empty((0, self.num_samples), float)     # the demon traj array
 
         # the unit promp prior W distribution
-        self.meanW = None
-        self.sigmaW = None
+        self.meanW = np.array([],float)
+        self.sigmaW = np.array([],float)
 
         # the unit promp updated W distribution
-        self.meanW_uUpdated = None
-        self.sigmaW_uUpdated = None
+        self.meanW_uUpdated = np.array([],float)
+        self.sigmaW_uUpdated = np.array([],float)
 
         # the n-dimension promps updated W distribution
-        self.meanW_nUpdated = None
-        self.sigmaW_nUpdated = None
+        self.meanW_nUpdated = np.array([],float)
+        self.sigmaW_nUpdated = np.array([],float)
 
     def add_demonstration(self, demonstration):
         """
@@ -126,7 +126,7 @@ class ProMP(object):
         """
         self.viapoints.append({'t': t, 'obsy': obsy})
 
-    def generate_uTrajectory(self, randomness=1e-10):
+    def gen_uTrajectory(self, randomness=1e-10):
         """
         Outputs a trajectory from unit promp
         :param randomness: float between 0. (output will be the mean of gaussians) and 1. (fully randomized inside the variance)
@@ -171,7 +171,7 @@ class ProMP(object):
         """
         plot the n-dimension updated distribution, valid from NDProMP or IProMP
         """
-        if self.meanW_nUpdated is None:
+        if self.meanW_nUpdated == np.array([],float):
             print "there is no updated distribution from NDProMP or IProMP"
             return
         x = self.x
@@ -202,12 +202,12 @@ class NDProMP(object):
         self.num_joints = num_joints
         self.promps = [ProMP(num_basis, sigma_basis, num_samples, sigmay[idx_joint,idx_joint]) for idx_joint in range(num_joints)]
 
-        self.W_full = np.array([]) # the weight for each demonstration
-        self.meanW_full = np.array([])
-        self.covW_full = np.array([])
+        self.W_full = np.array([], float) # the weight for each demonstration
+        self.meanW_full = np.array([], float)
+        self.covW_full = np.array([], float)
 
-        self.meanW_full_updated = np.array([]) # the updated weight distribution
-        self.covW_full_updated = np.array([])
+        self.meanW_full_updated = np.array([], float) # the updated weight distribution
+        self.covW_full_updated = np.array([], float)
 
         self.viapoints = []
         self.sigmay = sigmay  # the measurement noise cov mat
@@ -220,7 +220,7 @@ class NDProMP(object):
         """
         h = np.exp(-.5 * (np.array(map(lambda x: x - self.C,
                       np.tile(t, (self.num_basis, 1)).T)).T**2 / (self.sigma_basis**2)))
-        h_full = np.array([]).reshape(0,0)
+        h_full = np.array([], float).reshape(0,0)
         # construct the obs mat
         for idx_obs in range(self.num_joints):
             h_full = scipy.linalg.block_diag(h_full, h.T)
@@ -239,7 +239,7 @@ class NDProMP(object):
         for joint_demo_idx, joint_demo in enumerate(demonstration):
             self.promps[joint_demo_idx].add_demonstration(joint_demo)
         # construct the weight full samples
-        self.W_full = np.array([]).reshape(self.num_demos,0)
+        self.W_full = np.array([], float).reshape(self.num_demos,0)
         for idx_promp in range(self.num_joints):
             self.W_full = np.hstack([self.W_full, self.promps[idx_promp].W])
         # save the prior distribution
@@ -352,7 +352,7 @@ class NDProMP(object):
                 self.promps[i].meanW_nUpdated = new_meanW_full.reshape([self.num_joints,self.num_basis]).T[:,i]
                 self.promps[i].sigmaW_nUpdated = new_covW_full[i*self.num_basis:(1+i)*self.num_basis, i*self.num_basis:(i+1)*self.num_basis]
 
-    def generate_nTrajectory(self, randomness=1e-10):
+    def gen_nTrajectory(self, randomness=1e-10):
         new_meanW_full = self.meanW_full_updated
         trajectory = np.dot(self.Phi.T, new_meanW_full.reshape([self.num_joints, self.num_basis]).T)
         return trajectory
@@ -385,7 +385,7 @@ class IProMP(NDProMP):
         h = np.exp(-.5 * (np.array(map(lambda x: x - self.C,
                       np.tile(t, (self.num_basis, 1)).T)).T**2 / (self.sigma_basis ** 2)))
         zero_entry = np.zeros([1, self.num_basis])
-        h_full = np.array([]).reshape(0,0)
+        h_full = np.array([], float).reshape(0,0)
         # construct the obs mat
         for idx_obs in range(self.num_obs_joints):
             h_full = scipy.linalg.block_diag(h_full, h.T)
@@ -425,7 +425,7 @@ class IProMP(NDProMP):
             self.promps[i].meanW_nUpdated = new_meanW_full.reshape([self.num_joints, self.num_basis]).T[:, i]
             self.promps[i].sigmaW_nUpdated = new_covW_full[i * self.num_basis:(1 + i) * self.num_basis, i * self.num_basis:(i + 1) * self.num_basis]
 
-    def generate_nTrajectory(self, randomness=1e-10):
+    def gen_nTrajectory(self, randomness=1e-10):
         """
         Add a viapoint i.e. an observation at a specific time
         :param randomness: the measurement noise
@@ -435,18 +435,18 @@ class IProMP(NDProMP):
         trajectory = np.dot( self.Phi.T, new_meanW_full.reshape([self.num_joints,self.num_basis]).T )
         return trajectory
 
-    def prob_obs(self):
+    def prob_obs(self, candidate):
         """
         compute the pdf of observation sets
         :return: the total joint probability
         """
         prob_full = 0.0
-        for idx_obs, obs in enumerate(self.viapoints):
-            h_full = self.obs_mat(obs['t'])
+        for viapoint in self.viapoints:
+            h_full = self.obs_mat(viapoint['t'])
             # the y mean and cov
             mean_t = np.dot(h_full, self.meanW_full)[:,0]
             cov_t = np.dot(h_full, np.dot(self.covW_full, h_full.T)) + self.sigmay
-            prob = mvn.pdf(obs['obsy'], mean_t, cov_t)
+            prob = mvn.pdf(viapoint['obsy'], mean_t, cov_t)
             log_pro = math.log(prob) if prob != 0.0 else -np.inf
             prob_full = prob_full + log_pro
         return prob_full
@@ -474,7 +474,7 @@ class IProMP(NDProMP):
             alpha_gen.append({'candidate': alpha_candidate[idx_candidate], 'prob': candidate_pdf[idx_candidate]})
         return alpha_gen
 
-    def log_ll_alpha(self, alpha_candidate, obs, rate):
+    def log_ll_alpha(self, alpha_candidate, obsy, rate):
         """
         compute the alpha candidate log likelihood
         :param alpha_candidate: the alpha candidate
@@ -483,7 +483,8 @@ class IProMP(NDProMP):
         :return: the alpha candidate log likelihood
         """
         prob_full = 0.0
-        for obs_idx in range(len(obs)):
+        # for obs_idx in range(len(obs)):
+        for obs_idx, obs in enumerate(obsy):
             h_full = self.obs_mat(obs_idx/rate/alpha_candidate)
             mean_t = np.dot(h_full, self.meanW_full)[:,0]
             cov_t = np.dot(np.dot(h_full, self.covW_full),  h_full.T) + self.sigmay
@@ -516,7 +517,7 @@ class IProMP(NDProMP):
         :param rate: the sensor feedback rate
         :return: predicted traj
         """
-        traj = self.generate_nTrajectory()
+        traj = self.gen_nTrajectory()
         points = self.x
         grid = np.linspace(0, 1.0, np.int(alpha * rate))
         predict_traj = griddata(points, traj, grid, method='linear')

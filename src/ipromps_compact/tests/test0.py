@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
-import ipromps_lib
+import ipromps_compact.ipromps_lib
 import scipy.linalg
 # from scipy.stats import entropy
 # import rospy
@@ -45,17 +45,17 @@ pose_noise = 1.0
 num_alpha_candidate = 10
 nominal_duration = 1.0
 nominal_interval = nominal_duration / (num_samples-1)
-states_refresh_rate = 50.0
+states_rate = 50.0
 # preprocessing: scaling factor for data
 sf_imu = 1000.0
 sf_emg = 100.0
 sf_pose = 0.1
 
 # plot options
-b_plot_raw_dateset = False
-b_plot_norm_dateset = False
-b_plot_prior_distribution = False
-b_plot_update_distribution = False
+b_plot_raw_dateset = True
+b_plot_norm_dateset = True
+b_plot_prior_distribution = True
+b_plot_update_distribution = True
 b_plot_phase_distribution = True
 
 
@@ -63,15 +63,15 @@ b_plot_phase_distribution = True
 #################################
 # load raw date sets
 #################################
-dataset_aluminum_hold = joblib.load('./pkl/dataset_aluminum_hold.pkl')
-dataset_spanner_handover = joblib.load('./pkl/dataset_spanner_handover.pkl')
-dataset_tape_hold = joblib.load('./pkl/dataset_tape_hold.pkl')
+dataset_aluminum_hold = joblib.load('./datasets/pkl/dataset_aluminum_hold.pkl')
+dataset_spanner_handover = joblib.load('./datasets/pkl/dataset_spanner_handover.pkl')
+dataset_tape_hold = joblib.load('./datasets/pkl/dataset_tape_hold.pkl')
 #################################
 # load norm date sets
 #################################
-dataset_aluminum_hold_norm = joblib.load('./pkl/dataset_aluminum_hold_norm.pkl')
-dataset_spanner_handover_norm = joblib.load('./pkl/dataset_spanner_handover_norm.pkl')
-dataset_tape_hold_norm = joblib.load('./pkl/dataset_tape_hold_norm.pkl')
+dataset_aluminum_hold_norm = joblib.load('./datasets/pkl/dataset_aluminum_hold_norm.pkl')
+dataset_spanner_handover_norm = joblib.load('./datasets/pkl/dataset_spanner_handover_norm.pkl')
+dataset_tape_hold_norm = joblib.load('./datasets/pkl/dataset_tape_hold_norm.pkl')
 
 
 #################################
@@ -85,15 +85,15 @@ meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov
                                                       emg_meansurement_noise_cov,
                                                       pose_meansurement_noise_cov)
 # create a 3 tasks iProMP
-ipromp_aluminum_hold = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
-                                          num_samples=num_samples, num_obs_joints=num_obs_joints,
-                                          sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
-                                             num_samples=num_samples, num_obs_joints=num_obs_joints,
-                                             sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
-                                      num_samples=num_samples, num_obs_joints=num_obs_joints,
-                                      sigmay=meansurement_noise_cov_full)
+ipromp_aluminum_hold = ipromps_compact.ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
+                                                          num_samples=num_samples, num_obs_joints=num_obs_joints,
+                                                          sigmay=meansurement_noise_cov_full)
+ipromp_spanner_handover = ipromps_compact.ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
+                                                             num_samples=num_samples, num_obs_joints=num_obs_joints,
+                                                             sigmay=meansurement_noise_cov_full)
+ipromp_tape_hold = ipromps_compact.ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
+                                                      num_samples=num_samples, num_obs_joints=num_obs_joints,
+                                                      sigmay=meansurement_noise_cov_full)
 
 # add demostration
 for idx in range(num_demos):
@@ -112,13 +112,13 @@ for idx in range(num_demos):
 
 # model the phase distribution
 for i in range(num_demos):
-    alpha = (len(dataset_aluminum_hold[i]['imu']) - 1) / states_refresh_rate / num_samples
+    alpha = (len(dataset_aluminum_hold[i]['imu']) - 1) / states_rate / num_samples
     ipromp_aluminum_hold.add_alpha(alpha)
     ##
-    alpha = (len(dataset_spanner_handover[i]['imu']) - 1) / states_refresh_rate / num_samples
+    alpha = (len(dataset_spanner_handover[i]['imu']) - 1) / states_rate / num_samples
     ipromp_spanner_handover.add_alpha(alpha)
     ##
-    alpha = (len(dataset_tape_hold[i]['imu']) - 1) / states_refresh_rate / num_samples
+    alpha = (len(dataset_tape_hold[i]['imu']) - 1) / states_rate / num_samples
     ipromp_tape_hold.add_alpha(alpha)
 
 
@@ -209,64 +209,70 @@ else:
 # plot raw data
 #################################
 if b_plot_raw_dateset == True:
-    ## plot the aluminum hold task raw data
-    plt.figure(0)
-    for ch_ex in range(4):
-       plt.subplot(411+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]['imu'][:, ch_ex])), dataset_aluminum_hold[idx]['imu'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_imu_raw.eps', format='eps');pl.savefig('./fig/aluminum_hold_imu_raw.pdf', format='pdf')
-    plt.figure(1)
-    for ch_ex in range(8):
-       plt.subplot(421+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]['emg'][:, ch_ex])), dataset_aluminum_hold[idx]['emg'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_emg_raw.eps', format='eps');pl.savefig('./fig/aluminum_hold_emg_raw.pdf', format='pdf')
-    plt.figure(2)
-    for ch_ex in range(7):
-       plt.subplot(711+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]['pose'][:, ch_ex])), dataset_aluminum_hold[idx]['pose'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_pose_raw.eps', format='eps');pl.savefig('./fig/aluminum_hold_pose_raw.pdf', format='pdf')
-    ## plot the spanner handover task raw data
-    plt.figure(10)
-    for ch_ex in range(4):
-       plt.subplot(411 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]['imu'][:, ch_ex])), dataset_spanner_handover[idx]['imu'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/spanner_handover_imu_raw.eps', format='eps');pl.savefig('./fig/spanner_handover_imu_raw.pdf', format='pdf')
-    plt.figure(11)
-    for ch_ex in range(8):
-       plt.subplot(421 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]['emg'][:, ch_ex])), dataset_spanner_handover[idx]['emg'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/spanner_handover_emg_raw.eps', format='eps');pl.savefig('./fig/spanner_handover_emg_raw.pdf', format='pdf')
-    plt.figure(12)
-    for ch_ex in range(7):
-       plt.subplot(711 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]['pose'][:, ch_ex])), dataset_spanner_handover[idx]['pose'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/spanner_handover_pose_raw.eps', format='eps');pl.savefig('./fig/spanner_handover_pose_raw.pdf', format='pdf')
-    ## plot the tape hold task raw data
-    plt.figure(20)
-    for ch_ex in range(4):
-       plt.subplot(411 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]['imu'][:, ch_ex])), dataset_tape_hold[idx]['imu'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/tape_hold_imu_raw.eps', format='eps');pl.savefig('./fig/tape_hold_imu_raw.pdf', format='pdf')
-    plt.figure(21)
-    for ch_ex in range(8):
-       plt.subplot(421 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]['emg'][:, ch_ex])), dataset_tape_hold[idx]['emg'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/tape_hold_emg_raw.eps', format='eps');pl.savefig('./fig/tape_hold_emg_raw.pdf', format='pdf')
-    plt.figure(22)
-    for ch_ex in range(7):
-       plt.subplot(711 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]['pose'][:, ch_ex])), dataset_tape_hold[idx]['pose'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/tape_hold_pose_raw.eps', format='eps');pl.savefig('./fig/tape_hold_pose_raw.pdf', format='pdf')
+    # ## plot the aluminum hold task raw data
+    # plt.figure(0)
+    # for ch_ex in range(4):
+    #    plt.subplot(411+ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_aluminum_hold[idx]['imu'][:, ch_ex])), dataset_aluminum_hold[idx]['imu'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/aluminum_hold_imu_raw.eps', format='eps');# pl.savefig('./fig/aluminum_hold_imu_raw.pdf', format='pdf')
+    # plt.figure(1)
+    # for ch_ex in range(8):
+    #    plt.subplot(421+ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_aluminum_hold[idx]['emg'][:, ch_ex])), dataset_aluminum_hold[idx]['emg'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/aluminum_hold_emg_raw.eps', format='eps');# pl.savefig('./fig/aluminum_hold_emg_raw.pdf', format='pdf')
+    # plt.figure(2)
+    # for ch_ex in range(7):
+    #    plt.subplot(711+ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_aluminum_hold[idx]['pose'][:, ch_ex])), dataset_aluminum_hold[idx]['pose'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/aluminum_hold_pose_raw.eps', format='eps');# pl.savefig('./fig/aluminum_hold_pose_raw.pdf', format='pdf')
+    # ## plot the spanner handover task raw data
+    # plt.figure(10)
+    # for ch_ex in range(4):
+    #    plt.subplot(411 + ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_spanner_handover[idx]['imu'][:, ch_ex])), dataset_spanner_handover[idx]['imu'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/spanner_handover_imu_raw.eps', format='eps');# pl.savefig('./fig/spanner_handover_imu_raw.pdf', format='pdf')
+    # plt.figure(11)
+    # for ch_ex in range(8):
+    #    plt.subplot(421 + ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_spanner_handover[idx]['emg'][:, ch_ex])), dataset_spanner_handover[idx]['emg'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/spanner_handover_emg_raw.eps', format='eps');# pl.savefig('./fig/spanner_handover_emg_raw.pdf', format='pdf')
+    # plt.figure(12)
+    # for ch_ex in range(7):
+    #    plt.subplot(711 + ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_spanner_handover[idx]['pose'][:, ch_ex])), dataset_spanner_handover[idx]['pose'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/spanner_handover_pose_raw.eps', format='eps');# pl.savefig('./fig/spanner_handover_pose_raw.pdf', format='pdf')
+    # ## plot the tape hold task raw data
+    # plt.figure(20)
+    # for ch_ex in range(4):
+    #    plt.subplot(411 + ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_tape_hold[idx]['imu'][:, ch_ex])), dataset_tape_hold[idx]['imu'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/tape_hold_imu_raw.eps', format='eps');# pl.savefig('./fig/tape_hold_imu_raw.pdf', format='pdf')
+    # plt.figure(21)
+    # for ch_ex in range(8):
+    #    plt.subplot(421 + ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_tape_hold[idx]['emg'][:, ch_ex])), dataset_tape_hold[idx]['emg'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/tape_hold_emg_raw.eps', format='eps');# pl.savefig('./fig/tape_hold_emg_raw.pdf', format='pdf')
+    # plt.figure(22)
+    # for ch_ex in range(7):
+    #    plt.subplot(711 + ch_ex)
+    #    for idx in range(num_demos):
+    #        plt.plot(range(len(dataset_tape_hold[idx]['pose'][:, ch_ex])), dataset_tape_hold[idx]['pose'][:, ch_ex]); plt.axis('off')
+    # # pl.savefig('./fig/tape_hold_pose_raw.eps', format='eps');# pl.savefig('./fig/tape_hold_pose_raw.pdf', format='pdf')
 
+    fig = plt.figure()
+    for ch_ex in range(num_joints):
+        ax = plt.subplot(num_joints*100+10 + ch_ex)
+        for idx in range(num_demos):
+            ax.plot(range(len(dataset_aluminum_hold[idx]['imu'][:, ch_ex])),
+                     dataset_aluminum_hold[idx]['imu'][:, ch_ex]);
 
 #################################
 # plot normalized data
@@ -279,7 +285,7 @@ if b_plot_norm_dateset == True:
         for idx in range(num_demos):
             plt.plot(ipromp_aluminum_hold.x, dataset_aluminum_hold_norm[idx]['imu'][:, ch_ex]/sf_imu, linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_imu_norm.eps', format='eps');pl.savefig('./fig/aluminum_hold_imu_norm.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_imu_norm.eps', format='eps');# pl.savefig('./fig/aluminum_hold_imu_norm.pdf', format='pdf')
     plt.figure(51)
     for ch_ex in range(8):
         plt.subplot(421 + ch_ex)
@@ -287,7 +293,7 @@ if b_plot_norm_dateset == True:
             plt.plot(ipromp_aluminum_hold.x,
                      dataset_aluminum_hold_norm[idx]['emg'][:, ch_ex]/sf_emg,   linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_emg_norm.eps', format='eps');pl.savefig('./fig/aluminum_hold_emg_norm.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_emg_norm.eps', format='eps');# pl.savefig('./fig/aluminum_hold_emg_norm.pdf', format='pdf')
     plt.figure(52)
     for ch_ex in range(7):
         plt.subplot(711 + ch_ex)
@@ -295,7 +301,7 @@ if b_plot_norm_dateset == True:
             plt.plot(ipromp_aluminum_hold.x,
                      dataset_aluminum_hold_norm[idx]['pose'][:, ch_ex]/sf_pose,   linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_pose_norm.eps', format='eps');pl.savefig('./fig/aluminum_hold_pose_norm.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_pose_norm.eps', format='eps');# pl.savefig('./fig/aluminum_hold_pose_norm.pdf', format='pdf')
     ## plot the spanner handover task raw data
     plt.figure(60)
     for ch_ex in range(4):
@@ -304,7 +310,7 @@ if b_plot_norm_dateset == True:
             plt.plot(ipromp_spanner_handover.x,
                      dataset_spanner_handover_norm[idx]['imu'][:, ch_ex]/sf_imu,   linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/spanner_handover_imu_norm.eps', format='eps');pl.savefig('./fig/spanner_handover_imu_norm.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_imu_norm.eps', format='eps');# pl.savefig('./fig/spanner_handover_imu_norm.pdf', format='pdf')
     plt.figure(61)
     for ch_ex in range(8):
         plt.subplot(421 + ch_ex)
@@ -312,7 +318,7 @@ if b_plot_norm_dateset == True:
             plt.plot(ipromp_spanner_handover.x,
                      dataset_spanner_handover_norm[idx]['emg'][:, ch_ex]/sf_emg,   linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/spanner_handover_emg_norm.eps', format='eps');pl.savefig('./fig/spanner_handover_emg_norm.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_emg_norm.eps', format='eps');# pl.savefig('./fig/spanner_handover_emg_norm.pdf', format='pdf')
     plt.figure(62)
     for ch_ex in range(7):
         plt.subplot(711 + ch_ex)
@@ -320,7 +326,7 @@ if b_plot_norm_dateset == True:
             plt.plot(ipromp_spanner_handover.x,
                      dataset_spanner_handover_norm[idx]['pose'][:, ch_ex]/sf_pose,   linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/spanner_handover_pose_norm.eps', format='eps');pl.savefig('./fig/spanner_handover_pose_norm.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_pose_norm.eps', format='eps');# pl.savefig('./fig/spanner_handover_pose_norm.pdf', format='pdf')
     ## plot the tape hold task raw data
     plt.figure(70)
     for ch_ex in range(4):
@@ -328,14 +334,14 @@ if b_plot_norm_dateset == True:
         for idx in range(num_demos):
             plt.plot(ipromp_tape_hold.x, dataset_tape_hold_norm[idx]['imu'][:, ch_ex]/sf_imu,   linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/tape_hold_imu_norm.eps', format='eps');pl.savefig('./fig/tape_hold_imu_norm.pdf', format='pdf')
+    # pl.savefig('./fig/tape_hold_imu_norm.eps', format='eps');# pl.savefig('./fig/tape_hold_imu_norm.pdf', format='pdf')
     plt.figure(71)
     for ch_ex in range(8):
         plt.subplot(421 + ch_ex)
         for idx in range(num_demos):
             plt.plot(ipromp_tape_hold.x, dataset_tape_hold_norm[idx]['emg'][:, ch_ex]/sf_emg,   linewidth=1);
             plt.axis('off')
-    pl.savefig('./fig/tape_hold_emg_norm.eps', format='eps');pl.savefig('./fig/tape_hold_emg_norm.pdf', format='pdf')
+    # pl.savefig('./fig/tape_hold_emg_norm.eps', format='eps');# pl.savefig('./fig/tape_hold_emg_norm.pdf', format='pdf')
     plt.figure(72)
     for ch_ex in range(7):
         plt.subplot(711 + ch_ex)
@@ -343,7 +349,7 @@ if b_plot_norm_dateset == True:
             plt.plot(ipromp_tape_hold.x,
                      dataset_tape_hold_norm[idx]['pose'][:, ch_ex]/sf_pose,   linewidth=1);
             plt.axis('off')
-            pl.savefig('./fig/tape_hold_pose_norm.eps', format='eps');pl.savefig('./fig/tape_hold_pose_norm.pdf', format='pdf')
+            # pl.savefig('./fig/tape_hold_pose_norm.eps', format='eps');# pl.savefig('./fig/tape_hold_pose_norm.pdf', format='pdf')
 
 
 #################################
@@ -355,49 +361,49 @@ if b_plot_prior_distribution == True:
     for i in range(4):
         plt.subplot(411+i)
         ipromp_aluminum_hold.promps[i].plot_prior(color='b', legend='alumnium hold model, imu'); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_imu_prior.eps', format='eps'); pl.savefig('./fig/aluminum_hold_imu_prior.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_imu_prior.eps', format='eps'); # pl.savefig('./fig/aluminum_hold_imu_prior.pdf', format='pdf')
     plt.figure(51)
     for i in range(8):
         plt.subplot(421+i)
         ipromp_aluminum_hold.promps[4+i].plot_prior(color='y', legend='alumnium hold model, emg');plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_emg_prior.eps', format='eps'); pl.savefig('./fig/aluminum_hold_emg_prior.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_emg_prior.eps', format='eps'); # pl.savefig('./fig/aluminum_hold_emg_prior.pdf', format='pdf')
     plt.figure(52)
     for i in range(7):
         plt.subplot(711+i)
         ipromp_aluminum_hold.promps[4+8+i].plot_prior(color='r', legend='alumnium hold model, pose');plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_pose_prior.eps', format='eps'); pl.savefig('./fig/aluminum_hold_pose_prior.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_pose_prior.eps', format='eps'); # pl.savefig('./fig/aluminum_hold_pose_prior.pdf', format='pdf')
     # plot ipromp_spanner_handover
     plt.figure(60)
     for i in range(4):
         plt.subplot(411+i)
         ipromp_spanner_handover.promps[i].plot_prior(color='b', legend='spanner handover model, imu');plt.axis('off')
-    pl.savefig('./fig/spanner_handover_imu_prior.eps', format='eps'); pl.savefig('./fig/spanner_handover_imu_prior.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_imu_prior.eps', format='eps'); # pl.savefig('./fig/spanner_handover_imu_prior.pdf', format='pdf')
     plt.figure(61)
     for i in range(8):
         plt.subplot(421+i)
         ipromp_spanner_handover.promps[4+i].plot_prior(color='y', legend='spanner handover model, emg');plt.axis('off')
-    pl.savefig('./fig/spanner_handover_emg_prior.eps', format='eps'); pl.savefig('./fig/spanner_handover_emg_prior.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_emg_prior.eps', format='eps'); # pl.savefig('./fig/spanner_handover_emg_prior.pdf', format='pdf')
     plt.figure(62)
     for i in range(7):
         plt.subplot(711+i)
         ipromp_spanner_handover.promps[4+8+i].plot_prior(color='r', legend='spanner handover model, pose');plt.axis('off')
-    pl.savefig('./fig/spanner_handover_pose_prior.eps', format='eps'); pl.savefig('./fig/spanner_handover_pose_prior.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_pose_prior.eps', format='eps'); # pl.savefig('./fig/spanner_handover_pose_prior.pdf', format='pdf')
     # plot ipromp_tape_hold
     plt.figure(70)
     for i in range(4):
         plt.subplot(411+i)
         ipromp_tape_hold.promps[i].plot_prior(color='b', legend='tape hold model, imu');plt.axis('off')
-    pl.savefig('./fig/tape_hold_imu_prior.eps', format='eps'); pl.savefig('./fig/tape_hold_imu_prior.pdf', format='pdf')
+    # pl.savefig('./fig/tape_hold_imu_prior.eps', format='eps'); # pl.savefig('./fig/tape_hold_imu_prior.pdf', format='pdf')
     plt.figure(71)
     for i in range(8):
         plt.subplot(421+i)
         ipromp_tape_hold.promps[4+i].plot_prior(color='y', legend='tape hold model, emg');plt.axis('off')
-    pl.savefig('./fig/tape_hold_emg_prior.eps', format='eps'); pl.savefig('./fig/tape_hold_emg_prior.pdf', format='pdf')
+    # pl.savefig('./fig/tape_hold_emg_prior.eps', format='eps'); # pl.savefig('./fig/tape_hold_emg_prior.pdf', format='pdf')
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
-        ipromp_tape_hold.promps[4+8+i].plot(color='r', legend='tape hold model, pose');plt.axis('off')
-    pl.savefig('./fig/tape_hold_pose_prior.eps', format='eps'); pl.savefig('./fig/tape_hold_pose_prior.pdf', format='pdf')
+        ipromp_tape_hold.promps[4+8+i].plot_prior(color='r', legend='tape hold model, pose');plt.axis('off')
+    # pl.savefig('./fig/tape_hold_pose_prior.eps', format='eps'); # pl.savefig('./fig/tape_hold_pose_prior.pdf', format='pdf')
 
 
 #################################
@@ -410,57 +416,57 @@ if b_plot_update_distribution == True:
         plt.subplot(411+i)
         # plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
         ipromp_aluminum_hold.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/aluminum_hold_imu_post.eps', format='eps');pl.savefig('./fig/aluminum_hold_imu_post.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_imu_post.eps', format='eps');# pl.savefig('./fig/aluminum_hold_imu_post.pdf', format='pdf')
     plt.figure(51)
     for i in range(8):
         plt.subplot(421+i)
         # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend();
         ipromp_aluminum_hold.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/aluminum_hold_emg_post.eps', format='eps');pl.savefig('./fig/aluminum_hold_emg_post.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_emg_post.eps', format='eps');# pl.savefig('./fig/aluminum_hold_emg_post.pdf', format='pdf')
     plt.figure(52)
     for i in range(7):
         plt.subplot(711+i)
         # plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
         ipromp_aluminum_hold.promps[4+8+i].plot_nUpdated(color='g', legend='updated distribution', via_show=False); plt.legend();
-    pl.savefig('./fig/aluminum_hold_pose_post.eps', format='eps');pl.savefig('./fig/aluminum_hold_pose_post.pdf', format='pdf')
+    # pl.savefig('./fig/aluminum_hold_pose_post.eps', format='eps');# pl.savefig('./fig/aluminum_hold_pose_post.pdf', format='pdf')
     # plot ipromp_spanner_handover
     plt.figure(60)
     for i in range(4):
         plt.subplot(411+i)
         # plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_spanner_handover.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/spanner_handover_imu_post.eps', format='eps');pl.savefig('./fig/spanner_handover_imu_post.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_imu_post.eps', format='eps');# pl.savefig('./fig/spanner_handover_imu_post.pdf', format='pdf')
     plt.figure(61)
     for i in range(8):
         plt.subplot(421+i)
         # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_spanner_handover.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/spanner_handover_emg_post.eps', format='eps');pl.savefig('./fig/spanner_handover_emg_post.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_emg_post.eps', format='eps');# pl.savefig('./fig/spanner_handover_emg_post.pdf', format='pdf')
     plt.figure(62)
     for i in range(7):
         plt.subplot(711+i)
         # plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_spanner_handover.promps[4+8+i].plot_nUpdated(color='g', legend='updated distribution', via_show=False); plt.legend();
-    pl.savefig('./fig/spanner_handover_pose_post.eps', format='eps');pl.savefig('./fig/spanner_handover_pose_post.pdf', format='pdf')
+    # pl.savefig('./fig/spanner_handover_pose_post.eps', format='eps');# pl.savefig('./fig/spanner_handover_pose_post.pdf', format='pdf')
     # plot ipromp_tape_hold
     plt.figure(70)
     for i in range(4):
         plt.subplot(411+i)
         # plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_tape_hold.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/tape_hold_imu_post.eps', format='eps');pl.savefig('./fig/tape_hold_imu_post.pdf', format='pdf')
+    # pl.savefig('./fig/tape_hold_imu_post.eps', format='eps');# pl.savefig('./fig/tape_hold_imu_post.pdf', format='pdf')
     plt.figure(71)
     for i in range(8):
         plt.subplot(421+i)
         # plt.plot(ipromp_tape_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_tape_hold.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/tape_hold_emg_post.eps', format='eps');pl.savefig('./fig/tape_hold_emg_post.pdf', format='pdf')
+    # pl.savefig('./fig/tape_hold_emg_post.eps', format='eps');# pl.savefig('./fig/tape_hold_emg_post.pdf', format='pdf')
     plt.figure(72)
     for i in range(7):
         plt.subplot(711+i)
         # plt.plot(ipromp_tape_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
         ipromp_tape_hold.promps[4+8+i].plot_nUpdated(color='g', legend='updated distribution', via_show=False); plt.legend();
-    pl.savefig('./fig/tape_hold_pose_post.eps', format='eps');pl.savefig('./fig/tape_hold_pose_post.pdf', format='pdf')
+    # pl.savefig('./fig/tape_hold_pose_post.eps', format='eps');# pl.savefig('./fig/tape_hold_pose_post.pdf', format='pdf')
 
 
 #################################
@@ -513,6 +519,6 @@ if b_plot_phase_distribution == True:
     plt.plot(candidate_x, prob, linewidth=0, color='g', marker='o', markersize=14);
     print("the tape_hold alpha mean is ", hmean)
     print("the tape_hold alpha std is hmean", hstd)
-    pl.savefig('./fig/phase_distribution.eps', format='eps');pl.savefig('./fig/phase_distribution.pdf', format='pdf')
+    # pl.savefig('./fig/phase_distribution.eps', format='eps');# pl.savefig('./fig/phase_distribution.pdf', format='pdf')
 
 plt.show()

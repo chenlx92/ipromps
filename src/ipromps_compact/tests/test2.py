@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
-import ipromps_lib
+import ipromps_compact.ipromps_lib
 import scipy.linalg
 from sklearn.externals import joblib
 
@@ -26,7 +26,7 @@ emg_noise = 2.0
 pose_noise = 1.0
 # phase estimation para
 num_alpha_candidate = 10
-states_refresh_rate = 50.0
+states_rate = 50.0
 nominal_duration = 1.0
 # scaling factor for data
 sf_imu = 1000.0
@@ -42,16 +42,16 @@ b_plot_update_distribution = False
 #################################
 # load raw date sets
 #################################
-dataset_aluminum_hold = joblib.load('./pkl/dataset_aluminum_hold.pkl')
-dataset_spanner_handover = joblib.load('./pkl/dataset_spanner_handover.pkl')
-dataset_tape_hold = joblib.load('./pkl/dataset_tape_hold.pkl')
+dataset_aluminum_hold = joblib.load('./datasets/pkl/dataset_aluminum_hold.pkl')
+dataset_spanner_handover = joblib.load('./datasets/pkl/dataset_spanner_handover.pkl')
+dataset_tape_hold = joblib.load('./datasets/pkl/dataset_tape_hold.pkl')
 
 #################################
 # load norm date sets
 #################################
-dataset_aluminum_hold_norm = joblib.load('./pkl/dataset_aluminum_hold_norm.pkl')
-dataset_spanner_handover_norm = joblib.load('./pkl/dataset_spanner_handover_norm.pkl')
-dataset_tape_hold_norm = joblib.load('./pkl/dataset_tape_hold_norm.pkl')
+dataset_aluminum_hold_norm = joblib.load('./datasets/pkl/dataset_aluminum_hold_norm.pkl')
+dataset_spanner_handover_norm = joblib.load('./datasets/pkl/dataset_spanner_handover_norm.pkl')
+dataset_tape_hold_norm = joblib.load('./datasets/pkl/dataset_tape_hold_norm.pkl')
 
 
 #################################
@@ -62,8 +62,8 @@ imu_meansurement_noise_cov = np.eye(4) * imu_noise
 pose_meansurement_noise_cov = np.eye(7) * pose_noise
 meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov, pose_meansurement_noise_cov)
 # create a 3 tasks iProMP
-ipromp_tape_hold = ipromps_lib.NDProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
-                                       num_samples=num_samples, sigmay=meansurement_noise_cov_full)
+ipromp_tape_hold = ipromps_compact.ipromps_lib.NDProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
+                                                       num_samples=num_samples, sigmay=meansurement_noise_cov_full)
 
 # add demostration
 for idx in range(0, num_demos):
