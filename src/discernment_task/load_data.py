@@ -69,7 +69,7 @@ for i in range(len(file_prefix_aluminum_hold)):
     imu_points = np.arange(len(dataset_aluminum_hold[i]["imu"]))
     imu_grid = np.linspace(0, len(dataset_aluminum_hold[i]["imu"]) - 1, len_normal)
     imu_norm = griddata(imu_points, dataset_aluminum_hold[i]["imu"], imu_grid, method='linear')
-    ## resampling for emg
+    ## resampling for pose
     pose_points = np.arange(len(dataset_aluminum_hold[i]["pose"]))
     pose_grid = np.linspace(0, len(dataset_aluminum_hold[i]["pose"]) - 1, len_normal)
     pose_norm = griddata(pose_points, dataset_aluminum_hold[i]["pose"], pose_grid, method='linear')
@@ -87,7 +87,7 @@ for i in range(len(file_prefix_spanner_handover)):
     imu_points = np.arange(len(dataset_spanner_handover[i]["imu"]))
     imu_grid = np.linspace(0, len(dataset_spanner_handover[i]["imu"]) - 1, len_normal)
     imu_norm = griddata(imu_points, dataset_spanner_handover[i]["imu"], imu_grid, method='linear')
-    ## resampling for emg
+    ## resampling for pose
     pose_points = np.arange(len(dataset_spanner_handover[i]["pose"]))
     pose_grid = np.linspace(0, len(dataset_spanner_handover[i]["pose"]) - 1, len_normal)
     pose_norm = griddata(pose_points, dataset_spanner_handover[i]["pose"], pose_grid, method='linear')
@@ -105,7 +105,7 @@ for i in range(len(file_prefix_tape_hold)):
     imu_points = np.arange(len(dataset_tape_hold[i]["imu"]))
     imu_grid = np.linspace(0, len(dataset_tape_hold[i]["imu"]) - 1, len_normal)
     imu_norm = griddata(imu_points, dataset_tape_hold[i]["imu"], imu_grid, method='linear')
-    ## resampling for emg
+    ## resampling for pose
     pose_points = np.arange(len(dataset_tape_hold[i]["pose"]))
     pose_grid = np.linspace(0, len(dataset_tape_hold[i]["pose"]) - 1, len_normal)
     pose_norm = griddata(pose_points, dataset_tape_hold[i]["pose"], pose_grid, method='linear')

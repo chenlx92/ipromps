@@ -36,8 +36,8 @@ sf_pose = 0.1
 
 # plot options
 b_plot_raw_dateset = False
-b_plot_prior_distribution = False
-b_plot_update_distribution = False
+b_plot_prior_distribution = True
+b_plot_update_distribution = True
 b_plot_phase_distribution = False
 
 
