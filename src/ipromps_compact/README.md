@@ -11,5 +11,5 @@ This package is the implement of Interaction ProMP described [here](http://www.a
 
 # exaple
 `load_data.py` : load the data from csv file and resample the time sequence as same duration
-`train_offline`: train the Interaction ProMPs from the demonstrations
-`test_online`: test the trained models 
+`train_offline.py`: train the Interaction ProMPs from the demonstrations
+`test_online.py`: test the trained models 
