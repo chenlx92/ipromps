@@ -1,493 +1,199 @@
 #!/usr/bin/python
-# Filename: imu_emg_pose_test_compact.py
 
-from __future__ import print_function
-
+import rospy
+from states_manager.msg import multiModal
 import numpy as np
-import matplotlib.pyplot as plt
-import ipromps_lib
-import scipy.linalg
-# from scipy.stats import entropy
-# import rospy
+import threading
+import scipy.signal as signal
+import baxter_interface
+from baxter_interface import CHECK_VERSION
 from sklearn.externals import joblib
-import scipy.stats as stats
-import pylab as pl
+import time
+import sys
+import os
+from sklearn.externals import joblib
+import matplotlib.pyplot as plt
 
-from optparse import OptionParser
-parser = OptionParser()
-parser.add_option("-t", "--tdbk", action="store",
-                  dest="task_id",
-                  default=0,
-                  help="the index of demo in dataset")
-parser.add_option("-i", "--idbk", action="store",
-                  dest="idx_demo",
-                  default=0,
-                  help="the index of demo in dataset")
-(options, args) = parser.parse_args()
-task_id = np.int(options.task_id)
-idx_demo = np.int(options.idx_demo)
+path = '/../datasets/handover_20171128/pkl'
+num_alpha_candidate = 5
+timer_interval = 0.8
+ready_time = 2
 
-plt.close('all')    # close all windows
-
-# parameter of model
-num_demos = 20         # number of trajectoreis for training
-obs_duration = 0.08
-num_joints=19
-num_basis=31
-sigma_basis=0.05
-num_samples=101
-num_obs_joints=12
-# measurement noise
-imu_noise = 1.0
-emg_noise = 2.0
-pose_noise = 1.0
-# phase estimation para
-num_alpha_candidate = 10
-nominal_duration = 1.0
-nominal_interval = nominal_duration / (num_samples-1)
-states_rate = 50.0
-# preprocessing: scaling factor for data
-sf_imu = 1000.0
-sf_emg = 100.0
-sf_pose = 0.1
-
-# plot options
-b_plot_raw_dateset = False
-b_plot_norm_dateset = False
-b_plot_prior_distribution = False
-b_plot_update_distribution = False
-b_plot_phase_distribution = True
+###########################
 
 
-#################################
-# load raw date sets
-#################################
-dataset_aluminum_hold = joblib.load('./pkl/dataset_aluminum_hold.pkl')
-dataset_spanner_handover = joblib.load('./pkl/dataset_spanner_handover.pkl')
-dataset_tape_hold = joblib.load('./pkl/dataset_tape_hold.pkl')
-#################################
-# load norm date sets
-#################################
-dataset_aluminum_hold_norm = joblib.load('./pkl/dataset_aluminum_hold_norm.pkl')
-dataset_spanner_handover_norm = joblib.load('./pkl/dataset_spanner_handover_norm.pkl')
-dataset_tape_hold_norm = joblib.load('./pkl/dataset_tape_hold_norm.pkl')
+def make_command(line):
+    """
+    cleans a single line of recorded joint positions
+    :param line: the line described in a list to process
+    :return: the list cmd
+    """
+    joint_cmd_names = ['left_s0', 'left_s1', 'left_e0', 'left_e1', 'left_w0', 'left_w1', 'left_w2']
+    data_line = [line[0][2], line[0][3], line[0][0], line[0][1], line[0][4], line[0][5], line[0][6]]
+    command = dict(zip(joint_cmd_names, data_line))
+    return command
 
 
-#################################
-# Interaction ProMPs train
-#################################
-# the measurement noise cov matrix
-imu_meansurement_noise_cov = np.eye(4) * imu_noise
-emg_meansurement_noise_cov = np.eye(8) * emg_noise
-pose_meansurement_noise_cov = np.eye(7) * pose_noise
-meansurement_noise_cov_full = scipy.linalg.block_diag(imu_meansurement_noise_cov,
-                                                      emg_meansurement_noise_cov,
-                                                      pose_meansurement_noise_cov)
-# create a 3 tasks iProMP
-ipromp_aluminum_hold = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
-                                          num_samples=num_samples, num_obs_joints=num_obs_joints,
-                                          sigmay=meansurement_noise_cov_full)
-ipromp_spanner_handover = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
-                                             num_samples=num_samples, num_obs_joints=num_obs_joints,
-                                             sigmay=meansurement_noise_cov_full)
-ipromp_tape_hold = ipromps_lib.IProMP(num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis,
-                                      num_samples=num_samples, num_obs_joints=num_obs_joints,
-                                      sigmay=meansurement_noise_cov_full)
+def fun_timer():
+    """
+    the timer callback func
+    :return:
+    """
+    rospy.loginfo('Time out!!!')
+    global flag_record
+    flag_record = False  # stop record the msg
+    global ipromps_set, min_max_scaler, obs_data_list, filt_kernel
+    rospy.loginfo('The len of observed data is %d', len(obs_data_list))
+    obs_data = np.array([]).reshape([0, 18])
+    timestamp = []
+    for obs_data_list_idx in obs_data_list:
+        emg = obs_data_list_idx['emg']
+        left_hand = obs_data_list_idx['left_hand']
+        left_joints = obs_data_list_idx['left_joints']
+        full_data = np.hstack([emg, left_hand, left_joints])
+        obs_data = np.vstack([obs_data, full_data])
+        timestamp.append(obs_data_list_idx['stamp'])
 
-# add demostration
-for idx in range(num_demos):
-    # aluminum_hold
-    demo_temp = np.hstack([dataset_aluminum_hold_norm[idx]['imu']/sf_imu, dataset_aluminum_hold_norm[idx]['emg']/sf_emg])
-    demo_temp = np.hstack([demo_temp, dataset_aluminum_hold_norm[idx]['pose']/sf_pose])
-    ipromp_aluminum_hold.add_demonstration(demo_temp)
-    # spanner_handover
-    demo_temp = np.hstack([dataset_spanner_handover_norm[idx]['imu']/sf_imu, dataset_spanner_handover_norm[idx]['emg']/sf_emg])
-    demo_temp = np.hstack([demo_temp, dataset_spanner_handover_norm[idx]['pose']/sf_pose])
-    ipromp_spanner_handover.add_demonstration(demo_temp)
-    # tape_hold
-    demo_temp = np.hstack([dataset_tape_hold_norm[idx]['imu']/sf_imu, dataset_tape_hold_norm[idx]['emg']/sf_emg])
-    demo_temp = np.hstack([demo_temp, dataset_tape_hold_norm[idx]['pose']/sf_pose])
-    ipromp_tape_hold.add_demonstration(demo_temp)
+    # filter the data
+    obs_data = signal.medfilt(obs_data, filt_kernel)
 
-# model the phase distribution
-for i in range(num_demos):
-    # aluminum_hold
-    alpha = (len(dataset_aluminum_hold[i]['imu']) - 1) / states_rate / nominal_duration
-    ipromp_aluminum_hold.add_alpha(alpha)
-    # spanner_handover
-    alpha = (len(dataset_spanner_handover[i]['imu']) - 1) / states_rate / nominal_duration
-    ipromp_spanner_handover.add_alpha(alpha)
-    # tape_hold
-    alpha = (len(dataset_tape_hold[i]['imu']) - 1) / states_rate / nominal_duration
-    ipromp_tape_hold.add_alpha(alpha)
+    # preprocessing for the data
+    obs_data_post_arr = min_max_scaler.transform(obs_data)
+    # consider the unobserved info
+    obs_data_post_arr[:, 11:19] = 0.0
 
+    # phase estimation
+    rospy.loginfo('Phase estimation...')
+    alpha_max_list = []
+    for ipromp in ipromps_set:
+        alpha_temp = ipromp.alpha_candidate(num_alpha_candidate)
+        idx_max = ipromp.estimate_alpha(alpha_temp, obs_data_post_arr, timestamp)
+        alpha_max_list.append(alpha_temp[idx_max]['candidate'])
 
-################################
-# Interaction ProMPs test
-################################
-# select the testset
-selected_testset = None
-selected_testset = dataset_aluminum_hold[idx_demo] if task_id==0 else selected_testset
-selected_testset = dataset_spanner_handover[idx_demo] if task_id==1 else selected_testset
-selected_testset = dataset_tape_hold[idx_demo] if task_id==2 else selected_testset
-# construct the test set
-test_set = np.hstack((selected_testset['imu'][0:140,:]/sf_imu, selected_testset['emg'][0:140,:]/sf_emg, np.zeros([140, 7])))
-robot_response = selected_testset['pose']/sf_pose
+    # task recognition
+    rospy.loginfo('Adding via points in each trained model...')
+    for task_idx, ipromp in enumerate(ipromps_set):
+        for idx in range(len(obs_data_list)):
+            ipromp.add_viapoint(obs_data_list[idx]['stamp']/alpha_max_list[task_idx], obs_data_post_arr[idx, :])
+        ipromp.param_update(unit_update = False)
+    rospy.loginfo('Computing the likelihood for each model under observations...')
 
-# compute the best fit alpha for each task
-# aluminum_hold
-candidate_aluminum_hold = ipromp_aluminum_hold.alpha_candidate(num_alpha_candidate)
-idx_alpha_aluminum_hold = ipromp_aluminum_hold.estimate_alpha(candidate_aluminum_hold, test_set[0:int(obs_duration*states_rate),:], states_rate)
-# spanner_handover
-candidate_spanner_handover = ipromp_spanner_handover.alpha_candidate(num_alpha_candidate)
-idx_alpha_spanner_handover = ipromp_spanner_handover.estimate_alpha(candidate_spanner_handover, test_set[0:int(obs_duration/states_rate),:], states_rate)
-# tape_hold
-candidate_tape_hold = ipromp_tape_hold.alpha_candidate(num_alpha_candidate)
-idx_alpha_tape_hold = ipromp_tape_hold.estimate_alpha(candidate_tape_hold, test_set[0:int(obs_duration/states_rate),:], states_rate)
+    prob_task = []
+    for ipromp in ipromps_set:
+        prob_task_temp = ipromp.prob_obs()
+        prob_task.append(prob_task_temp)
+    idx_max_pro = np.argmax(prob_task)
+    rospy.loginfo('The max fit model index is task %d', idx_max_pro)
 
-# add via points to update the distribution
-for idx in range(int(obs_duration/states_rate)):
-    ipromp_aluminum_hold.add_viapoint(idx/states_rate/alpha, test_set[idx, :])
-    ipromp_spanner_handover.add_viapoint(idx/states_rate/alpha, test_set[idx, :])
-    ipromp_tape_hold.add_viapoint(idx/states_rate/alpha, test_set[idx, :])
+    # robot motion generation
+    [traj_time, traj] = ipromps_set[idx_max_pro].gen_real_traj(alpha_max_list[idx_max_pro])
+    traj = min_max_scaler.inverse_transform(traj)
+    robot_traj = traj[:, 11:18]
 
-# the model info
-# print('the number of demonstration is ',num_demos)
-# print('the number of observation is ', obs_ratio*nominal_interval)
+    # # compute the time cost for the response
+    # finished_time = rospy.Time.now()
+    # time_resp = (finished_time - init_time)
+    # rospy.loginfo('The time cost for robot response is %f', time_resp.secs+time_resp.nsecs*1e-9)
 
-# likelihood of observation
-prob_aluminum_hold = ipromp_aluminum_hold.prob_obs()
-print('from obs, the log pro of aluminum_hold is', prob_aluminum_hold)
-##
-prob_spanner_handover = ipromp_spanner_handover.prob_obs()
-print('from obs, the log pro of spanner_handover is', prob_spanner_handover)
-##
-prob_tape_hold = ipromp_tape_hold.prob_obs()
-print('from obs, the log pro of tape_hold is', prob_tape_hold)
+    # robot start point
+    global left
+    rospy.loginfo('Moving to start position...')
+    left_start = make_command(robot_traj)
+    left.move_to_joint_positions(left_start)
 
-idx_max_pro = np.argmax([prob_aluminum_hold, prob_spanner_handover, prob_tape_hold])
-if idx_max_pro == task_id:
-    print("OK, you are right!!!")
-else:
-    print("Sorry, you are wrong!!!, for %d", idx_max_pro)
-# if idx_max_pro == 0:
-#     print('the obs comes from aluminum_hold')
-# elif idx_max_pro == 1:
-#     print('the obs comes from spanner_handover')
-# elif idx_max_pro == 2:
-#     print('the obs comes from tape_hold')
+    # move the robot along the trajectory
+    robot_traj_temp = robot_traj
+    rospy.loginfo('Moving along the trajectory...')
+    start_time = rospy.get_time()
+    for t in range(len(traj_time)):
+        l_cmd = make_command(robot_traj_temp)
+        robot_traj_temp = np.delete(robot_traj_temp, 0, axis=0)
+        while (rospy.get_time()-start_time)<traj_time[t]:
+            left.set_joint_positions(l_cmd)
+    rospy.loginfo('The whole trajectory has been run!')
+    #
+    # rospy.loginfo('Saving the post IProMPs...')
+    # joblib.dump(ipromps_set, current_path+path+'/ipromps_set_post.pkl')
+
+    rospy.loginfo('All finished!!!')
 
 
+def callback(data):
+    if not flag_record:
+        return
+    # emg
+    emg_data = np.array([data.emgStates.ch0, data.emgStates.ch1, data.emgStates.ch2,
+                         data.emgStates.ch3, data.emgStates.ch4, data.emgStates.ch5,
+                         data.emgStates.ch6, data.emgStates.ch7]).reshape([1, 8])
+    # left_hand
+    left_hand = np.array([data.tf_of_interest.transforms[8].transform.translation.x,
+                          data.tf_of_interest.transforms[8].transform.translation.y,
+                          data.tf_of_interest.transforms[8].transform.translation.z]).reshape([1, 3])
+    # left_joints
+    left_joints = np.array(data.jointStates.position[2:9]).reshape([1, 7])
+    left_gripper = np.zeros_like(left_joints)
+
+    global obs_data_list, init_time
+    time_stamp = (data.header.stamp - init_time).secs + (data.header.stamp - init_time).nsecs*1e-9
+    obs_data_list.append({'emg': emg_data,
+                          'left_hand': left_hand,
+                          'left_joints': left_gripper,
+                          'stamp': time_stamp})
+    rospy.loginfo(obs_data_list[-1])
 
 
-#################################
-# plot raw data
-#################################
-if b_plot_raw_dateset == True:
-    ## plot the aluminum hold task raw data
-    plt.figure(0)
-    for ch_ex in range(4):
-       plt.subplot(411+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]['imu'][:, ch_ex])), dataset_aluminum_hold[idx]['imu'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_imu_raw.eps', format='eps');pl.savefig('./fig/aluminum_hold_imu_raw.pdf', format='pdf')
-    plt.figure(1)
-    for ch_ex in range(8):
-       plt.subplot(421+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]['emg'][:, ch_ex])), dataset_aluminum_hold[idx]['emg'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_emg_raw.eps', format='eps');pl.savefig('./fig/aluminum_hold_emg_raw.pdf', format='pdf')
-    plt.figure(2)
-    for ch_ex in range(7):
-       plt.subplot(711+ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_aluminum_hold[idx]['pose'][:, ch_ex])), dataset_aluminum_hold[idx]['pose'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_pose_raw.eps', format='eps');pl.savefig('./fig/aluminum_hold_pose_raw.pdf', format='pdf')
-    ## plot the spanner handover task raw data
-    plt.figure(10)
-    for ch_ex in range(4):
-       plt.subplot(411 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]['imu'][:, ch_ex])), dataset_spanner_handover[idx]['imu'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/spanner_handover_imu_raw.eps', format='eps');pl.savefig('./fig/spanner_handover_imu_raw.pdf', format='pdf')
-    plt.figure(11)
-    for ch_ex in range(8):
-       plt.subplot(421 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]['emg'][:, ch_ex])), dataset_spanner_handover[idx]['emg'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/spanner_handover_emg_raw.eps', format='eps');pl.savefig('./fig/spanner_handover_emg_raw.pdf', format='pdf')
-    plt.figure(12)
-    for ch_ex in range(7):
-       plt.subplot(711 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_spanner_handover[idx]['pose'][:, ch_ex])), dataset_spanner_handover[idx]['pose'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/spanner_handover_pose_raw.eps', format='eps');pl.savefig('./fig/spanner_handover_pose_raw.pdf', format='pdf')
-    ## plot the tape hold task raw data
-    plt.figure(20)
-    for ch_ex in range(4):
-       plt.subplot(411 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]['imu'][:, ch_ex])), dataset_tape_hold[idx]['imu'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/tape_hold_imu_raw.eps', format='eps');pl.savefig('./fig/tape_hold_imu_raw.pdf', format='pdf')
-    plt.figure(21)
-    for ch_ex in range(8):
-       plt.subplot(421 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]['emg'][:, ch_ex])), dataset_tape_hold[idx]['emg'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/tape_hold_emg_raw.eps', format='eps');pl.savefig('./fig/tape_hold_emg_raw.pdf', format='pdf')
-    plt.figure(22)
-    for ch_ex in range(7):
-       plt.subplot(711 + ch_ex)
-       for idx in range(num_demos):
-           plt.plot(range(len(dataset_tape_hold[idx]['pose'][:, ch_ex])), dataset_tape_hold[idx]['pose'][:, ch_ex]); plt.axis('off')
-    pl.savefig('./fig/tape_hold_pose_raw.eps', format='eps');pl.savefig('./fig/tape_hold_pose_raw.pdf', format='pdf')
+def ready_go(count):
+    """
+    the func for press START key and countdown
+    :param count: the time for countdown
+    :return:
+    """
+    global flag_record
+    while not flag_record:
+        input_str = raw_input('Press ENTER to start: ')
+        if '' == input_str:
+            flag_record = True
+    for idx in range(count):
+        time.sleep(1.0)
+        rospy.loginfo('The remaining time: %ds', count-idx-1)
 
 
-#################################
-# plot normalized data
-#################################
-if b_plot_norm_dateset == True:
-    ## plot the aluminum hold task raw data
-    plt.figure(50)
-    for ch_ex in range(4):
-        plt.subplot(411 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_aluminum_hold.x, dataset_aluminum_hold_norm[idx]['imu'][:, ch_ex]/sf_imu, linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_imu_norm.eps', format='eps');pl.savefig('./fig/aluminum_hold_imu_norm.pdf', format='pdf')
-    plt.figure(51)
-    for ch_ex in range(8):
-        plt.subplot(421 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_aluminum_hold.x,
-                     dataset_aluminum_hold_norm[idx]['emg'][:, ch_ex]/sf_emg,   linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_emg_norm.eps', format='eps');pl.savefig('./fig/aluminum_hold_emg_norm.pdf', format='pdf')
-    plt.figure(52)
-    for ch_ex in range(7):
-        plt.subplot(711 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_aluminum_hold.x,
-                     dataset_aluminum_hold_norm[idx]['pose'][:, ch_ex]/sf_pose,   linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_pose_norm.eps', format='eps');pl.savefig('./fig/aluminum_hold_pose_norm.pdf', format='pdf')
-    ## plot the spanner handover task raw data
-    plt.figure(60)
-    for ch_ex in range(4):
-        plt.subplot(411 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_spanner_handover.x,
-                     dataset_spanner_handover_norm[idx]['imu'][:, ch_ex]/sf_imu,   linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/spanner_handover_imu_norm.eps', format='eps');pl.savefig('./fig/spanner_handover_imu_norm.pdf', format='pdf')
-    plt.figure(61)
-    for ch_ex in range(8):
-        plt.subplot(421 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_spanner_handover.x,
-                     dataset_spanner_handover_norm[idx]['emg'][:, ch_ex]/sf_emg,   linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/spanner_handover_emg_norm.eps', format='eps');pl.savefig('./fig/spanner_handover_emg_norm.pdf', format='pdf')
-    plt.figure(62)
-    for ch_ex in range(7):
-        plt.subplot(711 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_spanner_handover.x,
-                     dataset_spanner_handover_norm[idx]['pose'][:, ch_ex]/sf_pose,   linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/spanner_handover_pose_norm.eps', format='eps');pl.savefig('./fig/spanner_handover_pose_norm.pdf', format='pdf')
-    ## plot the tape hold task raw data
-    plt.figure(70)
-    for ch_ex in range(4):
-        plt.subplot(411 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_tape_hold.x, dataset_tape_hold_norm[idx]['imu'][:, ch_ex]/sf_imu,   linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/tape_hold_imu_norm.eps', format='eps');pl.savefig('./fig/tape_hold_imu_norm.pdf', format='pdf')
-    plt.figure(71)
-    for ch_ex in range(8):
-        plt.subplot(421 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_tape_hold.x, dataset_tape_hold_norm[idx]['emg'][:, ch_ex]/sf_emg,   linewidth=1);
-            plt.axis('off')
-    pl.savefig('./fig/tape_hold_emg_norm.eps', format='eps');pl.savefig('./fig/tape_hold_emg_norm.pdf', format='pdf')
-    plt.figure(72)
-    for ch_ex in range(7):
-        plt.subplot(711 + ch_ex)
-        for idx in range(num_demos):
-            plt.plot(ipromp_tape_hold.x,
-                     dataset_tape_hold_norm[idx]['pose'][:, ch_ex]/sf_pose,   linewidth=1);
-            plt.axis('off')
-            pl.savefig('./fig/tape_hold_pose_norm.eps', format='eps');pl.savefig('./fig/tape_hold_pose_norm.pdf', format='pdf')
+if __name__ == '__main__':
 
+    # init node
+    rospy.init_node('online_ipromps_node', anonymous=True)
+    rospy.loginfo('Created the ROS node!')
 
-#################################
-# plot the prior distributioin
-#################################
-if b_plot_prior_distribution == True:
-    # plot ipromp_aluminum_hold
-    plt.figure(50)
-    for i in range(4):
-        plt.subplot(411+i)
-        ipromp_aluminum_hold.promps[i].plot_prior(color='b', legend='alumnium hold model, imu'); plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_imu_prior.eps', format='eps'); pl.savefig('./fig/aluminum_hold_imu_prior.pdf', format='pdf')
-    plt.figure(51)
-    for i in range(8):
-        plt.subplot(421+i)
-        ipromp_aluminum_hold.promps[4+i].plot_prior(color='y', legend='alumnium hold model, emg');plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_emg_prior.eps', format='eps'); pl.savefig('./fig/aluminum_hold_emg_prior.pdf', format='pdf')
-    plt.figure(52)
-    for i in range(7):
-        plt.subplot(711+i)
-        ipromp_aluminum_hold.promps[4+8+i].plot_prior(color='r', legend='alumnium hold model, pose');plt.axis('off')
-    pl.savefig('./fig/aluminum_hold_pose_prior.eps', format='eps'); pl.savefig('./fig/aluminum_hold_pose_prior.pdf', format='pdf')
-    # plot ipromp_spanner_handover
-    plt.figure(60)
-    for i in range(4):
-        plt.subplot(411+i)
-        ipromp_spanner_handover.promps[i].plot_prior(color='b', legend='spanner handover model, imu');plt.axis('off')
-    pl.savefig('./fig/spanner_handover_imu_prior.eps', format='eps'); pl.savefig('./fig/spanner_handover_imu_prior.pdf', format='pdf')
-    plt.figure(61)
-    for i in range(8):
-        plt.subplot(421+i)
-        ipromp_spanner_handover.promps[4+i].plot_prior(color='y', legend='spanner handover model, emg');plt.axis('off')
-    pl.savefig('./fig/spanner_handover_emg_prior.eps', format='eps'); pl.savefig('./fig/spanner_handover_emg_prior.pdf', format='pdf')
-    plt.figure(62)
-    for i in range(7):
-        plt.subplot(711+i)
-        ipromp_spanner_handover.promps[4+8+i].plot_prior(color='r', legend='spanner handover model, pose');plt.axis('off')
-    pl.savefig('./fig/spanner_handover_pose_prior.eps', format='eps'); pl.savefig('./fig/spanner_handover_pose_prior.pdf', format='pdf')
-    # plot ipromp_tape_hold
-    plt.figure(70)
-    for i in range(4):
-        plt.subplot(411+i)
-        ipromp_tape_hold.promps[i].plot_prior(color='b', legend='tape hold model, imu');plt.axis('off')
-    pl.savefig('./fig/tape_hold_imu_prior.eps', format='eps'); pl.savefig('./fig/tape_hold_imu_prior.pdf', format='pdf')
-    plt.figure(71)
-    for i in range(8):
-        plt.subplot(421+i)
-        ipromp_tape_hold.promps[4+i].plot_prior(color='y', legend='tape hold model, emg');plt.axis('off')
-    pl.savefig('./fig/tape_hold_emg_prior.eps', format='eps'); pl.savefig('./fig/tape_hold_emg_prior.pdf', format='pdf')
-    plt.figure(72)
-    for i in range(7):
-        plt.subplot(711+i)
-        ipromp_tape_hold.promps[4+8+i].plot(color='r', legend='tape hold model, pose');plt.axis('off')
-    pl.savefig('./fig/tape_hold_pose_prior.eps', format='eps'); pl.savefig('./fig/tape_hold_pose_prior.pdf', format='pdf')
+    # load datasets
+    rospy.loginfo('Loading the datasets...')
+    current_path = os.path.split(os.path.abspath(sys.argv[0]))[0]   # the directory of this script
+    [ipromps_set, datasets4train_post, min_max_scaler, filt_kernel] = joblib.load(current_path+path+'/ipromps_set.pkl')
 
+    # the flag var of starting info record
+    flag_record = False
+    # to save the online data
+    obs_data_list = []
+    # create a timer
+    timer = threading.Timer(timer_interval, fun_timer)
 
-#################################
-# plot the updated distributioin
-#################################
-if b_plot_update_distribution == True:
-    # plot ipromp_aluminum_hold
-    plt.figure(50)
-    for i in range(4):
-        plt.subplot(411+i)
-        # plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/aluminum_hold_imu_post.eps', format='eps');pl.savefig('./fig/aluminum_hold_imu_post.pdf', format='pdf')
-    plt.figure(51)
-    for i in range(8):
-        plt.subplot(421+i)
-        # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/aluminum_hold_emg_post.eps', format='eps');pl.savefig('./fig/aluminum_hold_emg_post.pdf', format='pdf')
-    plt.figure(52)
-    for i in range(7):
-        plt.subplot(711+i)
-        # plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend();
-        ipromp_aluminum_hold.promps[4+8+i].plot_nUpdated(color='g', legend='updated distribution', via_show=False); plt.legend();
-    pl.savefig('./fig/aluminum_hold_pose_post.eps', format='eps');pl.savefig('./fig/aluminum_hold_pose_post.pdf', format='pdf')
-    # plot ipromp_spanner_handover
-    plt.figure(60)
-    for i in range(4):
-        plt.subplot(411+i)
-        # plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/spanner_handover_imu_post.eps', format='eps');pl.savefig('./fig/spanner_handover_imu_post.pdf', format='pdf')
-    plt.figure(61)
-    for i in range(8):
-        plt.subplot(421+i)
-        # plt.plot(ipromp_aluminum_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/spanner_handover_emg_post.eps', format='eps');pl.savefig('./fig/spanner_handover_emg_post.pdf', format='pdf')
-    plt.figure(62)
-    for i in range(7):
-        plt.subplot(711+i)
-        # plt.plot(ipromp_aluminum_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_spanner_handover.promps[4+8+i].plot_nUpdated(color='g', legend='updated distribution', via_show=False); plt.legend();
-    pl.savefig('./fig/spanner_handover_pose_post.eps', format='eps');pl.savefig('./fig/spanner_handover_pose_post.pdf', format='pdf')
-    # plot ipromp_tape_hold
-    plt.figure(70)
-    for i in range(4):
-        plt.subplot(411+i)
-        # plt.plot(ipromp_aluminum_hold.x, test_set[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/tape_hold_imu_post.eps', format='eps');pl.savefig('./fig/tape_hold_imu_post.pdf', format='pdf')
-    plt.figure(71)
-    for i in range(8):
-        plt.subplot(421+i)
-        # plt.plot(ipromp_tape_hold.x, test_set[:, 4+i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[4+i].plot_nUpdated(color='g', legend='updated distribution', via_show=True); plt.legend();
-    pl.savefig('./fig/tape_hold_emg_post.eps', format='eps');pl.savefig('./fig/tape_hold_emg_post.pdf', format='pdf')
-    plt.figure(72)
-    for i in range(7):
-        plt.subplot(711+i)
-        # plt.plot(ipromp_tape_hold.x, robot_response[:, i], color='r', linewidth=3, label='ground truth'); plt.legend()
-        ipromp_tape_hold.promps[4+8+i].plot_nUpdated(color='g', legend='updated distribution', via_show=False); plt.legend();
-    pl.savefig('./fig/tape_hold_pose_post.eps', format='eps');pl.savefig('./fig/tape_hold_pose_post.pdf', format='pdf')
+    # baxter init
+    rospy.loginfo("Getting robot state... ")
+    rs = baxter_interface.RobotEnable(CHECK_VERSION)
+    init_state = rs.state().enabled
+    rospy.loginfo("Enabling robot... ")
+    rs.enable()
+    left = baxter_interface.Limb('left')
 
+    # the start cmd
+    ready_go(ready_time)
 
-#################################
-# plot the phase distributioin
-#################################
-if b_plot_phase_distribution == True:
-    fig = plt.figure(100)
-    ##
-    plt.subplot(311)
-    h = ipromp_aluminum_hold.alpha
-    h.sort()
-    hmean = np.mean(h)
-    hstd = np.std(h)
-    pdf = stats.norm.pdf(h, hmean, hstd)
-    pl.hist(h,normed=True,color='b')
-    plt.plot(h, pdf, linewidth=5, color='r', marker='o',markersize=10) # including h here is crucial
-    candidate = ipromp_aluminum_hold.alpha_candidate(num_alpha_candidate)
-    candidate_x = [x['candidate'] for x in candidate]
-    prob = [x['prob'] for x in candidate]
-    plt.plot(candidate_x, prob, linewidth=0, color='g', marker='o', markersize=14);
-    print("the aluminum_hold alpha mean is ", hmean)
-    print("the aluminum_hold alpha std is hmean", hstd)
-    ##
-    plt.subplot(312)
-    h = ipromp_spanner_handover.alpha
-    h.sort()
-    hmean = np.mean(h)
-    hstd = np.std(h)
-    pdf = stats.norm.pdf(h, hmean, hstd)
-    pl.hist(h,normed=True,color='b')
-    plt.plot(h, pdf, linewidth=5, color='r', marker='o',markersize=10) # including h here is crucial
-    candidate = ipromp_spanner_handover.alpha_candidate(num_alpha_candidate)
-    candidate_x = [x['candidate'] for x in candidate]
-    prob = [x['prob'] for x in candidate]
-    plt.plot(candidate_x, prob, linewidth=0, color='g', marker='o', markersize=14);
-    print("the spanner_handover alpha mean is ", hmean)
-    print("the spanner_handover alpha std is hmean", hstd)
-    ##
-    plt.subplot(313)
-    h = ipromp_tape_hold.alpha
-    h.sort()
-    hmean = np.mean(h)
-    hstd = np.std(h)
-    pdf = stats.norm.pdf(h, hmean, hstd)
-    pl.hist(h,normed=True,color='b')
-    plt.plot(h, pdf, linewidth=5, color='r', marker='o',markersize=10) # including h here is crucial
-    candidate = ipromp_tape_hold.alpha_candidate(num_alpha_candidate)
-    candidate_x = [x['candidate'] for x in candidate]
-    prob = [x['prob'] for x in candidate]
-    plt.plot(candidate_x, prob, linewidth=0, color='g', marker='o', markersize=14);
-    print("the tape_hold alpha mean is ", hmean)
-    print("the tape_hold alpha std is hmean", hstd)
-    pl.savefig('./fig/phase_distribution.eps', format='eps');pl.savefig('./fig/phase_distribution.pdf', format='pdf')
+    # the init time
+    init_time = rospy.Time.now()
+    # subscribe the /multiModal_states topic
+    rospy.Subscriber("/multiModal_states", multiModal, callback)
 
-plt.show()
+    # start the timer
+    timer.start()
+
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()

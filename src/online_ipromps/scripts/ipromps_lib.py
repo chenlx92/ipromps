@@ -7,7 +7,6 @@ import math
 from scipy.interpolate import interp1d
 import scipy.linalg
 import scipy.stats as stats
-from scipy.interpolate import griddata
 from scipy.stats import multivariate_normal as mvn
 
 
@@ -333,6 +332,11 @@ class NDProMP(object):
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo])
         self.viapoints.append({'t': t, 'obsy': obsys})
 
+    def param_update(self, unit_update):
+        """
+        :param unit_update:
+        :return:
+        """
         new_meanW_full = self.meanW_full
         new_covW_full = self.covW_full
         for viapoint in self.viapoints:
@@ -344,10 +348,13 @@ class NDProMP(object):
             K = np.dot(np.dot(new_covW_full, h_full.T), np.linalg.inv(aux))
             new_meanW_full = new_meanW_full + np.dot(K, y_observed - np.dot(h_full, new_meanW_full))
             new_covW_full = new_covW_full - np.dot(K, np.dot(h_full, new_covW_full))
-            # save the updated distribution for ndpromp
-            self.meanW_full_updated = new_meanW_full
-            self.covW_full_updated = new_covW_full
-            # save the updated distribution for each promp
+
+        # save the updated distribution for ndpromp
+        self.meanW_full_updated = new_meanW_full
+        self.covW_full_updated = new_covW_full
+
+        # save the updated distribution for each promp
+        if unit_update:
             for i in range(self.num_joints):
                 self.promps[i].meanW_nUpdated = new_meanW_full.reshape([self.num_joints,self.num_basis]).T[:,i]
                 self.promps[i].sigmaW_nUpdated = new_covW_full[i*self.num_basis:(1+i)*self.num_basis, i*self.num_basis:(i+1)*self.num_basis]
@@ -402,10 +409,39 @@ class IProMP(NDProMP):
         """
         if len(obsys) != self.num_joints:
             raise ValueError("The given viapoint has {} joints while num_joints={}".format(len(obsys), self.num_joints))
+
         for joint_demo in range(self.num_joints):
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo])
         self.viapoints.append({'t': t, 'obsy': obsys})
 
+        # new_meanW_full = self.meanW_full
+        # new_covW_full = self.covW_full
+        #
+        # for viapoint in self.viapoints:
+        #     h_full = self.obs_mat(viapoint['t'])
+        #     # the observation of specific time
+        #     y_observed = viapoint['obsy'].reshape([self.num_joints, 1])
+        #     # update the distribution
+        #     aux = self.sigmay + np.dot(h_full, np.dot(new_covW_full, h_full.T))
+        #     K = np.dot(np.dot(new_covW_full, h_full.T), np.linalg.inv(aux))
+        #     new_meanW_full = new_meanW_full + np.dot(K, y_observed - np.dot(h_full, new_meanW_full))
+        #     new_covW_full = new_covW_full - np.dot(K, np.dot(h_full, new_covW_full))
+        #
+        # # save the updated distribution for ipromp
+        # self.meanW_full_updated = new_meanW_full
+        # self.covW_full_updated = new_covW_full
+        #
+        # # save the updated distribution for each promp
+        # for i in range(self.num_joints):
+        #     self.promps[i].meanW_nUpdated = new_meanW_full.reshape([self.num_joints, self.num_basis]).T[:, i]
+        #     self.promps[i].sigmaW_nUpdated = new_covW_full[i * self.num_basis:(1 + i) * self.num_basis, i * self.num_basis:(i + 1) * self.num_basis]
+
+    def param_update(self, unit_update):
+        """
+        updated the mean and sigma of w by the via points
+        :param unit_update: the bool option for
+        :return:
+        """
         new_meanW_full = self.meanW_full
         new_covW_full = self.covW_full
         for viapoint in self.viapoints:
@@ -417,13 +453,17 @@ class IProMP(NDProMP):
             K = np.dot(np.dot(new_covW_full, h_full.T), np.linalg.inv(aux))
             new_meanW_full = new_meanW_full + np.dot(K, y_observed - np.dot(h_full, new_meanW_full))
             new_covW_full = new_covW_full - np.dot(K, np.dot(h_full, new_covW_full))
+
         # save the updated distribution for ipromp
         self.meanW_full_updated = new_meanW_full
         self.covW_full_updated = new_covW_full
+
         # save the updated distribution for each promp
-        for i in range(self.num_joints):
-            self.promps[i].meanW_nUpdated = new_meanW_full.reshape([self.num_joints, self.num_basis]).T[:, i]
-            self.promps[i].sigmaW_nUpdated = new_covW_full[i * self.num_basis:(1 + i) * self.num_basis, i * self.num_basis:(i + 1) * self.num_basis]
+        if unit_update:
+            for i in range(self.num_joints):
+                self.promps[i].meanW_nUpdated = new_meanW_full.reshape([self.num_joints, self.num_basis]).T[:, i]
+                self.promps[i].sigmaW_nUpdated = new_covW_full[i * self.num_basis:(1 + i) * self.num_basis,
+                                             i * self.num_basis:(i + 1) * self.num_basis]
 
     def gen_nTrajectory(self, randomness=1e-10):
         """
@@ -432,7 +472,7 @@ class IProMP(NDProMP):
         :return: the mean of predictive distribution
         """
         new_meanW_full = self.meanW_full_updated
-        trajectory = np.dot( self.Phi.T, new_meanW_full.reshape([self.num_joints,self.num_basis]).T )
+        trajectory = np.dot(self.Phi.T, new_meanW_full.reshape([self.num_joints, self.num_basis]).T)
         return trajectory
 
     def prob_obs(self):
@@ -474,52 +514,48 @@ class IProMP(NDProMP):
             alpha_gen.append({'candidate': alpha_candidate[idx_candidate], 'prob': candidate_pdf[idx_candidate]})
         return alpha_gen
 
-    def log_ll_alpha(self, alpha_candidate, obs, rate):
+    def log_ll_alpha(self, alpha_candidate, obs, time):
         """
         compute the alpha candidate log likelihood
         :param alpha_candidate: the alpha candidate
         :param obs: the observations
-        :param rate: the sensor feedback rate
+        :param time: the timestamp
         :return: the alpha candidate log likelihood
         """
         prob_full = 0.0
-        for obs_idx in range(len(obs)):
-            h_full = self.obs_mat(obs_idx/rate/alpha_candidate)
-            mean_t = np.dot(h_full, self.meanW_full)[:,0]
-            cov_t = np.dot(np.dot(h_full, self.covW_full),  h_full.T) + self.sigmay
+        for obs_idx in range(len(time)):
+            h_full = self.obs_mat(time[obs_idx]/alpha_candidate)
+            mean_t = np.dot(h_full, self.meanW_full)[:, 0]
+            cov_t = np.dot(np.dot(h_full, self.covW_full), h_full.T) + self.sigmay
 
             prob = mvn.pdf(obs[obs_idx], mean_t, cov_t)
             log_prob = math.log(prob) if prob != 0.0 else -np.inf
             prob_full = prob_full + log_prob
         return prob_full
 
-    def estimate_alpha(self, alpha_candidates, obs, rate):
+    def estimate_alpha(self, alpha_candidates, obs, times):
         """
         compute the MAP
-        :param alpha_candidate: the alpha candidate
+        :param alpha_candidates: the alpha candidate
         :param obs: the observations
-        :param rate: the sensor feedback rate
+        :param times: the timestamp
         :return: MAP for alpha
         """
         pp_list = []
         for alpha_candidate in alpha_candidates:
-            lh = self.log_ll_alpha(alpha_candidate['candidate'], obs, rate)
+            lh = self.log_ll_alpha(alpha_candidate['candidate'], obs, times)
             pp = math.log(alpha_candidate['prob']) + lh
             pp_list.append(pp)
         id_max = np.argmax(pp_list)
         return id_max
 
-    def gen_real_traj(self, alpha, rate):
+    def gen_real_traj(self, alpha):
         """
         generate the predicted traj, which resume the real length
         :param alpha: the best fit alpha
-        :param rate: the sensor feedback rate
-        :return: predicted traj
+        :return: time_traj, traj
         """
         traj = self.gen_nTrajectory()
-        points = self.x
-        grid = np.linspace(0, 1.0, np.int(alpha * rate))
-        predict_traj = griddata(points, traj, grid, method='linear')
-        id_predict_traj = np.linspace(0.0, alpha, len(grid))
-        return id_predict_traj, predict_traj
+        time_traj = np.linspace(0.0, alpha, self.num_points)
+        return time_traj, traj
 
