@@ -7,7 +7,6 @@ import threading
 import scipy.signal as signal
 import baxter_interface
 from baxter_interface import CHECK_VERSION
-from sklearn.externals import joblib
 import time
 import sys
 import os
@@ -15,9 +14,9 @@ from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 
 path = '/../datasets/handover_20171128/pkl'
-num_alpha_candidate = 5
-timer_interval = 0.8
-ready_time = 2
+num_alpha_candidate = 10
+timer_interval = 1
+ready_time = 5
 
 ###########################
 
@@ -63,19 +62,20 @@ def fun_timer():
     obs_data_post_arr[:, 11:19] = 0.0
 
     # phase estimation
-    rospy.loginfo('Phase estimation...')
+    rospy.loginfo('Phase estimating...')
     alpha_max_list = []
     for ipromp in ipromps_set:
         alpha_temp = ipromp.alpha_candidate(num_alpha_candidate)
         idx_max = ipromp.estimate_alpha(alpha_temp, obs_data_post_arr, timestamp)
         alpha_max_list.append(alpha_temp[idx_max]['candidate'])
+        ipromp.set_alpha(alpha_temp[idx_max]['candidate'])
 
     # task recognition
     rospy.loginfo('Adding via points in each trained model...')
     for task_idx, ipromp in enumerate(ipromps_set):
         for idx in range(len(obs_data_list)):
             ipromp.add_viapoint(obs_data_list[idx]['stamp']/alpha_max_list[task_idx], obs_data_post_arr[idx, :])
-        ipromp.param_update(unit_update = False)
+        ipromp.param_update(unit_update=True)
     rospy.loginfo('Computing the likelihood for each model under observations...')
 
     prob_task = []
@@ -83,6 +83,7 @@ def fun_timer():
         prob_task_temp = ipromp.prob_obs()
         prob_task.append(prob_task_temp)
     idx_max_pro = np.argmax(prob_task)
+    # idx_max_pro = 2
     rospy.loginfo('The max fit model index is task %d', idx_max_pro)
 
     # robot motion generation
@@ -90,15 +91,15 @@ def fun_timer():
     traj = min_max_scaler.inverse_transform(traj)
     robot_traj = traj[:, 11:18]
 
-    # # compute the time cost for the response
-    # finished_time = rospy.Time.now()
-    # time_resp = (finished_time - init_time)
-    # rospy.loginfo('The time cost for robot response is %f', time_resp.secs+time_resp.nsecs*1e-9)
+    # save the robot traj
+    rospy.loginfo('Saving the robot traj...')
+    joblib.dump(robot_traj, current_path+path+'/robot_traj.pkl')
 
     # robot start point
     global left
     rospy.loginfo('Moving to start position...')
     left_start = make_command(robot_traj)
+    print(left_start)
     left.move_to_joint_positions(left_start)
 
     # move the robot along the trajectory
@@ -108,32 +109,39 @@ def fun_timer():
     for t in range(len(traj_time)):
         l_cmd = make_command(robot_traj_temp)
         robot_traj_temp = np.delete(robot_traj_temp, 0, axis=0)
-        while (rospy.get_time()-start_time)<traj_time[t]:
+        while (rospy.get_time()-start_time) < traj_time[t]:
             left.set_joint_positions(l_cmd)
     rospy.loginfo('The whole trajectory has been run!')
-    #
-    # rospy.loginfo('Saving the post IProMPs...')
-    # joblib.dump(ipromps_set, current_path+path+'/ipromps_set_post.pkl')
+
+    # save the conditional result
+    rospy.loginfo('Saving the post IProMPs...')
+    joblib.dump(ipromps_set, current_path+path+'/ipromps_set_post.pkl')
 
     rospy.loginfo('All finished!!!')
 
 
 def callback(data):
+    global flag_record
     if not flag_record:
         return
+
+    global init_time
+    if init_time is None:
+        init_time = data.header.stamp
+
     # emg
     emg_data = np.array([data.emgStates.ch0, data.emgStates.ch1, data.emgStates.ch2,
                          data.emgStates.ch3, data.emgStates.ch4, data.emgStates.ch5,
                          data.emgStates.ch6, data.emgStates.ch7]).reshape([1, 8])
     # left_hand
-    left_hand = np.array([data.tf_of_interest.transforms[8].transform.translation.x,
-                          data.tf_of_interest.transforms[8].transform.translation.y,
-                          data.tf_of_interest.transforms[8].transform.translation.z]).reshape([1, 3])
+    left_hand = np.array([data.tf_of_interest.transforms[5].transform.translation.x,
+                          data.tf_of_interest.transforms[5].transform.translation.y,
+                          data.tf_of_interest.transforms[5].transform.translation.z]).reshape([1, 3])
     # left_joints
     left_joints = np.array(data.jointStates.position[2:9]).reshape([1, 7])
     left_gripper = np.zeros_like(left_joints)
 
-    global obs_data_list, init_time
+    global obs_data_list
     time_stamp = (data.header.stamp - init_time).secs + (data.header.stamp - init_time).nsecs*1e-9
     obs_data_list.append({'emg': emg_data,
                           'left_hand': left_hand,
@@ -188,7 +196,8 @@ if __name__ == '__main__':
     ready_go(ready_time)
 
     # the init time
-    init_time = rospy.Time.now()
+    # init_time = rospy.Time.now()
+    init_time = None
     # subscribe the /multiModal_states topic
     rospy.Subscriber("/multiModal_states", multiModal, callback)
 

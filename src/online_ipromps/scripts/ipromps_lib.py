@@ -38,6 +38,8 @@ class ProMP(object):
         # the n-dimension promps updated W distribution
         self.meanW_nUpdated = None
         self.sigmaW_nUpdated = None
+        # the n-dimension promps fit alpha
+        self.alpha_fit = None
 
     def add_demonstration(self, demonstration):
         """
@@ -166,7 +168,7 @@ class ProMP(object):
         plt.fill_between(x, mean-std, mean+std, color=color, alpha=0.4)
         plt.plot(x, mean, color=color, label=legend)
 
-    def plot_nUpdated(self, legend='', color='b', via_show=True):
+    def plot_nUpdated(self, legend='', color='b', via_show=True, alpha=1):
         """
         plot the n-dimension updated distribution, valid from NDProMP or IProMP
         """
@@ -181,8 +183,10 @@ class ProMP(object):
         # option to show the via point
         if via_show:
             for viapoint_id, viapoint in enumerate(self.viapoints):
-                x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
-                plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, color=color)
+                # x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
+                # plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, color=color)
+                # plt.plot(viapoint['t']/self.alpha_fit, viapoint['obsy'], marker="o", markersize=10, color=color)
+                plt.plot(viapoint['t'], viapoint['obsy'], marker="o", markersize=10, color=color)
 
 
 class NDProMP(object):
@@ -382,6 +386,14 @@ class IProMP(NDProMP):
         self.alpha = []
         self.mean_alpha = []
         self.std_alpha = []
+
+        # the fit alpha
+        self.alpha_fit = None
+
+    def set_alpha(self, alpha):
+        self.alpha_fit = alpha
+        for joint_demo in range(self.num_joints):
+            self.promps[joint_demo].alpha_fit = alpha
 
     def obs_mat(self, t):
         """

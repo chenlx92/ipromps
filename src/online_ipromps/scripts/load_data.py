@@ -29,7 +29,6 @@ for task_dir in task_dir_list:
                           'stamp': (data_csv.values[:, 2]-data_csv.values[0, 2])*1e-9,
                           'emg': data_csv.values[:, 7:15],
                           'left_hand': data_csv.values[:, 207:210],
-                          # 'left_joints': data_csv.values[:, 98:105]
                           'left_joints': data_csv.values[:, 99:106]
                           })
     datasets_raw.append(demo_temp)

@@ -26,9 +26,9 @@ sigma_basis = 0.05
 num_alpha_candidate = 10
 
 # measurement noise
-emg_noise = 0.1
-hand_noise = 0.1
-pose_noise = 0.1
+emg_noise = 0.3
+hand_noise = 0.3
+pose_noise = 0.3
 measure_noise_cov_full = scipy.linalg.block_diag(np.eye(8) * emg_noise,
                                                  np.eye(3) * hand_noise,
                                                  np.eye(7) * pose_noise)
@@ -64,7 +64,7 @@ for task_idx in range(len(datasets4train)):
                                   (task_idx * num_demos + demo_idx)*len_norm + len_norm, :]
         datasets_temp.append({'emg': temp[:, 0:8],
                               'left_hand': temp[:, 8:11],
-                              'left_joints': temp[:, 8:15],
+                              'left_joints': temp[:, 11:18],
                               'alpha': datasets4train[task_idx][demo_idx]['alpha']})
     datasets4train_post.append(datasets_temp)
 
