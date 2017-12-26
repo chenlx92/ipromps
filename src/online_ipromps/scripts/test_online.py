@@ -13,6 +13,10 @@ import os
 from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 
+import subprocess
+subprocess.call(['speech-dispatcher'])        #start speech dispatcher
+subprocess.call(['spd-say', '"your process has finished"'])
+
 path = '/../datasets/handover_20171128/pkl'
 num_alpha_candidate = 10
 timer_interval = 1
@@ -21,14 +25,15 @@ ready_time = 5
 ###########################
 
 
-def make_command(line):
+def make_command(line, t):
     """
     cleans a single line of recorded joint positions
     :param line: the line described in a list to process
+    :param t: the row index of the array
     :return: the list cmd
     """
     joint_cmd_names = ['left_s0', 'left_s1', 'left_e0', 'left_e1', 'left_w0', 'left_w1', 'left_w2']
-    data_line = [line[0][2], line[0][3], line[0][0], line[0][1], line[0][4], line[0][5], line[0][6]]
+    data_line = [line[t][2], line[t][3], line[t][0], line[t][1], line[t][4], line[t][5], line[t][6]]
     command = dict(zip(joint_cmd_names, data_line))
     return command
 
@@ -98,17 +103,15 @@ def fun_timer():
     # robot start point
     global left
     rospy.loginfo('Moving to start position...')
-    left_start = make_command(robot_traj)
+    left_start = make_command(robot_traj, 0)
     print(left_start)
     left.move_to_joint_positions(left_start)
 
     # move the robot along the trajectory
-    robot_traj_temp = robot_traj
     rospy.loginfo('Moving along the trajectory...')
     start_time = rospy.get_time()
     for t in range(len(traj_time)):
-        l_cmd = make_command(robot_traj_temp)
-        robot_traj_temp = np.delete(robot_traj_temp, 0, axis=0)
+        l_cmd = make_command(robot_traj, t)
         while (rospy.get_time()-start_time) < traj_time[t]:
             left.set_joint_positions(l_cmd)
     rospy.loginfo('The whole trajectory has been run!')
@@ -196,7 +199,6 @@ if __name__ == '__main__':
     ready_go(ready_time)
 
     # the init time
-    # init_time = rospy.Time.now()
     init_time = None
     # subscribe the /multiModal_states topic
     rospy.Subscriber("/multiModal_states", multiModal, callback)
