@@ -8,6 +8,7 @@ from scipy.interpolate import interp1d
 import scipy.linalg
 import scipy.stats as stats
 from scipy.stats import multivariate_normal as mvn
+from sklearn import preprocessing
 
 
 class ProMP(object):
@@ -148,15 +149,15 @@ class ProMP(object):
         sampW = np.random.multivariate_normal(newMean, randomness*newSigma, 1).T
         return np.dot(self.Phi.T, sampW)
 
-    def plot_prior(self, legend='', color='b'):
+    def plot_prior(self, legend='', color='b', alpha_std=0.4, alpha_mean=0.8, mean_linewidth=2):
         """
         plot the prior distribution from training sets
         """
         x = self.x
         mean = np.dot(self.Phi.T, self.meanW)
         std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
-        plt.fill_between(x, mean - std, mean + std, color=color, alpha=0.6)
-        plt.plot(x, mean, color=color, label=legend, linewidth=3, alpha=0.4)
+        plt.fill_between(x, mean-std, mean+std, color=color, alpha=alpha_std)
+        plt.plot(x, mean, color=color, label=legend, linewidth=mean_linewidth, alpha=alpha_mean)
 
     def plot_uUpdated(self, legend='', color='b'):
         """
@@ -168,7 +169,7 @@ class ProMP(object):
         plt.fill_between(x, mean-std, mean+std, color=color, alpha=0.4)
         plt.plot(x, mean, color=color, label=legend)
 
-    def plot_nUpdated(self, legend='', color='b', via_show=True, alpha=1):
+    def plot_nUpdated(self, legend='', color='b', via_show=True, alpha_std=0.4, mean_linewidth=3):
         """
         plot the n-dimension updated distribution, valid from NDProMP or IProMP
         """
@@ -178,8 +179,8 @@ class ProMP(object):
         x = self.x
         mean0 = np.dot(self.Phi.T, self.meanW_nUpdated)
         std0 = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_nUpdated, self.Phi))))
-        plt.plot(x, mean0, linestyle='--', color=color, label=legend, linewidth=5)
-        plt.fill_between(x, mean0-std0, mean0+std0, color=color, alpha=0.4)
+        plt.plot(x, mean0, linestyle='--', color=color, label=legend, linewidth=mean_linewidth)
+        plt.fill_between(x, mean0-std0, mean0+std0, color=color, alpha=alpha_std)
         # option to show the via point
         if via_show:
             for viapoint_id, viapoint in enumerate(self.viapoints):
@@ -187,6 +188,8 @@ class ProMP(object):
                 # plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, color=color)
                 # plt.plot(viapoint['t']/self.alpha_fit, viapoint['obsy'], marker="o", markersize=10, color=color)
                 plt.plot(viapoint['t'], viapoint['obsy'], marker="o", markersize=10, color=color)
+                plt.errorbar(viapoint['t'], viapoint['obsy'], yerr=self.sigmay, fmt="o")
+
 
 
 class NDProMP(object):
@@ -373,11 +376,16 @@ class IProMP(NDProMP):
     """
     (n)-dimensional Interaction ProMP, derived from NDProMP
     """
-    def __init__(self, num_joints=28, num_basis=11, sigma_basis=0.05, num_samples=101, num_obs_joints=None, sigmay=None):
+    def __init__(self, num_joints=28, num_obs_joints=None, num_basis=11, sigma_basis=0.05,
+                 num_samples=101, sigmay=None, min_max_scaler=None, num_alpha_candidate=10):
         """
         construct function, call NDProMP construct function and define the member variables
         """
-        NDProMP.__init__(self, num_joints=num_joints, num_basis=num_basis, sigma_basis=sigma_basis, num_samples=num_samples, sigmay=sigmay)
+        # compute the obs noise after preprocessing
+        noise_cov_full = min_max_scaler.scale_.T * sigmay * min_max_scaler.scale_
+
+        NDProMP.__init__(self, num_joints=num_joints, num_basis=num_basis,
+                         sigma_basis=sigma_basis, num_samples=num_samples, sigmay=noise_cov_full)
 
         self.viapoints = []
         self.num_obs_joints = num_obs_joints    # the observed joints number
@@ -387,8 +395,14 @@ class IProMP(NDProMP):
         self.mean_alpha = []
         self.std_alpha = []
 
+        # the preprocessing
+        self.min_max_scaler = min_max_scaler
+
         # the fit alpha
         self.alpha_fit = None
+
+        # num_alpha_candidate
+        self.num_alpha_candidate = num_alpha_candidate
 
     def set_alpha(self, alpha):
         self.alpha_fit = alpha
@@ -513,16 +527,20 @@ class IProMP(NDProMP):
         self.mean_alpha = np.mean(self.alpha)
         self.std_alpha = np.std(self.alpha)
 
-    def alpha_candidate(self, num):
+    def alpha_candidate(self, num=None):
         """
         compute the alpha candidate by unit sampling
         :param num: the num of alpha candidate
         :return: the list of alpha candidate
         """
+        if num is None:
+            num = self.num_alpha_candidate
+        self.num_alpha_candidate = num
+
         alpha_candidate = np.linspace(self.mean_alpha-2*self.std_alpha, self.mean_alpha+2*self.std_alpha, num)
         candidate_pdf = stats.norm.pdf(alpha_candidate, self.mean_alpha, self.std_alpha)
         alpha_gen = []
-        for idx_candidate in range(num):
+        for idx_candidate in range(self.num_alpha_candidate):
             alpha_gen.append({'candidate': alpha_candidate[idx_candidate], 'prob': candidate_pdf[idx_candidate]})
         return alpha_gen
 
