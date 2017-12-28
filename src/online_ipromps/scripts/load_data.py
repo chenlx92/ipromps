@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+# the params should be changed:
+# len_norm:
+# datasets_path:
+# specify the included info(emg,imu,tf...) and the corresponding column in csv file
+
 # data structure is: list(task1,2...)-->list(demo1,2...)-->dict(emg,imu,tf...)
 
 import numpy as np
@@ -35,8 +40,8 @@ for task_dir in task_dir_list:
 
 # resample the datasets
 datasets_norm = []
-for idx, task_data in enumerate(datasets_raw):
-    print('Resampling data from ' + task_dir_list[idx])
+for task_idx, task_data in enumerate(datasets_raw):
+    print('Resampling data from ' + task_dir_list[task_idx])
     demo_norm_temp = []
     for demo_data in task_data:
         time_stamp = demo_data['stamp']
@@ -56,7 +61,8 @@ for idx, task_data in enumerate(datasets_raw):
 
 # save all the datasets
 print('Saving the datasets ...')
+joblib.dump(task_dir_list, datasets_path + '/../pkl/task_dir_list.pkl')
 joblib.dump(datasets_raw, datasets_path + '/../pkl/datasets_raw.pkl')
 joblib.dump(datasets_norm, datasets_path + '/../pkl/datasets_len' + str(len_norm) + '.pkl')
 
-print('Loaded, resampled and normalize the datasets successfully!!!')
+print('Loaded, normalized and saved the datasets successfully!!!')
