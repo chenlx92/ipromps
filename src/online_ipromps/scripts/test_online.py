@@ -13,13 +13,13 @@ import os
 from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 
-import subprocess
-subprocess.call(['speech-dispatcher'])        #start speech dispatcher
-subprocess.call(['spd-say', '"your process has finished"'])
+# import subprocess
+# subprocess.call(['speech-dispatcher'])        #start speech dispatcher
+# subprocess.call(['spd-say', '"your process has finished"'])
 
 path = '/../datasets/handover_20171128/pkl'
 num_alpha_candidate = 10
-timer_interval = 1
+timer_interval = 0.3
 ready_time = 5
 
 ###########################
@@ -46,7 +46,7 @@ def fun_timer():
     rospy.loginfo('Time out!!!')
     global flag_record
     flag_record = False  # stop record the msg
-    global ipromps_set, min_max_scaler, obs_data_list, filt_kernel
+    global ipromps_set, obs_data_list, filt_kernel
     rospy.loginfo('The len of observed data is %d', len(obs_data_list))
     obs_data = np.array([]).reshape([0, 18])
     timestamp = []
@@ -62,7 +62,7 @@ def fun_timer():
     obs_data = signal.medfilt(obs_data, filt_kernel)
 
     # preprocessing for the data
-    obs_data_post_arr = min_max_scaler.transform(obs_data)
+    obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
     # consider the unobserved info
     obs_data_post_arr[:, 11:19] = 0.0
 
@@ -70,7 +70,7 @@ def fun_timer():
     rospy.loginfo('Phase estimating...')
     alpha_max_list = []
     for ipromp in ipromps_set:
-        alpha_temp = ipromp.alpha_candidate(num_alpha_candidate)
+        alpha_temp = ipromp.alpha_candidate()
         idx_max = ipromp.estimate_alpha(alpha_temp, obs_data_post_arr, timestamp)
         alpha_max_list.append(alpha_temp[idx_max]['candidate'])
         ipromp.set_alpha(alpha_temp[idx_max]['candidate'])
@@ -93,7 +93,7 @@ def fun_timer():
 
     # robot motion generation
     [traj_time, traj] = ipromps_set[idx_max_pro].gen_real_traj(alpha_max_list[idx_max_pro])
-    traj = min_max_scaler.inverse_transform(traj)
+    traj = ipromps_set[idx_max_pro].min_max_scaler.inverse_transform(traj)
     robot_traj = traj[:, 11:18]
 
     # save the robot traj
@@ -104,7 +104,6 @@ def fun_timer():
     global left
     rospy.loginfo('Moving to start position...')
     left_start = make_command(robot_traj, 0)
-    print(left_start)
     left.move_to_joint_positions(left_start)
 
     # move the robot along the trajectory
@@ -178,7 +177,7 @@ if __name__ == '__main__':
     # load datasets
     rospy.loginfo('Loading the datasets...')
     current_path = os.path.split(os.path.abspath(sys.argv[0]))[0]   # the directory of this script
-    [ipromps_set, datasets4train_post, min_max_scaler, filt_kernel] = joblib.load(current_path+path+'/ipromps_set.pkl')
+    [ipromps_set, datasets4train_post, filt_kernel] = joblib.load(current_path+path+'/ipromps_set.pkl')
 
     # the flag var of starting info record
     flag_record = False
