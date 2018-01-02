@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import rospy
 from states_manager.msg import multiModal
 import numpy as np
@@ -11,36 +10,29 @@ import time
 import sys
 import os
 from sklearn.externals import joblib
-import matplotlib.pyplot as plt
-
-# import subprocess
-# subprocess.call(['speech-dispatcher'])        #start speech dispatcher
-# subprocess.call(['spd-say', '"your process has finished"'])
 
 path = '/../datasets/handover_20171128/pkl'
 num_alpha_candidate = 10
 timer_interval = 0.3
-ready_time = 5
-
-###########################
+ready_time = 3
 
 
-def make_command(line, t):
+def make_command(arr, t):
     """
     cleans a single line of recorded joint positions
-    :param line: the line described in a list to process
+    :param arr: the line described in a list to process
     :param t: the row index of the array
-    :return: the list cmd
+    :return: the cmd list
     """
     joint_cmd_names = ['left_s0', 'left_s1', 'left_e0', 'left_e1', 'left_w0', 'left_w1', 'left_w2']
-    data_line = [line[t][2], line[t][3], line[t][0], line[t][1], line[t][4], line[t][5], line[t][6]]
+    data_line = [arr[t][2], arr[t][3], arr[t][0], arr[t][1], arr[t][4], arr[t][5], arr[t][6]]
     command = dict(zip(joint_cmd_names, data_line))
     return command
 
 
 def fun_timer():
     """
-    the timer callback func
+    the timer callback function
     :return:
     """
     rospy.loginfo('Time out!!!')
@@ -48,7 +40,7 @@ def fun_timer():
     flag_record = False  # stop record the msg
     global ipromps_set, obs_data_list, filt_kernel
     rospy.loginfo('The len of observed data is %d', len(obs_data_list))
-    obs_data = np.array([]).reshape([0, 18])
+    obs_data = np.array([]).reshape([0, ipromps_set[0].num_joints])
     timestamp = []
     for obs_data_list_idx in obs_data_list:
         emg = obs_data_list_idx['emg']
@@ -58,8 +50,8 @@ def fun_timer():
         obs_data = np.vstack([obs_data, full_data])
         timestamp.append(obs_data_list_idx['stamp'])
 
-    # filter the data
-    obs_data = signal.medfilt(obs_data, filt_kernel)
+    # # filter the data
+    # obs_data = signal.medfilt(obs_data, filt_kernel)
 
     # preprocessing for the data
     obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
@@ -88,17 +80,12 @@ def fun_timer():
         prob_task_temp = ipromp.prob_obs()
         prob_task.append(prob_task_temp)
     idx_max_pro = np.argmax(prob_task)
-    # idx_max_pro = 2
     rospy.loginfo('The max fit model index is task %d', idx_max_pro)
 
     # robot motion generation
     [traj_time, traj] = ipromps_set[idx_max_pro].gen_real_traj(alpha_max_list[idx_max_pro])
     traj = ipromps_set[idx_max_pro].min_max_scaler.inverse_transform(traj)
     robot_traj = traj[:, 11:18]
-
-    # save the robot traj
-    rospy.loginfo('Saving the robot traj...')
-    joblib.dump(robot_traj, current_path+path+'/robot_traj.pkl')
 
     # robot start point
     global left
@@ -118,6 +105,10 @@ def fun_timer():
     # save the conditional result
     rospy.loginfo('Saving the post IProMPs...')
     joblib.dump(ipromps_set, current_path+path+'/ipromps_set_post.pkl')
+
+    # save the robot traj
+    rospy.loginfo('Saving the robot traj...')
+    joblib.dump(robot_traj, current_path+path+'/robot_traj.pkl')
 
     rospy.loginfo('All finished!!!')
 
@@ -155,7 +146,7 @@ def callback(data):
 def ready_go(count):
     """
     the func for press START key and countdown
-    :param count: the time for countdown
+    :param count: the time duration for countdown
     :return:
     """
     global flag_record

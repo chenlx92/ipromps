@@ -513,8 +513,8 @@ class IProMP(NDProMP):
             mean_t = np.dot(h_full, self.meanW_full)[:,0]
             cov_t = np.dot(h_full, np.dot(self.covW_full, h_full.T)) + self.sigmay
             prob = mvn.pdf(viapoint['obsy'], mean_t, cov_t)
-            log_pro = math.log(prob) if prob != 0.0 else -np.inf
-            prob_full = prob_full + log_pro
+            log_prob = math.log(prob) if prob != 0.0 else -np.inf
+            prob_full = prob_full + log_prob
         return prob_full
 
     def add_alpha(self, alpha):

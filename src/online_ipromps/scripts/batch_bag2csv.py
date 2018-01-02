@@ -19,7 +19,7 @@ path = options.dataset_dir
 
 
 if path is None:
-    print('please input the dataset directory.')
+    print('please input the datasets directory.')
 
 else:
     task_list = glob.glob(os.path.join(path, "*"))
