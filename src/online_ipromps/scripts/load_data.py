@@ -13,9 +13,18 @@ from scipy.interpolate import griddata
 from sklearn.externals import joblib
 import glob
 import os
+import scipy.signal as signal
 
 len_norm = 101
+# datasets_path = '../datasets/handover_20171128/raw'
 datasets_path = '../datasets/handover_20171128/raw'
+filt_kernel = [7, 1]
+info_n_idx_csv = {
+                'emg': [7, 15],
+                'left_hand': [207, 210],
+                'left_joints': [99, 106]
+                }
+
 
 ##########################
 
@@ -47,6 +56,9 @@ for task_idx, task_data in enumerate(datasets_raw):
         time_stamp = demo_data['stamp']
         grid = np.linspace(0, time_stamp[-1], len_norm)
         # resample
+        # emg_raw_filtered = signal.medfilt(demo_data['emg'], filt_kernel)
+        # left_hand_raw_filtered = signal.medfilt(demo_data['left_hand'], filt_kernel)
+        # left_joints_raw_filtered = signal.medfilt(demo_data['left_joints'], filt_kernel)
         emg_norm = griddata(time_stamp, demo_data['emg'], grid, method='linear')
         left_hand_norm = griddata(time_stamp, demo_data['left_hand'], grid, method='linear')
         left_joints_norm = griddata(time_stamp, demo_data['left_joints'], grid, method='linear')
