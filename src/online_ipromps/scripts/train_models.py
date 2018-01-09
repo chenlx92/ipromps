@@ -1,46 +1,54 @@
 #!/usr/bin/python
-
 import numpy as np
 import ipromps_lib
 import scipy.linalg
 from sklearn.externals import joblib
 from sklearn import preprocessing
 import scipy.signal as signal
-import scipy.stats as stats
-import matplotlib.pyplot as plt
-import pylab as pl
+import os
+import ConfigParser
 
-# datasets dir
-datasets_path = '../datasets/handover_20171128/pkl'
-datasets_norm_dir = '../datasets/handover_20171128/pkl/datasets_len101.pkl'
+
+# read conf file
+file_path = os.path.dirname(__file__)
+cp = ConfigParser.SafeConfigParser()
+cp.read(os.path.join(file_path, '../config/model.conf'))
+
+# datasets path
+datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
+datasets_pkl_path = os.path.join(datasets_path, 'pkl')
+datasets_norm_path = os.path.join(datasets_pkl_path, 'datasets_norm.pkl')
+task_name_path = os.path.join(datasets_pkl_path, 'task_name_list.pkl')
 
 # datasets param
-num_joints = 8+3+7
-num_obs_joints = 8+3
-num_demos = 10
-len_norm = 101
+num_joints = cp.getint('datasets', 'num_joints')
+num_obs_joints = cp.getint('datasets', 'num_obs_joints')
+num_demos = cp.getint('datasets', 'num_demo')
+len_norm = cp.getint('datasets', 'len_norm')
 
 # optional ipromps model param
-num_basis = 31
-sigma_basis = 0.05
-num_alpha_candidate = 10
+num_basis = cp.getint('basisFunc', 'num_basisFunc')
+sigma_basis = cp.getfloat('basisFunc', 'sigma_basisFunc')
+num_alpha_candidate = cp.getint('phase', 'num_phaseCandidate')
+
+# the med filter kernel
+filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
 
 # measurement noise
-emg_noise = 500
-hand_noise = 0.05
-joints_noise = 0.05
+emg_noise = cp.getfloat('noise', 'emg')
+hand_noise = cp.getfloat('noise', 'left_hand')
+joints_noise = cp.getfloat('noise', 'left_joints')
 noise_cov_full = scipy.linalg.block_diag(np.eye(8) * emg_noise,
                                          np.eye(3) * hand_noise,
                                          np.eye(7) * joints_noise)
 
-# the med filter kernel
-filt_kernel = [13, 1]
 
-###########################
+##
 
 # load norm datasets
-datasets_norm = joblib.load(datasets_norm_dir)
+datasets_norm = joblib.load(datasets_norm_path)
 datasets4train = [x[0:num_demos] for x in datasets_norm]
+task_name_list = joblib.load(task_name_path)
 
 # preprocessing for the norm data
 print('Preprocessing the data...')
@@ -48,7 +56,7 @@ y_full = np.array([]).reshape(0, num_joints)
 for datasets4train_idx in datasets4train:
     for demo_idx in datasets4train_idx:
         h = np.hstack([demo_idx['emg'], demo_idx['left_hand'], demo_idx['left_joints']])
-        h = signal.medfilt(h, filt_kernel)  # filter the norm data
+        h = signal.medfilt(h, filter_kernel)  # filter the norm data
         y_full = np.vstack([y_full, h])
 min_max_scaler = preprocessing.MinMaxScaler()
 datasets_norm_full = min_max_scaler.fit_transform(y_full)
@@ -78,7 +86,7 @@ ipromps_set = [ipromps_lib.IProMP(num_joints=num_joints, num_obs_joints=num_obs_
 
 # add demo and alpha var for each IProMPs
 for idx, task_idx in enumerate(ipromps_set):
-    print('Training the task %d IProMP...'%(idx))
+    print('Training the IProMP for task %s...' % task_name_list[idx])
     # for demo_idx in datasets4train[idx]:
     for demo_idx in datasets4train_post[idx]:
         demo_temp = np.hstack([demo_idx['emg'], demo_idx['left_hand'], demo_idx['left_joints']])
@@ -87,6 +95,6 @@ for idx, task_idx in enumerate(ipromps_set):
 
 # save the trained models
 print('Saving the trained models...')
-joblib.dump([ipromps_set, datasets4train_post, filt_kernel], datasets_path + '/ipromps_set.pkl')
+joblib.dump([ipromps_set, datasets4train_post], os.path.join(datasets_pkl_path, 'ipromps_set.pkl'))
 
 print('Trained the IProMPs successfully!!!')

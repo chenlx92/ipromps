@@ -5,37 +5,46 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pylab as pl
 import scipy.stats as stats
+import os
+import ConfigParser
 
-path = '../datasets/handover_20171128/pkl'
+# read conf file
+file_path = os.path.dirname(__file__)
+cp = ConfigParser.SafeConfigParser()
+cp.read(os.path.join(file_path, '../config/model.conf'))
+
+datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
+
 info_n_idx = {
             'emg': [0, 8],
             'left_hand': [8, 11],
             'left_joints': [11, 18]
             }
 
+# the info to be plotted
+info = cp.get('visualization', 'info')
+joint_num = info_n_idx[info][1] - info_n_idx[info][0]
+
 ###########################
 
-# the info to be plotted
-info = 'left_joints'
-joint_num = info_n_idx[info][1] - info_n_idx[info][0]
 plt.close('all')
 
 # load datasets
 print('Loading the models...')
-[ipromps_set, datasets4train_post, filt_kernel] = joblib.load(path + '/ipromps_set.pkl')
-ipromps_set_post = joblib.load(path + '/ipromps_set_post.pkl')
-datasets_len101 = joblib.load(path + '/datasets_len101.pkl')
-robot_traj = joblib.load(path + '/robot_traj.pkl')
+[ipromps_set, datasets4train_post, filter_kernel] = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
+ipromps_set_post = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set_post.pkl'))
+datasets_len101 = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm.pkl'))
+robot_traj = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj.pkl'))
 
 
 # plot the norm data
-# for task_idx, ipromps_idx in enumerate(ipromps_set_post):
-#     fig = plt.figure(task_idx+10)   # from fig. 10
-#     fig.suptitle('the norm ' + info)
-#     for demo_idx in range(ipromps_idx.num_demos):
-#         for joint_idx in range(joint_num):
-#             ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
-#             plt.plot(ipromps_idx.x, datasets_len101[task_idx][demo_idx][info][:, joint_idx])
+for task_idx, ipromps_idx in enumerate(ipromps_set_post):
+    fig = plt.figure(task_idx+10)   # from fig. 10
+    fig.suptitle('the norm ' + info)
+    for demo_idx in range(ipromps_idx.num_demos):
+        for joint_idx in range(joint_num):
+            ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
+            plt.plot(ipromps_idx.x, datasets_len101[task_idx][demo_idx][info][:, joint_idx])
 
 # plot datasets4train_post data
 for task_idx, ipromps_idx in enumerate(ipromps_set_post):
@@ -53,11 +62,11 @@ for task_idx, ipromps_idx in enumerate(ipromps_set_post):
         ipromps_idx.promps[joint_idx + info_n_idx[info][0]].plot_prior()
 # plot post distribution
 for task_idx, ipromps_idx in enumerate(ipromps_set_post):
-    print(ipromps_idx.promps[0].alpha_fit)
+    # print(ipromps_idx.promps[0].alpha_fit)
     fig = plt.figure(task_idx)
     for joint_idx in range(joint_num):
         ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
-        ipromps_idx.promps[joint_idx + info_n_idx[info][0]].plot_nUpdated(color='r', via_show=False)
+        ipromps_idx.promps[joint_idx + info_n_idx[info][0]].plot_nUpdated(color='r', via_show=True)
 
 # # plot the predict robot motion
 # fig = plt.figure(50)

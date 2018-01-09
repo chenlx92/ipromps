@@ -7,14 +7,23 @@ import scipy.signal as signal
 import baxter_interface
 from baxter_interface import CHECK_VERSION
 import time
-import sys
 import os
+import ConfigParser
 from sklearn.externals import joblib
 
-path = '/../datasets/handover_20171128/pkl'
-num_alpha_candidate = 10
-timer_interval = 0.3
-ready_time = 3
+# read conf file
+file_path = os.path.dirname(__file__)
+cp = ConfigParser.SafeConfigParser()
+cp.read(os.path.join(file_path, '../config/model.conf'))
+
+# load param
+datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
+num_alpha_candidate = cp.getint('phase', 'num_phaseCandidate')
+timer_interval = cp.getfloat('online', 'timer_interval')
+ready_time = cp.getint('online', 'ready_time')
+task_name_path = os.path.join(datasets_path, 'pkl/task_name_list.pkl')
+task_name_list = joblib.load(task_name_path)
+filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
 
 
 def make_command(arr, t):
@@ -38,7 +47,7 @@ def fun_timer():
     rospy.loginfo('Time out!!!')
     global flag_record
     flag_record = False  # stop record the msg
-    global ipromps_set, obs_data_list, filt_kernel
+    global ipromps_set, obs_data_list
     rospy.loginfo('The len of observed data is %d', len(obs_data_list))
     obs_data = np.array([]).reshape([0, ipromps_set[0].num_joints])
     timestamp = []
@@ -50,8 +59,8 @@ def fun_timer():
         obs_data = np.vstack([obs_data, full_data])
         timestamp.append(obs_data_list_idx['stamp'])
 
-    # # filter the data
-    # obs_data = signal.medfilt(obs_data, filt_kernel)
+    # filter the data
+    obs_data = signal.medfilt(obs_data, filter_kernel)
 
     # preprocessing for the data
     obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
@@ -79,12 +88,12 @@ def fun_timer():
     for ipromp in ipromps_set:
         prob_task_temp = ipromp.prob_obs()
         prob_task.append(prob_task_temp)
-    idx_max_pro = np.argmax(prob_task)
-    rospy.loginfo('The max fit model index is task %d', idx_max_pro)
+    idx_max_prob = np.argmax(prob_task)
+    rospy.loginfo('The max fit model index is task %s', task_name_list[idx_max_prob])
 
     # robot motion generation
-    [traj_time, traj] = ipromps_set[idx_max_pro].gen_real_traj(alpha_max_list[idx_max_pro])
-    traj = ipromps_set[idx_max_pro].min_max_scaler.inverse_transform(traj)
+    [traj_time, traj] = ipromps_set[idx_max_prob].gen_real_traj(alpha_max_list[idx_max_prob])
+    traj = ipromps_set[idx_max_prob].min_max_scaler.inverse_transform(traj)
     robot_traj = traj[:, 11:18]
 
     # robot start point
@@ -104,11 +113,10 @@ def fun_timer():
 
     # save the conditional result
     rospy.loginfo('Saving the post IProMPs...')
-    joblib.dump(ipromps_set, current_path+path+'/ipromps_set_post.pkl')
-
+    joblib.dump(ipromps_set, os.path.join(datasets_path, 'pkl/ipromps_set_post.pkl'))
     # save the robot traj
     rospy.loginfo('Saving the robot traj...')
-    joblib.dump(robot_traj, current_path+path+'/robot_traj.pkl')
+    joblib.dump(robot_traj, os.path.join(datasets_path, 'pkl/robot_traj.pkl'))
 
     rospy.loginfo('All finished!!!')
 
@@ -167,8 +175,8 @@ if __name__ == '__main__':
 
     # load datasets
     rospy.loginfo('Loading the datasets...')
-    current_path = os.path.split(os.path.abspath(sys.argv[0]))[0]   # the directory of this script
-    [ipromps_set, datasets4train_post, filt_kernel] = joblib.load(current_path+path+'/ipromps_set.pkl')
+    current_path = os.path.dirname(__file__)    # the directory of this script
+    [ipromps_set, datasets4train_post] = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
 
     # the flag var of starting info record
     flag_record = False
