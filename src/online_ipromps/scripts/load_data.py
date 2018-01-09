@@ -1,43 +1,44 @@
 #!/usr/bin/python
 
-# the params should be changed:
-# len_norm:
-# datasets_path:
-# specify the included info(emg,imu,tf...) and the corresponding column in csv file
-
 # data structure is: list(task1,2...)-->list(demo1,2...)-->dict(emg,imu,tf...)
-
 import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
 from sklearn.externals import joblib
 import glob
 import os
+import ConfigParser
 import scipy.signal as signal
 
-len_norm = 101
-# datasets_path = '../datasets/handover_20171128/raw'
-datasets_path = '../datasets/handover_20171128/raw'
-filt_kernel = [7, 1]
+# read conf file
+file_path = os.path.dirname(__file__)
+cp = ConfigParser.SafeConfigParser()
+cp.read(os.path.join(file_path, '../config/model.conf'))
+
+# load config param
+datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
+len_norm = cp.getint('datasets', 'len_norm')
+filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
+
+# the information and corresponding index in csv file
 info_n_idx_csv = {
                 'emg': [7, 15],
                 'left_hand': [207, 210],
                 'left_joints': [99, 106]
                 }
 
-
 ##########################
 
 # load raw datasets
 datasets_raw = []
-task_dir_list = glob.glob(os.path.join(datasets_path, "*"))
+task_dir_list = glob.glob(os.path.join(datasets_path, 'raw/*'))
 for task_dir in task_dir_list:
-    full_task_dir = task_dir + '/csv/'
+    full_task_dir = os.path.join(task_dir, 'csv')
     print('Loading data from ' + full_task_dir)
-    demo_dir_list = glob.glob(os.path.join(full_task_dir, "201*"))   # the prefix of data
+    demo_dir_list = glob.glob(os.path.join(full_task_dir, '201*'))   # the prefix of data
     demo_temp = []
     for demo_dir_idx in demo_dir_list:
-        data_csv = pd.read_csv(demo_dir_idx + '/multiModal_states.csv')     # the file name of csv
+        data_csv = pd.read_csv(os.path.join(demo_dir_idx, 'multiModal_states.csv')) # the file name of csv
         # the info of interest
         demo_temp.append({
                           'stamp': (data_csv.values[:, 2]-data_csv.values[0, 2])*1e-9,
@@ -73,8 +74,8 @@ for task_idx, task_data in enumerate(datasets_raw):
 
 # save all the datasets
 print('Saving the datasets ...')
-joblib.dump(task_dir_list, datasets_path + '/../pkl/task_dir_list.pkl')
-joblib.dump(datasets_raw, datasets_path + '/../pkl/datasets_raw.pkl')
-joblib.dump(datasets_norm, datasets_path + '/../pkl/datasets_len' + str(len_norm) + '.pkl')
+joblib.dump(task_dir_list, datasets_path + '/pkl/task_dir_list.pkl')
+joblib.dump(datasets_raw, datasets_path + '/pkl/datasets_raw.pkl')
+joblib.dump(datasets_norm, datasets_path + '/pkl/datasets_len' + str(len_norm) + '.pkl')
 
 print('Loaded, normalized and saved the datasets successfully!!!')
