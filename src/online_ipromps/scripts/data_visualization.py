@@ -25,7 +25,7 @@ info_n_idx = {
 info = cp.get('visualization', 'info')
 joint_num = info_n_idx[info][1] - info_n_idx[info][0]
 
-###########################
+##
 
 plt.close('all')
 
