@@ -1,6 +1,4 @@
 #!/usr/bin/python
-# Filename: ipromps_lib.py
-
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -8,7 +6,6 @@ from scipy.interpolate import interp1d
 import scipy.linalg
 import scipy.stats as stats
 from scipy.stats import multivariate_normal as mvn
-from sklearn import preprocessing
 
 
 class ProMP(object):
@@ -149,15 +146,35 @@ class ProMP(object):
         sampW = np.random.multivariate_normal(newMean, randomness*newSigma, 1).T
         return np.dot(self.Phi.T, sampW)
 
-    def plot_prior(self, legend='', color='b', alpha_std=0.4, alpha_mean=0.8, mean_linewidth=2):
+    def plot_prior(self, legend='', b_distribution=True, color='b', alpha_std=0.4, linewidth_mean=2,
+                   b_regression=True, b_dataset=True):
         """
         plot the prior distribution from training sets
+        :param legend: the figure legend
+        :param b_distribution: the 1 std envelope and mean
+        :param color: the color of envelope and mean
+        :param alpha_std: the transparency of envelope
+        :param linewidth_mean:
+        :param b_regression:
+        :param b_dataset: the dataset to train to model
+        :return:
         """
         x = self.x
-        mean = np.dot(self.Phi.T, self.meanW)
-        std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
-        plt.fill_between(x, mean-std, mean+std, color=color, alpha=alpha_std)
-        plt.plot(x, mean, color=color, label=legend, linewidth=mean_linewidth, alpha=alpha_mean)
+        # the probability distribution
+        if b_distribution:
+            mean = np.dot(self.Phi.T, self.meanW)
+            std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
+            plt.fill_between(x, mean-std, mean+std, color=color, alpha=alpha_std)
+            plt.plot(x, mean, color=color, label=legend, linewidth=linewidth_mean)
+        # the regression result
+        if b_regression:
+            for w in self.W:
+                reg = np.dot(self.Phi.T, w)
+                plt.plot(x, reg, color='black', label=legend, linewidth=linewidth_mean, alpha=0.5)
+        # the dataset to train to model
+        if b_dataset:
+            for y in self.Y:
+                plt.plot(x, y, color='y', label=legend, linewidth=linewidth_mean, alpha=0.5)
 
     def plot_uUpdated(self, legend='', color='b'):
         """
@@ -169,7 +186,7 @@ class ProMP(object):
         plt.fill_between(x, mean-std, mean+std, color=color, alpha=0.4)
         plt.plot(x, mean, color=color, label=legend)
 
-    def plot_nUpdated(self, legend='', color='b', via_show=True, alpha_std=0.4, mean_linewidth=3):
+    def plot_nUpdated(self, legend='', color='b', via_show=True, alpha_std=0.4, mean_line_width=3):
         """
         plot the n-dimension updated distribution, valid from NDProMP or IProMP
         """
@@ -179,7 +196,7 @@ class ProMP(object):
         x = self.x
         mean0 = np.dot(self.Phi.T, self.meanW_nUpdated)
         std0 = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_nUpdated, self.Phi))))
-        plt.plot(x, mean0, linestyle='--', color=color, label=legend, linewidth=mean_linewidth)
+        plt.plot(x, mean0, linestyle='--', color=color, label=legend, linewidth=mean_line_width)
         plt.fill_between(x, mean0-std0, mean0+std0, color=color, alpha=alpha_std)
         # option to show the via point
         if via_show:
