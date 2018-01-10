@@ -167,18 +167,18 @@ def ready_go(count):
         rospy.loginfo('The remaining time: %ds', count-idx-1)
 
 
-if __name__ == '__main__':
-
+def main():
     # init node
     rospy.init_node('online_ipromps_node', anonymous=True)
     rospy.loginfo('Created the ROS node!')
 
     # load datasets
     rospy.loginfo('Loading the datasets...')
-    current_path = os.path.dirname(__file__)    # the directory of this script
-    [ipromps_set, datasets4train_post] = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
+    global ipromps_set
+    ipromps_set = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
 
     # the flag var of starting info record
+    global flag_record, obs_data_list
     flag_record = False
     # to save the online data
     obs_data_list = []
@@ -186,9 +186,18 @@ if __name__ == '__main__':
     timer = threading.Timer(timer_interval, fun_timer)
 
     # baxter init
+    global left
     rospy.loginfo("Getting robot state... ")
     rs = baxter_interface.RobotEnable(CHECK_VERSION)
     init_state = rs.state().enabled
+
+    def clean_shutdown():
+        print("\nExiting example...")
+        if not init_state:
+            print("Disabling robot...")
+            rs.disable()
+    rospy.on_shutdown(clean_shutdown)
+
     rospy.loginfo("Enabling robot... ")
     rs.enable()
     left = baxter_interface.Limb('left')
@@ -197,6 +206,7 @@ if __name__ == '__main__':
     ready_go(ready_time)
 
     # the init time
+    global init_time
     init_time = None
     # subscribe the /multiModal_states topic
     rospy.Subscriber("/multiModal_states", multiModal, callback)
@@ -206,3 +216,7 @@ if __name__ == '__main__':
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
+
+
+if __name__ == '__main__':
+    main()
