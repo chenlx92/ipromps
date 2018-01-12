@@ -192,7 +192,7 @@ def main():
     init_state = rs.state().enabled
 
     def clean_shutdown():
-        print("\nExiting example...")
+        print("\nExiting the script...")
         if not init_state:
             print("Disabling robot...")
             rs.disable()

@@ -42,6 +42,8 @@ class ProMP(object):
     def add_demonstration(self, demonstration):
         """
         add demonstration to train promp
+        :param demonstration:
+        :return:
         """
         interpolate = interp1d(np.linspace(0, 1, len(demonstration)), demonstration, kind='cubic')
         stretched_demo = interpolate(self.x)
@@ -53,10 +55,18 @@ class ProMP(object):
 
     @property
     def noise(self):
+        """
+        compute the regression noise
+        :return:
+        """
         return self.sigmaSignal
 
     @property
     def num_demos(self):
+        """
+        the number of demonstration
+        :return:
+        """
         return self.Y.shape[0]
 
     @property
@@ -201,12 +211,8 @@ class ProMP(object):
         # option to show the via point
         if via_show:
             for viapoint_id, viapoint in enumerate(self.viapoints):
-                # x_index = x[int(round((len(x)-1)*viapoint['t'], 0))]
-                # plt.plot(x_index, viapoint['obsy'], marker="o", markersize=10, color=color)
-                # plt.plot(viapoint['t']/self.alpha_fit, viapoint['obsy'], marker="o", markersize=10, color=color)
                 plt.plot(viapoint['t'], viapoint['obsy'], marker="o", markersize=10, color=color)
                 plt.errorbar(viapoint['t'], viapoint['obsy'], yerr=self.sigmay, fmt="o")
-
 
 
 class NDProMP(object):
@@ -215,21 +221,23 @@ class NDProMP(object):
     """
     def __init__(self, num_joints, num_basis=11, sigma_basis=0.05, num_samples=101, sigmay=None):
         """
-        :param num_joints: Number of underlying ProMPs
+        :param num_joints:
         :param num_basis:
         :param sigma_basis:
         :param num_samples:
+        :param sigmay:
         """
         if num_joints < 1:
             raise ValueError("You must declare at least 1 joint in a NDProMP")
         self.num_joints = num_joints
-        self.promps = [ProMP(num_basis, sigma_basis, num_samples, sigmay[idx_joint,idx_joint]) for idx_joint in range(num_joints)]
+        self.promps = [ProMP(num_basis, sigma_basis, num_samples, sigmay[idx_joint,idx_joint])
+                       for idx_joint in range(num_joints)]
 
-        self.W_full = np.array([]) # the weight for each demonstration
+        self.W_full = np.array([])  # the weight for each demonstration
         self.meanW_full = np.array([])
         self.covW_full = np.array([])
 
-        self.meanW_full_updated = np.array([]) # the updated weight distribution
+        self.meanW_full_updated = np.array([])  # the updated weight distribution
         self.covW_full_updated = np.array([])
 
         self.viapoints = []
@@ -242,7 +250,7 @@ class NDProMP(object):
         :return: the observation mat
         """
         h = np.exp(-.5 * (np.array(map(lambda x: x - self.C,
-                      np.tile(t, (self.num_basis, 1)).T)).T**2 / (self.sigma_basis**2)))
+                                       np.tile(t, (self.num_basis, 1)).T)).T**2 / (self.sigma_basis**2)))
         h_full = np.array([]).reshape(0,0)
         # construct the obs mat
         for idx_obs in range(self.num_joints):
@@ -346,8 +354,8 @@ class NDProMP(object):
     def add_viapoint(self, t, obsys):
         """
         Add a viapoint i.e. an observation at a specific time
-        :param t: Time of observation
-        :param obsys: List of observations obys[joint] for each joint
+        :param t: time stamp of observation
+        :param obsys: list of observations obys[joint] for each joint
         :return:
         """
         if len(obsys) != self.num_joints:
@@ -384,6 +392,10 @@ class NDProMP(object):
                 self.promps[i].sigmaW_nUpdated = new_covW_full[i*self.num_basis:(1+i)*self.num_basis, i*self.num_basis:(i+1)*self.num_basis]
 
     def gen_nTrajectory(self, randomness=1e-10):
+        """
+        :param randomness:
+        :return:
+        """
         new_meanW_full = self.meanW_full_updated
         trajectory = np.dot(self.Phi.T, new_meanW_full.reshape([self.num_joints, self.num_basis]).T)
         return trajectory
@@ -397,6 +409,14 @@ class IProMP(NDProMP):
                  num_samples=101, sigmay=None, min_max_scaler=None, num_alpha_candidate=10):
         """
         construct function, call NDProMP construct function and define the member variables
+        :param num_joints:
+        :param num_obs_joints:
+        :param num_basis:
+        :param sigma_basis:
+        :param num_samples:
+        :param sigmay:
+        :param min_max_scaler:
+        :param num_alpha_candidate:
         """
         # compute the obs noise after preprocessing
         noise_cov_full = min_max_scaler.scale_.T * sigmay * min_max_scaler.scale_
@@ -422,6 +442,11 @@ class IProMP(NDProMP):
         self.num_alpha_candidate = num_alpha_candidate
 
     def set_alpha(self, alpha):
+        """
+        set the alpha for this model
+        :param alpha:
+        :return:
+        """
         self.alpha_fit = alpha
         for joint_demo in range(self.num_joints):
             self.promps[joint_demo].alpha_fit = alpha
@@ -456,28 +481,6 @@ class IProMP(NDProMP):
         for joint_demo in range(self.num_joints):
             self.promps[joint_demo].add_viapoint(t, obsys[joint_demo])
         self.viapoints.append({'t': t, 'obsy': obsys})
-
-        # new_meanW_full = self.meanW_full
-        # new_covW_full = self.covW_full
-        #
-        # for viapoint in self.viapoints:
-        #     h_full = self.obs_mat(viapoint['t'])
-        #     # the observation of specific time
-        #     y_observed = viapoint['obsy'].reshape([self.num_joints, 1])
-        #     # update the distribution
-        #     aux = self.sigmay + np.dot(h_full, np.dot(new_covW_full, h_full.T))
-        #     K = np.dot(np.dot(new_covW_full, h_full.T), np.linalg.inv(aux))
-        #     new_meanW_full = new_meanW_full + np.dot(K, y_observed - np.dot(h_full, new_meanW_full))
-        #     new_covW_full = new_covW_full - np.dot(K, np.dot(h_full, new_covW_full))
-        #
-        # # save the updated distribution for ipromp
-        # self.meanW_full_updated = new_meanW_full
-        # self.covW_full_updated = new_covW_full
-        #
-        # # save the updated distribution for each promp
-        # for i in range(self.num_joints):
-        #     self.promps[i].meanW_nUpdated = new_meanW_full.reshape([self.num_joints, self.num_basis]).T[:, i]
-        #     self.promps[i].sigmaW_nUpdated = new_covW_full[i * self.num_basis:(1 + i) * self.num_basis, i * self.num_basis:(i + 1) * self.num_basis]
 
     def param_update(self, unit_update):
         """
@@ -537,7 +540,7 @@ class IProMP(NDProMP):
     def add_alpha(self, alpha):
         """
         Add a phase to the trajectory
-        Observations and corresponding basis activations
+        :param alpha:
         :return:
         """
         self.alpha.append(alpha)
@@ -605,4 +608,3 @@ class IProMP(NDProMP):
         traj = self.gen_nTrajectory()
         time_traj = np.linspace(0.0, alpha, self.num_points)
         return time_traj, traj
-

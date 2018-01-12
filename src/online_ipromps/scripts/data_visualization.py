@@ -48,6 +48,7 @@ def plot_raw_data(num=0):
 def plot_prior(num=10):
     for task_idx, ipromps_idx in enumerate(ipromps_set_post):
         fig = plt.figure(task_idx+num)
+        fig.suptitle('the raw data of ' + info)
         for joint_idx in range(joint_num):
             ax = fig.add_subplot(joint_num, 1, 1+joint_idx)
             ipromps_idx.promps[joint_idx + info_n_idx[info][0]].plot_prior()
@@ -90,11 +91,11 @@ def plot_robot_traj(num=40):
 
 
 def main():
-    plot_raw_data()
-    plot_prior()
-    plot_post()
-    plot_alpha()
-    plot_robot_traj()
+    # plot_raw_data()
+    plot_prior(0)
+    # plot_post(0)
+    # plot_alpha()
+    # plot_robot_traj()
     plt.show()
 
 

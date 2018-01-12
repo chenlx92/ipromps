@@ -8,6 +8,7 @@ import glob
 import os
 import ConfigParser
 import scipy.signal as signal
+from sklearn import preprocessing
 
 # read conf file
 file_path = os.path.dirname(__file__)
@@ -17,6 +18,8 @@ cp.read(os.path.join(file_path, '../config/model.conf'))
 datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
 len_norm = cp.getint('datasets', 'len_norm')
 filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
+num_demos = cp.getint('datasets', 'num_demo')
+num_joints = cp.getint('datasets', 'num_joints')
 
 # # the information and corresponding index in csv file
 # info_n_idx_csv = {
@@ -72,11 +75,36 @@ def main():
                                     })
         datasets_norm.append(demo_norm_temp)
 
+    # preprocessing for the norm data
+    print('Preprocessing the data...')
+    datasets4train = [x[0:num_demos] for x in datasets_norm]
+    y_full = np.array([]).reshape(0, num_joints)
+    for task_data in datasets4train:
+        for demo_data in task_data:
+            h = np.hstack([demo_data['emg'], demo_data['left_hand'], demo_data['left_joints']])
+            y_full = np.vstack([y_full, h])
+    min_max_scaler = preprocessing.MinMaxScaler()
+    datasets_norm_full = min_max_scaler.fit_transform(y_full)
+    # construct a data structure to train the model
+    datasets_norm_preproc = []
+    for task_idx in range(len(datasets4train)):
+        datasets_temp = []
+        for demo_idx in range(num_demos):
+            temp = datasets_norm_full[(task_idx * num_demos + demo_idx) * len_norm:
+            (task_idx * num_demos + demo_idx) * len_norm + len_norm, :]
+            datasets_temp.append({'emg': temp[:, 0:8],
+                                  'left_hand': temp[:, 8:11],
+                                  'left_joints': temp[:, 11:18],
+                                  'alpha': datasets4train[task_idx][demo_idx]['alpha']})
+        datasets_norm_preproc.append(datasets_temp)
+
     # save all the datasets
     print('Saving the datasets as pkl ...')
     joblib.dump(task_name_list, os.path.join(datasets_path, 'pkl/task_name_list.pkl'))
     joblib.dump(datasets_raw, os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
     joblib.dump(datasets_norm, os.path.join(datasets_path, 'pkl/datasets_norm.pkl'))
+    joblib.dump(datasets_norm_preproc, os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
+    joblib.dump(min_max_scaler, os.path.join(datasets_path, 'pkl/min_max_scaler.pkl'))
 
     # the finished reminder
     print('Loaded, filtered, normalized and saved the datasets successfully!!!')
