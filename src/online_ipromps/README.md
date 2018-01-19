@@ -29,3 +29,19 @@ All command run in **baxter.sh** space.
 3. `rosrun openni_tracker openni_tracker`: open the human skeleton tracking node  
 4. `roslaunch myo_driver myo_raw_pub.launch`: start the Myo armband node  
 5. `rosrun states_manager states_pub.py`: open the state manager node  
+
+# The training set 
+note of collection: 
+1. check the csv file derived from rosbag 
+2. start to record all interest data and demonstrate the collaborative task motion (human and robot) in the same time 
+3. demonstrate with spatio-temporal variance 
+4. no occlusion in demonstration,  check the demo human tracking data 
+5. no robot orientation change in simple test
+6. take photos of armband wear position, object handle position and record training process video
+
+option of improvement:
+1. use robot joint/cartesian space/twist
+2. consider the EMG signals' effect (correlate it with robot motion?)
+3. design the task with different motion of robot arm, human hand, elbow, shoulder...
+4. use double robot arm
+
