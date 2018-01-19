@@ -13,11 +13,16 @@ cp = ConfigParser.SafeConfigParser()
 cp.read(os.path.join(file_path, '../config/model.conf'))
 # the datasets path
 datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
+# # the interest info and corresponding index in csv file
+# info_n_idx = {
+#             'emg': [0, 8],
+#             'left_hand': [8, 11],
+#             'left_joints': [11, 18]
+#             }
 # the interest info and corresponding index in csv file
 info_n_idx = {
-            'emg': [0, 8],
-            'left_hand': [8, 11],
-            'left_joints': [11, 18]
+            'left_hand': [0, 3],
+            'left_joints': [3, 10]
             }
 
 # the info to be plotted
@@ -30,6 +35,8 @@ ipromps_set_post = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set_post
 robot_traj = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj.pkl'))
 datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
 datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
+datasets_filtered = joblib.load(os.path.join(datasets_path, 'pkl/datasets_filtered.pkl'))
+task_name = joblib.load(os.path.join(datasets_path, 'pkl/task_name_list.pkl'))
 
 
 # plot the raw data
@@ -44,14 +51,26 @@ def plot_raw_data(num=0):
                 plt.plot(range(len(data)), data)
 
 
+# plot the filtered data
+def plot_filtered_data(num=5):
+    for task_idx, ipromps_idx in enumerate(ipromps_set_post):
+        fig = plt.figure(task_idx + num)
+        fig.suptitle('the filtered data of ' + info)
+        for demo_idx in range(ipromps_idx.num_demos):
+            for joint_idx in range(joint_num):
+                ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
+                data = datasets_filtered[task_idx][demo_idx][info][:, joint_idx]
+                plt.plot(range(len(data)), data)
+
+
 # plot the prior distribution
 def plot_prior(num=10):
     for task_idx, ipromps_idx in enumerate(ipromps_set_post):
         fig = plt.figure(task_idx+num)
-        fig.suptitle('the raw data of ' + info)
+        fig.suptitle('the prior of ' + info + ' for ' + task_name[task_idx] + ' model')
         for joint_idx in range(joint_num):
             ax = fig.add_subplot(joint_num, 1, 1+joint_idx)
-            ipromps_idx.promps[joint_idx + info_n_idx[info][0]].plot_prior()
+            ipromps_idx.promps[joint_idx + info_n_idx[info][0]].plot_prior(b_regression=True)
 
 
 # plot alpha distribute
@@ -92,6 +111,7 @@ def plot_robot_traj(num=40):
 
 def main():
     # plot_raw_data()
+    # plot_filtered_data()
     plot_prior(0)
     # plot_post(0)
     # plot_alpha()

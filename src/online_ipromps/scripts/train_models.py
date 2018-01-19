@@ -51,7 +51,8 @@ def main():
         print('Training the IProMP for task: %s...' % task_name[idx])
         # for demo_idx in datasets4train[idx]:
         for demo_idx in datasets_norm_preproc[idx]:
-            demo_temp = np.hstack([demo_idx['emg'], demo_idx['left_hand'], demo_idx['left_joints']])
+            # demo_temp = np.hstack([demo_idx['emg'], demo_idx['left_hand'], demo_idx['left_joints']])
+            demo_temp = np.hstack([demo_idx['left_hand'], demo_idx['left_joints']])
             ipromp.add_demonstration(demo_temp)   # spatial variance demo
             ipromp.add_alpha(demo_idx['alpha'])   # temporal variance demo
 

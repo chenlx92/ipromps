@@ -22,7 +22,7 @@ num_alpha_candidate = cp.getint('phase', 'num_phaseCandidate')
 timer_interval = cp.getfloat('online', 'timer_interval')
 ready_time = cp.getint('online', 'ready_time')
 task_name_path = os.path.join(datasets_path, 'pkl/task_name_list.pkl')
-task_name_list = joblib.load(task_name_path)
+task_name = joblib.load(task_name_path)
 filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
 
 
@@ -52,10 +52,11 @@ def fun_timer():
     obs_data = np.array([]).reshape([0, ipromps_set[0].num_joints])
     timestamp = []
     for obs_data_list_idx in obs_data_list:
-        emg = obs_data_list_idx['emg']
+        # emg = obs_data_list_idx['emg']
         left_hand = obs_data_list_idx['left_hand']
         left_joints = obs_data_list_idx['left_joints']
-        full_data = np.hstack([emg, left_hand, left_joints])
+        # full_data = np.hstack([emg, left_hand, left_joints])
+        full_data = np.hstack([left_hand, left_joints])
         obs_data = np.vstack([obs_data, full_data])
         timestamp.append(obs_data_list_idx['stamp'])
 
@@ -65,7 +66,7 @@ def fun_timer():
     # preprocessing for the data
     obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
     # consider the unobserved info
-    obs_data_post_arr[:, 11:19] = 0.0
+    obs_data_post_arr[:, 3:10] = 0.0
 
     # phase estimation
     rospy.loginfo('Phase estimating...')
@@ -89,12 +90,13 @@ def fun_timer():
         prob_task_temp = ipromp.prob_obs()
         prob_task.append(prob_task_temp)
     idx_max_prob = np.argmax(prob_task)
-    rospy.loginfo('The max fit model index is task %s', task_name_list[idx_max_prob])
+    # idx_max_prob = 0 # a trick for testing
+    rospy.loginfo('The max fit model index is task %s', task_name[idx_max_prob])
 
     # robot motion generation
     [traj_time, traj] = ipromps_set[idx_max_prob].gen_real_traj(alpha_max_list[idx_max_prob])
     traj = ipromps_set[idx_max_prob].min_max_scaler.inverse_transform(traj)
-    robot_traj = traj[:, 11:18]
+    robot_traj = traj[:, 3:10]
 
     # robot start point
     global left
@@ -144,7 +146,8 @@ def callback(data):
 
     global obs_data_list
     time_stamp = (data.header.stamp - init_time).secs + (data.header.stamp - init_time).nsecs*1e-9
-    obs_data_list.append({'emg': emg_data,
+    obs_data_list.append({
+                          # 'emg': emg_data,
                           'left_hand': left_hand,
                           'left_joints': left_gripper,
                           'stamp': time_stamp})

@@ -16,6 +16,7 @@ We use EMG signals to enhance the task
 ref: https://askubuntu.com/questions/682825/how-to-update-to-the-latest-numpy-and-scipy-on-ubuntu-14-04lts  
 
 # The package description
+<<<<<<< HEAD
 ├── config
 │   └── model.conf
 ├── datasets
@@ -35,6 +36,27 @@ ref: https://askubuntu.com/questions/682825/how-to-update-to-the-latest-numpy-an
 │   ├── train_models.py
 │   └── train_offline.py
 └─
+=======
+├── config  
+│   └── model.conf  
+├── datasets  
+│   └── dataset_name  
+│       ├── info  
+│       ├── pkl  
+│       └── raw  
+├── README.md  
+├── scripts  
+│   ├── bag_to_csv.sh  
+│   ├── batch_bag2csv.py  
+│   ├── data_visualization.py  
+│   ├── ipromps_lib.py  
+│   ├── load_data.py  
+│   ├── noise_cov_cal.py  
+│   ├── test_online.py  
+│   ├── train_models.py  
+│   └── train_offline.py  
+└─  
+>>>>>>> dev
 
 ## config
 `model.conf`: the configuration including all params
