@@ -2,14 +2,14 @@
 This package is the implement of Interaction ProMP described [here](http://www.ausy.tu-darmstadt.de/uploads/Team/PubGJMaeda/phase_estim_IJRR.pdf).  
 We use EMG signals to enhance the task recognition. We not make sure if the EMG signals are correlated with robot motion and we will confirm it latter. 
 
-# Dependence
+# Dependences
 - Python >=2.6
 - NumPy
 - sklearn
 - SciPy >= 0.19.1
 - pandas
 
-## Upgrade scipy 
+## upgrade scipy 
 1. Install the gfortran. Maybe need to install gfortran-5 as dependency.  
 2. Upgrade the scipy with "sudo easy_install --upgrade scipy"  
 (not sure need to upgrade the numpy with "sudo easy_install --upgrade numpy")  
@@ -38,7 +38,7 @@ ref: https://askubuntu.com/questions/682825/how-to-update-to-the-latest-numpy-an
 └─ package.xml  
 
 
-## config
+## cfg
 `params.cfg`: the configuration including all params.
 
 ## datasets
@@ -58,7 +58,7 @@ The scripts to load data, train models and test it online.
 `test_online`: test the trained models  
 
 
-# The steps command to run IProMPs
+# The command steps to this package
 All commands run in **baxter.sh** space.  
 1 `roslaunch openni_launch openni.launch`: open the xtion  
 2 `roslaunch aruco_hand_eye baxter_xtion_cal_pub.launch`: load the baxter-xtion calibration result  
@@ -68,20 +68,20 @@ All commands run in **baxter.sh** space.
 6 `rosrun states_manager states_pub.py`: open the state manager node  
 
 # The notes for collecting datasets
-## Notes for datasets collection
+## notes for datasets collection
 Everytime when collecting the datasets, please read these notes. 
 1. **Check** the csv file derived from rosbag 
 2. **In the same time**, start to record all interest data and demonstrate the collaborative task motion (human and robot)  
 3. Demonstrate with **spatio-temporal variance**  
 4. No human hand **occlusion and joint** with robot  
 
-## Record the training process
+## record the training process
 Take some significant notes to be used in testing.  
 1. Armband wear position on hand  
 2. Object grasp position  
 3. Collaborative task process video  
 
-## Options of possible improvement in this model
+## possible options to improve this model
 Some possible option to improvement the performance of this model are list as below. 
 1. Use robot twist/joint/cartesian space  
 2. EMG signals' effect (dose it correlate with robot motion?)  
