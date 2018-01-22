@@ -1,6 +1,6 @@
-# Interaction ProMP
-This package is the implement of Interaction ProMP described [here](http://www.ausy.tu-darmstadt.de/uploads/Team/PubGJMaeda/phase_estim_IJRR.pdf).  
-We use EMG signals to enhance the task recognition. We not make sure if the EMG signals are correlated with robot motion and we will confirm it latter. 
+# Interaction ProMPs  
+Interaction ProMPs generate a robot collaborative motion based on the prediction from a set of partial human motion observations. The approach also works in multi-task scenarios. We use EMG signals to enhance the task recognition. 
+We not make sure if the EMG signals are correlated with robot motion and we will confirm it latter. 
 
 # Dependences
 - Python >=2.6
@@ -9,11 +9,12 @@ We use EMG signals to enhance the task recognition. We not make sure if the EMG 
 - SciPy >= 0.19.1
 - pandas
 
-## upgrade scipy 
+## upgrade scipy
+Need to upgrade the scipy especially to use the probability python module. 
 1. Install the gfortran. Maybe need to install gfortran-5 as dependency.  
-2. Upgrade the scipy with "sudo easy_install --upgrade scipy"  
-(not sure need to upgrade the numpy with "sudo easy_install --upgrade numpy")  
-ref: https://askubuntu.com/questions/682825/how-to-update-to-the-latest-numpy-and-scipy-on-ubuntu-14-04lts  
+2. Upgrade the scipy with `sudo easy_install --upgrade scipy`  
+(not sure need to upgrade the numpy with `sudo easy_install --upgrade numpy`)  
+The reference tutorial is [ref](https://askubuntu.com/questions/682825/how-to-update-to-the-latest-numpy-and-scipy-on-ubuntu-14-04lts).  
 
 # The package architecture  
 ├── cfg  
@@ -35,15 +36,14 @@ ref: https://askubuntu.com/questions/682825/how-to-update-to-the-latest-numpy-an
 │   └── train_offline.py  
 ├── README.md  
 ├── CMakeLists.txt  
-└─ package.xml  
+└── package.xml  
 
 
 ## cfg
 `params.cfg`: the configuration including all params.
 
 ## datasets
-The datasets path involves multiple demo dadta and to save the middle data. 
-
+The datasets path involves multiple demo data in `raw` path, the middle data in `pkl` path and notes in `info` path. 
 
 ## scripts
 The scripts to load data, train models and test it online. 
@@ -75,7 +75,7 @@ Everytime when collecting the datasets, please read these notes.
 3. Demonstrate with **spatio-temporal variance**  
 4. No human hand **occlusion and joint** with robot  
 
-## record the training process
+## notes for training process
 Take some significant notes to be used in testing.  
 1. Armband wear position on hand  
 2. Object grasp position  
