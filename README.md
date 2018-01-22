@@ -1,10 +1,10 @@
 # Interaction ProMPs  
-Interaction ProMPs generate a robot collaborative motion based on the prediction from a set of partial human motion observations. The approach also works in multi-task scenarios. This package use EMG signals to enhance the task recognition. 
+Interaction ProMPs generate a robot collaborative motion based on the prediction from a set of partial human motion observations. The approach also works in multi-task scenarios. This package use EMG signals to enhance the task recognition.   
 Not make sure if the EMG signals are correlated with robot motion and we will confirm it latter. 
 
 
 # Dependences
-Serveral package dependeces for this package. 
+Serveral dependeces for this package. 
 ## ML packages: 
 - Python >=2.6
 - NumPy
@@ -22,7 +22,7 @@ Serveral package dependeces for this package.
 - states_manager
 
 # upgrade scipy
-Need to upgrade the scipy especially to use the probability python module. 
+Need to upgrade the scipy especially to use the probability python module.   
 1. Install the gfortran. Maybe need to install gfortran-5 as dependency.  
 2. Upgrade the scipy with `sudo easy_install --upgrade scipy`  
 (not sure need to upgrade the numpy with `sudo easy_install --upgrade numpy`)  
@@ -59,12 +59,12 @@ The reference tutorial is [ref](https://askubuntu.com/questions/682825/how-to-up
 The datasets path involves multiple demo data in `raw` path, the middle data in `pkl` path and notes in `info` path. 
 
 ## scripts
-The scripts to load data, train models and test it online. 
+The scripts to load data, train models and test it online.  
 `bag_to_csv.sh`: a script to convert single rosbag to csv, called in `batch_bag2csv.py`  
 `batch_bag2csv.py`: a batch python script to convert rosbag to csv, run it in terminal for some ros shell script  
-`ipromps_lib.py`: the lib for IProMP including unit ProMP, ProMPs and Interaction ProMPs
+`ipromps_lib.py`: the lib for IProMP including unit ProMP, ProMPs and Interaction ProMPs  
 `load_data.py` : load the data from csv file, filter the data and resample the data as same duration  
-`train_models.py`: train the models from the loaded data
+`train_models.py`: train the models from the loaded data  
 `train_offline.py`: train the Interaction ProMPs (load data and train model), call for `load_data.py` and `train_models.py`  
 `data_visualization.py`: visualization for data  
 `noise_cov_cal.py`: theorically measure the observation noise covariance matrix  
@@ -83,6 +83,7 @@ All commands run in **baxter.sh** space.
 
 # The notes for collecting datasets
 Some notes need to read everytime when collecting the demo data. 
+
 ## notes for datasets collection
 Everytime when collecting the datasets, please read these notes. 
 1. **Check** the csv file derived from rosbag 
