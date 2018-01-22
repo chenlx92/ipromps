@@ -1,20 +1,33 @@
 # Interaction ProMPs  
-Interaction ProMPs generate a robot collaborative motion based on the prediction from a set of partial human motion observations. The approach also works in multi-task scenarios. We use EMG signals to enhance the task recognition. 
-We not make sure if the EMG signals are correlated with robot motion and we will confirm it latter. 
+Interaction ProMPs generate a robot collaborative motion based on the prediction from a set of partial human motion observations. The approach also works in multi-task scenarios. This package use EMG signals to enhance the task recognition. 
+Not make sure if the EMG signals are correlated with robot motion and we will confirm it latter. 
+
 
 # Dependences
+Serveral package dependeces for this package. 
+## ML packages: 
 - Python >=2.6
 - NumPy
 - sklearn
 - SciPy >= 0.19.1
 - pandas
 
-## upgrade scipy
+## robotics packages: 
+- openni_launch
+- aruco_hand_eye
+- openni_tracker
+
+## custom packages: 
+- myo_driver
+- states_manager
+
+# upgrade scipy
 Need to upgrade the scipy especially to use the probability python module. 
 1. Install the gfortran. Maybe need to install gfortran-5 as dependency.  
 2. Upgrade the scipy with `sudo easy_install --upgrade scipy`  
 (not sure need to upgrade the numpy with `sudo easy_install --upgrade numpy`)  
 The reference tutorial is [ref](https://askubuntu.com/questions/682825/how-to-update-to-the-latest-numpy-and-scipy-on-ubuntu-14-04lts).  
+
 
 # The package architecture  
 ├── cfg  
@@ -55,7 +68,7 @@ The scripts to load data, train models and test it online.
 `train_offline.py`: train the Interaction ProMPs (load data and train model), call for `load_data.py` and `train_models.py`  
 `data_visualization.py`: visualization for data  
 `noise_cov_cal.py`: theorically measure the observation noise covariance matrix  
-`test_online`: test the trained models  
+`test_online.py`: test the trained models  
 
 
 # The command steps to this package
@@ -67,7 +80,9 @@ All commands run in **baxter.sh** space.
 5 `roslaunch myo_driver myo_raw_pub.launch`: start the Myo armband node  
 6 `rosrun states_manager states_pub.py`: open the state manager node  
 
+
 # The notes for collecting datasets
+Some notes need to read everytime when collecting the demo data. 
 ## notes for datasets collection
 Everytime when collecting the datasets, please read these notes. 
 1. **Check** the csv file derived from rosbag 
