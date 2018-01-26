@@ -103,4 +103,4 @@ Some possible option to improvement the performance of this model are list as be
 2. EMG signals' effect (dose it correlate with robot motion?)  
 3. Design the tasks with different motion of robot arm, human hand, elbow, shoulder...  
 4. Use double robot arm  
-5. No robot orientation change in simple test at the beginning  
+5. No robot and human orientation change cause the tracking algorithm does not have oritation info

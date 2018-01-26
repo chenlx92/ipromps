@@ -3,7 +3,7 @@ import rospy
 from states_manager.msg import multiModal
 import numpy as np
 import threading
-import scipy.signal as signal
+from scipy.ndimage.filters import gaussian_filter1d
 import baxter_interface
 from baxter_interface import CHECK_VERSION
 import time
@@ -14,7 +14,7 @@ from sklearn.externals import joblib
 # read conf file
 file_path = os.path.dirname(__file__)
 cp = ConfigParser.SafeConfigParser()
-cp.read(os.path.join(file_path, '../config/model.conf'))
+cp.read(os.path.join(file_path, '../cfg/params.cfg'))
 
 # load param
 datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
@@ -23,7 +23,8 @@ timer_interval = cp.getfloat('online', 'timer_interval')
 ready_time = cp.getint('online', 'ready_time')
 task_name_path = os.path.join(datasets_path, 'pkl/task_name_list.pkl')
 task_name = joblib.load(task_name_path)
-filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
+# filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
+sigma = cp.get('filter', 'sigma')
 
 
 def make_command(arr, t):
@@ -61,8 +62,7 @@ def fun_timer():
         timestamp.append(obs_data_list_idx['stamp'])
 
     # filter the data
-    obs_data = signal.medfilt(obs_data, filter_kernel)
-
+    obs_data = gaussian_filter1d(obs_data.T, sigma=sigma).T
     # preprocessing for the data
     obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
     # consider the unobserved info
