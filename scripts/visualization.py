@@ -24,6 +24,7 @@ datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_no
 datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
 datasets_filtered = joblib.load(os.path.join(datasets_path, 'pkl/datasets_filtered.pkl'))
 task_name = joblib.load(os.path.join(datasets_path, 'pkl/task_name_list.pkl'))
+[robot_traj_offline, ground_truth] = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_offline.pkl'))
 
 # read datasets cfg file
 datasets_path = os.path.join(file_path, cp_models.get('datasets', 'path'))
@@ -163,7 +164,7 @@ def plot_3d_filtered_traj(num=0):
         ax = fig.gca(projection='3d')
         for demo_idx in demo_list:
             data = datasets_filtered[task_idx][demo_idx][info]
-            ax.plot(data[:, 0], data[:, 1], data[:, 2], linewidth=3, label='human'+str(demo_idx))
+            ax.plot(data[:, 0], data[:, 1], data[:, 2], linewidth=3, label='human'+str(demo_idx), alpha=0.5)
             ax.set_xlabel('X Label')
             ax.set_ylabel('Y Label')
             ax.set_zlabel('Z Label')
@@ -177,11 +178,29 @@ def plot_3d_filtered_r_traj(num=0):
         ax = fig.gca(projection='3d')
         for demo_idx in demo_list:
             data = datasets_filtered[task_idx][demo_idx]['left_joints']
-            ax.plot(data[:, 0], data[:, 1], data[:, 2], linewidth=3, linestyle=':', label='robot'+str(demo_idx))
+            ax.plot(data[:, 0], data[:, 1], data[:, 2],
+                    linewidth=3, linestyle=':', label='robot'+str(demo_idx), alpha=0.3)
             ax.set_xlabel('X Label')
             ax.set_ylabel('Y Label')
             ax.set_zlabel('Z Label')
             ax.legend()
+
+
+# plot the 3d generated robot traj
+def plot_3d_filtered_r_traj_offline(num=0):
+    for task_idx, demo_list in enumerate(data_index):
+        fig = plt.figure(task_idx+num)
+        ax = fig.gca(projection='3d')
+        data = robot_traj_offline
+        ax.plot(data[:, 0], data[:, 1], data[:, 2],
+                linewidth=8, linestyle='-', label='generated robot traj')
+        data = ground_truth['left_joints']
+        ax.plot(data[:, 0], data[:, 1], data[:, 2],
+                linewidth=8, linestyle='-', label='ground truth robot traj', alpha=0.3)
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_zlabel('Z Label')
+        ax.legend()
 
 
 def main():
@@ -197,6 +216,7 @@ def main():
     # plot_3d_raw_traj()
     plot_3d_filtered_traj(10)
     plot_3d_filtered_r_traj(10)
+    plot_3d_filtered_r_traj_offline(10)
     plt.show()
 
 
