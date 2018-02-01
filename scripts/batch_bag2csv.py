@@ -7,7 +7,7 @@ import ConfigParser
 # read conf file
 file_path = os.path.dirname(__file__)
 cp = ConfigParser.SafeConfigParser()
-cp.read(os.path.join(file_path, '../config/model.conf'))
+cp.read(os.path.join(file_path, '../cfg/models.cfg'))
 # load the raw data set
 datasets_raw_path = os.path.join(file_path, cp.get('datasets', 'path'), 'raw')
 

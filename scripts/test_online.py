@@ -14,7 +14,7 @@ from sklearn.externals import joblib
 # read conf file
 file_path = os.path.dirname(__file__)
 cp = ConfigParser.SafeConfigParser()
-cp.read(os.path.join(file_path, '../cfg/params.cfg'))
+cp.read(os.path.join(file_path, '../cfg/models.cfg'))
 
 # load param
 datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
@@ -90,28 +90,29 @@ def fun_timer():
         prob_task_temp = ipromp.prob_obs()
         prob_task.append(prob_task_temp)
     idx_max_prob = np.argmax(prob_task)
-    # idx_max_prob = 0 # a trick for testing
+    idx_max_prob = 0 # a trick for testing
     rospy.loginfo('The max fit model index is task %s', task_name[idx_max_prob])
 
     # robot motion generation
     [traj_time, traj] = ipromps_set[idx_max_prob].gen_real_traj(alpha_max_list[idx_max_prob])
     traj = ipromps_set[idx_max_prob].min_max_scaler.inverse_transform(traj)
-    robot_traj = traj[:, 3:10]
+    # robot_traj = traj[:, 3:10]
+    robot_traj = traj[:, 3:6]
 
-    # robot start point
-    global left
-    rospy.loginfo('Moving to start position...')
-    left_start = make_command(robot_traj, 0)
-    left.move_to_joint_positions(left_start)
-
-    # move the robot along the trajectory
-    rospy.loginfo('Moving along the trajectory...')
-    start_time = rospy.get_time()
-    for t in range(len(traj_time)):
-        l_cmd = make_command(robot_traj, t)
-        while (rospy.get_time()-start_time) < traj_time[t]:
-            left.set_joint_positions(l_cmd)
-    rospy.loginfo('The whole trajectory has been run!')
+    # # robot start point
+    # global left
+    # rospy.loginfo('Moving to start position...')
+    # left_start = make_command(robot_traj, 0)
+    # left.move_to_joint_positions(left_start)
+    #
+    # # move the robot along the trajectory
+    # rospy.loginfo('Moving along the trajectory...')
+    # start_time = rospy.get_time()
+    # for t in range(len(traj_time)):
+    #     l_cmd = make_command(robot_traj, t)
+    #     while (rospy.get_time()-start_time) < traj_time[t]:
+    #         left.set_joint_positions(l_cmd)
+    # rospy.loginfo('The whole trajectory has been run!')
 
     # save the conditional result
     rospy.loginfo('Saving the post IProMPs...')
@@ -141,7 +142,11 @@ def callback(data):
                           data.tf_of_interest.transforms[5].transform.translation.y,
                           data.tf_of_interest.transforms[5].transform.translation.z]).reshape([1, 3])
     # left_joints
-    left_joints = np.array(data.jointStates.position[2:9]).reshape([1, 7])
+    # left_joints = np.array(data.jointStates.position[2:9]).reshape([1, 7])
+    # left_hand actually
+    left_joints = np.array([data.tf_of_interest.transforms[5].transform.translation.x,
+                          data.tf_of_interest.transforms[5].transform.translation.y,
+                          data.tf_of_interest.transforms[5].transform.translation.z]).reshape([1, 3])
     left_gripper = np.zeros_like(left_joints)
 
     global obs_data_list

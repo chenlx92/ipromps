@@ -27,10 +27,12 @@ sigma = cp_models.get('filter', 'sigma')
 cp_datasets = ConfigParser.SafeConfigParser()
 cp_datasets.read(os.path.join(datasets_path, 'info/cfg/datasets.cfg'))
 # read datasets params
-data_index0 = list(np.fromstring(cp_datasets.get('index', 'data_index0'), dtype=int, sep=','))
-data_index1 = list(np.fromstring(cp_datasets.get('index', 'data_index1'), dtype=int, sep=','))
-data_index2 = list(np.fromstring(cp_datasets.get('index', 'data_index2'), dtype=int, sep=','))
-data_index = [data_index0, data_index1, data_index2]
+# data_index0 = list(np.fromstring(cp_datasets.get('index_12', 'data_index0'), dtype=int, sep=','))
+# data_index1 = list(np.fromstring(cp_datasets.get('index_12', 'data_index1'), dtype=int, sep=','))
+# data_index2 = list(np.fromstring(cp_datasets.get('index_12', 'data_index2'), dtype=int, sep=','))
+# data_index = [data_index0, data_index1, data_index2]
+data_index0 = list(np.fromstring(cp_datasets.get('index_12', 'data_index0'), dtype=int, sep=','))
+data_index = [data_index0]
 
 # # the information and corresponding index in csv file
 # info_n_idx_csv = {

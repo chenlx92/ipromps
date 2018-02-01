@@ -25,16 +25,20 @@ datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
 datasets_filtered = joblib.load(os.path.join(datasets_path, 'pkl/datasets_filtered.pkl'))
 task_name = joblib.load(os.path.join(datasets_path, 'pkl/task_name_list.pkl'))
 [robot_traj_offline, ground_truth] = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_offline.pkl'))
+robot_traj = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj.pkl'))
+
 
 # read datasets cfg file
 datasets_path = os.path.join(file_path, cp_models.get('datasets', 'path'))
 cp_datasets = ConfigParser.SafeConfigParser()
 cp_datasets.read(os.path.join(datasets_path, 'info/cfg/datasets.cfg'))
 # read datasets params
-data_index0 = list(np.fromstring(cp_datasets.get('index', 'data_index0'), dtype=int, sep=','))
-data_index1 = list(np.fromstring(cp_datasets.get('index', 'data_index1'), dtype=int, sep=','))
-data_index2 = list(np.fromstring(cp_datasets.get('index', 'data_index2'), dtype=int, sep=','))
-data_index = [data_index0, data_index1, data_index2]
+# data_index0 = list(np.fromstring(cp_datasets.get('index_12', 'data_index0'), dtype=int, sep=','))
+# data_index1 = list(np.fromstring(cp_datasets.get('index_12', 'data_index1'), dtype=int, sep=','))
+# data_index2 = list(np.fromstring(cp_datasets.get('index_12', 'data_index2'), dtype=int, sep=','))
+# data_index = [data_index0, data_index1, data_index2]
+data_index0 = list(np.fromstring(cp_datasets.get('index_12', 'data_index0'), dtype=int, sep=','))
+data_index = [data_index0]
 
 # the idx of interest info in data structure
 info_n_idx = {
@@ -44,6 +48,7 @@ info_n_idx = {
 # the info to be plotted
 info = cp_models.get('visualization', 'info')
 joint_num = info_n_idx[info][1] - info_n_idx[info][0]
+num_obs = cp_models.getint('visualization', 'num_obs')
 
 
 # plot the raw data
@@ -158,17 +163,36 @@ def plot_3d_raw_traj(num=0):
 
 
 # plot the 3d filtered traj
-def plot_3d_filtered_traj(num=0):
+def plot_3d_filtered_h_traj(num=0):
     for task_idx, demo_list in enumerate(data_index):
         fig = plt.figure(task_idx+num)
         ax = fig.gca(projection='3d')
         for demo_idx in demo_list:
-            data = datasets_filtered[task_idx][demo_idx][info]
-            ax.plot(data[:, 0], data[:, 1], data[:, 2], linewidth=3, label='human'+str(demo_idx), alpha=0.5)
+            data = datasets_filtered[task_idx][demo_idx]['left_hand']
+            ax.plot(data[:, 0], data[:, 1], data[:, 2], linewidth=3,
+                    label='training sets about human '+str(demo_idx), alpha=0.5)
             ax.set_xlabel('X Label')
             ax.set_ylabel('Y Label')
             ax.set_zlabel('Z Label')
             ax.legend()
+
+
+# plot the offline obs
+def plot_offline_3d_obs(num=0):
+    for task_idx, demo_list in enumerate(data_index):
+        fig = plt.figure(task_idx + num)
+        ax = fig.gca(projection='3d')
+        # obs_data_dict = datasets_raw[0][13]
+        obs_data_dict = ground_truth
+        data = obs_data_dict['left_hand']
+        ax.plot(data[0:num_obs, 0], data[0:num_obs, 1], data[0:num_obs, 2],
+                'o', linewidth=3, label='obs points', alpha=0.5)
+        ax.plot(data[:, 0], data[:, 1], data[:, 2],
+                '-', linewidth=8, color='r', label='obs points', alpha=0.3)
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_zlabel('Z Label')
+        ax.legend()
 
 
 # plot the 3d filtered robot traj
@@ -179,7 +203,7 @@ def plot_3d_filtered_r_traj(num=0):
         for demo_idx in demo_list:
             data = datasets_filtered[task_idx][demo_idx]['left_joints']
             ax.plot(data[:, 0], data[:, 1], data[:, 2],
-                    linewidth=3, linestyle=':', label='robot'+str(demo_idx), alpha=0.3)
+                    linewidth=3, linestyle=':', label='training sets about robot '+str(demo_idx), alpha=0.5)
             ax.set_xlabel('X Label')
             ax.set_ylabel('Y Label')
             ax.set_zlabel('Z Label')
@@ -187,7 +211,7 @@ def plot_3d_filtered_r_traj(num=0):
 
 
 # plot the 3d generated robot traj
-def plot_3d_filtered_r_traj_offline(num=0):
+def plot_gen_3d_offline_r_traj(num=0):
     for task_idx, demo_list in enumerate(data_index):
         fig = plt.figure(task_idx+num)
         ax = fig.gca(projection='3d')
@@ -196,11 +220,45 @@ def plot_3d_filtered_r_traj_offline(num=0):
                 linewidth=8, linestyle='-', label='generated robot traj')
         data = ground_truth['left_joints']
         ax.plot(data[:, 0], data[:, 1], data[:, 2],
-                linewidth=8, linestyle='-', label='ground truth robot traj', alpha=0.3)
+                linewidth=8, linestyle='-', color='r', label='ground truth robot traj', alpha=0.3)
         ax.set_xlabel('X Label')
         ax.set_ylabel('Y Label')
         ax.set_zlabel('Z Label')
         ax.legend()
+
+
+# plot the 3d generated robot traj
+def plot_gen_3d_online_r_traj(num=0):
+    for task_idx, demo_list in enumerate(data_index):
+        fig = plt.figure(task_idx+num)
+        ax = fig.gca(projection='3d')
+        data = robot_traj
+        ax.plot(data[:, 0], data[:, 1], data[:, 2],
+                linewidth=8, linestyle='-', label='generated robot traj')
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_zlabel('Z Label')
+        ax.legend()
+
+
+def plot_online_3d_obs(num):
+    pass
+
+
+# plot offline test pair
+def pairs_offline(num=0):
+    plot_3d_filtered_h_traj(num)
+    plot_3d_filtered_r_traj(num)
+    plot_offline_3d_obs(num)
+    plot_gen_3d_offline_r_traj(num)
+
+
+# plot online test pair
+def pairs_online(num=0):
+    plot_3d_filtered_h_traj(num)
+    plot_3d_filtered_r_traj(num)
+    plot_online_3d_obs(num)
+    plot_gen_3d_online_r_traj(num)
 
 
 def main():
@@ -213,10 +271,12 @@ def main():
     # plot_robot_traj()
     # plot_raw_data_index()
     # plot_filter_data_index(20)
-    # plot_3d_raw_traj()
-    plot_3d_filtered_traj(10)
-    plot_3d_filtered_r_traj(10)
-    plot_3d_filtered_r_traj_offline(10)
+
+    #3D
+    # plot_3d_raw_traj(10)
+    # plot_3d_gen_r_traj_online(10)
+    pairs_offline(10)
+
     plt.show()
 
 

@@ -23,12 +23,14 @@ sigma = cp_models.get('filter', 'sigma')
 num_joints = cp_models.getint('datasets', 'num_joints')
 ipromps_set = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
 datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
+test_index = cp_models.getint('visualization', 'test_index')
+num_obs = cp_models.getint('visualization', 'num_obs')
 
 
 def main():
 
     # read test data
-    obs_data_dict = datasets_raw[1][14]
+    obs_data_dict = datasets_raw[0][test_index]
 
     left_hand = obs_data_dict['left_hand']
     left_joints = obs_data_dict['left_joints']
@@ -43,8 +45,8 @@ def main():
     obs_data_post_arr[:, 3:6] = 0.0
 
     # choose the data
-    obs_data_post_arr = obs_data_post_arr[0:40, :]
-    timestamp = timestamp[0:40]
+    obs_data_post_arr = obs_data_post_arr[0:num_obs, :]
+    timestamp = timestamp[0:num_obs]
 
     # phase estimation
     print('Phase estimating...')

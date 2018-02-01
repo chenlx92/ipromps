@@ -8,7 +8,7 @@ import ConfigParser
 # read conf file
 file_path = os.path.dirname(__file__)
 cp = ConfigParser.SafeConfigParser()
-cp.read(os.path.join(file_path, '../cfg/params.cfg'))
+cp.read(os.path.join(file_path, '../cfg/models.cfg'))
 # the datasets path
 datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
 
