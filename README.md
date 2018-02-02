@@ -1,5 +1,9 @@
 # Interaction ProMPs  
-Interaction ProMPs generate a robot collaborative motion based on the prediction from a set of partial human motion observations. The approach also works in multi-task scenarios. This package use EMG signals to enhance the task recognition.   
+Interaction ProMPs generate a robot collaborative motion based on the prediction from a set of partial human motion observations. 
+
+![generalization](./docs/media/generalization.png  "generalization")
+
+The approach also works in multi-task scenarios. This package use EMG signals to enhance the task recognition.   
 Not make sure if the EMG signals are correlated with robot motion and we will confirm it latter. 
 
 
