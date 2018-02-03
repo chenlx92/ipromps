@@ -1,0 +1,2 @@
+ - There are strong vison occlusions in this dataset. 
+ - There is a bug in the data publishing node. Some time the transform keep 0 as init when the lookup transform function return nothing. 
