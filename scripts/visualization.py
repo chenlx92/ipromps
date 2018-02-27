@@ -19,26 +19,22 @@ datasets_path = os.path.join(file_path, cp_models.get('datasets', 'path'))
 # load datasets
 ipromps_set = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
 ipromps_set_post = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set_post.pkl'))
-robot_traj = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj.pkl'))
 datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
 datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
 datasets_filtered = joblib.load(os.path.join(datasets_path, 'pkl/datasets_filtered.pkl'))
 task_name = joblib.load(os.path.join(datasets_path, 'pkl/task_name_list.pkl'))
 [robot_traj_offline, ground_truth] = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_offline.pkl'))
-robot_traj = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj.pkl'))
+robot_traj_online = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_online.pkl'))
+obs_data_online = joblib.load(os.path.join(datasets_path, 'pkl/obs_data_online.pkl'))
+
 
 
 # read datasets cfg file
-datasets_path = os.path.join(file_path, cp_models.get('datasets', 'path'))
 cp_datasets = ConfigParser.SafeConfigParser()
 cp_datasets.read(os.path.join(datasets_path, 'info/cfg/datasets.cfg'))
 # read datasets params
-# data_index0 = list(np.fromstring(cp_datasets.get('index_12', 'data_index0'), dtype=int, sep=','))
-# data_index1 = list(np.fromstring(cp_datasets.get('index_12', 'data_index1'), dtype=int, sep=','))
-# data_index2 = list(np.fromstring(cp_datasets.get('index_12', 'data_index2'), dtype=int, sep=','))
-# data_index = [data_index0, data_index1, data_index2]
-data_index0 = list(np.fromstring(cp_datasets.get('index_12', 'data_index0'), dtype=int, sep=','))
-data_index = [data_index0]
+data_index_sec = cp_datasets.items('index_15')
+data_index = [map(int, task[1].split(',')) for task in data_index_sec]
 
 # the idx of interest info in data structure
 info_n_idx = {
@@ -118,7 +114,7 @@ def plot_robot_traj(num=0):
     fig.suptitle('predict robot motion')
     for joint_idx in range(7):
         ax = fig.add_subplot(7, 1, 1 + joint_idx)
-        plt.plot(np.linspace(0, 1.0, 101), robot_traj[:, joint_idx])
+        plt.plot(np.linspace(0, 1.0, 101), robot_traj_online[:, joint_idx])
 
 
 # plot the raw data index
@@ -182,7 +178,6 @@ def plot_offline_3d_obs(num=0):
     for task_idx, demo_list in enumerate(data_index):
         fig = plt.figure(task_idx + num)
         ax = fig.gca(projection='3d')
-        # obs_data_dict = datasets_raw[0][13]
         obs_data_dict = ground_truth
         data = obs_data_dict['left_hand']
         ax.plot(data[0:num_obs, 0], data[0:num_obs, 1], data[0:num_obs, 2],
@@ -203,7 +198,7 @@ def plot_3d_filtered_r_traj(num=0):
         for demo_idx in demo_list:
             data = datasets_filtered[task_idx][demo_idx]['left_joints']
             ax.plot(data[:, 0], data[:, 1], data[:, 2],
-                    linewidth=3, linestyle=':', label='training sets about robot '+str(demo_idx), alpha=0.5)
+                    linewidth=3, linestyle='-', label='training sets about robot '+str(demo_idx), alpha=0.5)
             ax.set_xlabel('X Label')
             ax.set_ylabel('Y Label')
             ax.set_zlabel('Z Label')
@@ -232,9 +227,9 @@ def plot_gen_3d_online_r_traj(num=0):
     for task_idx, demo_list in enumerate(data_index):
         fig = plt.figure(task_idx+num)
         ax = fig.gca(projection='3d')
-        data = robot_traj
+        data = robot_traj_online
         ax.plot(data[:, 0], data[:, 1], data[:, 2],
-                linewidth=8, linestyle='-', label='generated robot traj')
+                linewidth=8, linestyle='-', label='generated online robot traj', alpha=0.2)
         ax.set_xlabel('X Label')
         ax.set_ylabel('Y Label')
         ax.set_zlabel('Z Label')
@@ -242,7 +237,18 @@ def plot_gen_3d_online_r_traj(num=0):
 
 
 def plot_online_3d_obs(num):
-    pass
+    for task_idx, demo_list in enumerate(data_index):
+        fig = plt.figure(task_idx + num)
+        ax = fig.gca(projection='3d')
+        data = obs_data_online
+        ax.plot(data[0:num_obs, 0], data[0:num_obs, 1], data[0:num_obs, 2],
+                'o', linewidth=3, label='obs points', alpha=0.2)
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_zlabel('Z Label')
+        ax.legend()
+
+
 
 
 # plot offline test pair
@@ -275,7 +281,8 @@ def main():
     #3D
     # plot_3d_raw_traj(10)
     # plot_3d_gen_r_traj_online(10)
-    pairs_offline(10)
+    # pairs_offline(20)
+    pairs_online(10)
 
     plt.show()
 

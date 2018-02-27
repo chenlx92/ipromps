@@ -42,7 +42,7 @@ def main():
     # preprocessing for the data
     obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
     # consider the unobserved info
-    obs_data_post_arr[:, 3:6] = 0.0
+    obs_data_post_arr[:, 3:10] = 0.0
 
     # choose the data
     obs_data_post_arr = obs_data_post_arr[0:num_obs, :]
@@ -76,7 +76,7 @@ def main():
     # robot motion generation
     [traj_time, traj] = ipromps_set[idx_max_prob].gen_real_traj(alpha_max_list[idx_max_prob])
     traj = ipromps_set[idx_max_prob].min_max_scaler.inverse_transform(traj)
-    robot_traj = traj[:, 3:6]
+    robot_traj = traj[:, 3:10]
 
     # save the conditional result
     print('Saving the post IProMPs...')
