@@ -135,6 +135,24 @@ class ProMP(object):
         """
         self.viapoints.append({'t': t, 'obsy': obsy})
 
+    def param_updata(self, randomness=1e-10):
+        """
+        :param randomness:
+        :return:
+        """
+        newMean = self.meanW
+        newSigma = self.sigmaW
+        # conditioning
+        for viapoint in self.viapoints:
+            PhiT = np.exp(-.5 * (np.array(map(lambda x: x - self.C, np.tile(viapoint['t'], (self.num_basis, 1)).T)).T ** 2 / (self.sigma_basis ** 2)))
+            aux = self.sigmay + np.dot(np.dot(PhiT.T, newSigma), PhiT)
+            K = np.dot(newSigma, PhiT) * 1 / aux
+            newMean = newMean + np.dot(K, (viapoint['obsy'] - np.dot(PhiT.T, newMean)))
+            newSigma = newSigma - np.dot(K, np.dot(PhiT.T, newSigma))
+        # save the updated distribution
+        self.meanW_uUpdated = newMean
+        self.sigmaW_uUpdated = newSigma
+
     def gen_uTrajectory(self, randomness=1e-10):
         """
         Outputs a trajectory from unit promp
@@ -157,7 +175,7 @@ class ProMP(object):
         return np.dot(self.Phi.T, sampW)
 
     def plot_prior(self, legend='', b_distribution=True, color='b', alpha_std=0.4, linewidth_mean=2,
-                   b_regression=True, b_dataset=True):
+                   b_regression=True, b_dataset=True, linewidth_data=2):
         """
         plot the prior distribution from training sets
         :param legend: the figure legend
@@ -167,6 +185,7 @@ class ProMP(object):
         :param linewidth_mean:
         :param b_regression:
         :param b_dataset: the dataset to train to model
+        :param linewidth_data:
         :return:
         """
         x = self.x
@@ -175,26 +194,40 @@ class ProMP(object):
             mean = np.dot(self.Phi.T, self.meanW)
             std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW, self.Phi))))
             plt.fill_between(x, mean-std, mean+std, color=color, alpha=alpha_std)
-            plt.plot(x, mean, color=color, label=legend, linewidth=linewidth_mean)
+            # plt.plot(x, mean, color=color, label=legend, linewidth=linewidth_mean)
         # the regression result
         if b_regression:
             for w in self.W:
                 reg = np.dot(self.Phi.T, w)
-                plt.plot(x, reg, color='black', label=legend, linewidth=linewidth_mean, alpha=0.5)
+                plt.plot(x, reg, color='black', label=legend, linewidth=linewidth_data, alpha=0.5)
         # the dataset to train to model
         if b_dataset:
             for y in self.Y:
-                plt.plot(x, y, color='y', label=legend, linewidth=linewidth_mean, alpha=0.5)
+                plt.plot(x, y, color='gray', label=legend, linewidth=linewidth_data, alpha=0.5)
 
-    def plot_uUpdated(self, legend='', color='b'):
+    def plot_uUpdated(self, legend='', color='g'):
         """
-        plot the unit update ProMP, only valid from unit ProMP
+        :param legend:
+        :param color:
+        :param via_show:
+        :return:
         """
         x = self.x
         mean = np.dot(self.Phi.T, self.meanW_uUpdated)
         std = 2 * np.sqrt(np.diag(np.dot(self.Phi.T, np.dot(self.sigmaW_uUpdated, self.Phi))))
         plt.fill_between(x, mean-std, mean+std, color=color, alpha=0.4)
-        plt.plot(x, mean, color=color, label=legend)
+        plt.plot(x, mean, '--',color=color, label=legend, linewidth=5)
+
+    def plot_uViapoints(self):
+        '''
+        :return:
+        '''
+        for viapoint_id, viapoint in enumerate(self.viapoints):
+            if viapoint_id == 0:
+                plt.plot(viapoint['t'], viapoint['obsy'], marker="o", markersize=15, color='gray', label='via points')
+            else:
+                plt.plot(viapoint['t'], viapoint['obsy'], marker="o", markersize=15, color='gray')
+            # plt.errorbar(viapoint['t'], viapoint['obsy'], yerr=self.sigmay, fmt='o', markersize=15)
 
     def plot_nUpdated(self, legend='', color='b', via_show=True, alpha_std=0.4, mean_line_width=3):
         """
