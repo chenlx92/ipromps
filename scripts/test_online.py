@@ -4,12 +4,13 @@ from states_manager.msg import multiModal
 import numpy as np
 import threading
 from scipy.ndimage.filters import gaussian_filter1d
-import baxter_interface
-from baxter_interface import CHECK_VERSION
 import time
 import os
 import ConfigParser
 from sklearn.externals import joblib
+import sys
+from geometry_msgs.msg import Pose
+import moveit_commander
 
 # read conf file
 file_path = os.path.dirname(__file__)
@@ -20,24 +21,71 @@ cp.read(os.path.join(file_path, '../cfg/models.cfg'))
 datasets_path = os.path.join(file_path, cp.get('datasets', 'path'))
 num_alpha_candidate = cp.getint('phase', 'num_phaseCandidate')
 timer_interval = cp.getfloat('online', 'timer_interval')
-ready_time = cp.getint('online', 'ready_time')
 task_name_path = os.path.join(datasets_path, 'pkl/task_name_list.pkl')
 task_name = joblib.load(task_name_path)
-# filter_kernel = np.fromstring(cp.get('filter', 'filter_kernel'), dtype=int, sep=',')
 sigma = cp.get('filter', 'sigma')
+GROUP_NAME_ARM = 'left_arm'
+
+specify_position = np.array([1.1132629934, -0.2387471985, 0.271010064])
+threshold = 0.08
 
 
-def make_command(arr, t):
-    """
-    cleans a single line of recorded joint positions
-    :param arr: the line described in a list to process
-    :param t: the row index of the array
-    :return: the cmd list
-    """
-    joint_cmd_names = ['left_s0', 'left_s1', 'left_e0', 'left_e1', 'left_w0', 'left_w1', 'left_w2']
-    data_line = [arr[t][2], arr[t][3], arr[t][0], arr[t][1], arr[t][4], arr[t][5], arr[t][6]]
-    command = dict(zip(joint_cmd_names, data_line))
-    return command
+def move_robot(traj, traj_time):
+
+    moveit_commander.roscpp_initialize(sys.argv)
+    moveit_commander.RobotCommander()
+    moveit_commander.PlanningSceneInterface()
+    left = moveit_commander.MoveGroupCommander(GROUP_NAME_ARM)
+    # marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=1000)
+    reference_frame = 'base'
+    left.set_goal_position_tolerance(0.01)
+    left.set_goal_orientation_tolerance(0.05)
+    left.allow_replanning(True)
+    left.set_planning_time(5)
+    left.set_pose_reference_frame(reference_frame)
+    end_effector_link = left.get_end_effector_link()
+
+    current_pose = left.get_current_pose(end_effector_link).pose
+
+    list_of_poses = []
+    for idx in range(len(traj)):
+        traj_pose = Pose()
+        traj_pose.position.x = traj[idx, 0]
+        traj_pose.position.y = traj[idx, 1]
+        traj_pose.position.z = traj[idx, 2]
+        traj_pose.orientation.x = 0.0075093375
+        traj_pose.orientation.y = 0.999812779
+        traj_pose.orientation.z = -0.0177864406
+        traj_pose.orientation.w = 0.0012881299
+        list_of_poses.append(traj_pose)
+
+    max_tries = 50
+    attempts = 0
+    fraction = 0.0
+    while fraction < 1.0 and attempts < max_tries:
+        (plan, fraction) = left.compute_cartesian_path(
+            list_of_poses,  # waypoints to follow
+            0.01,  # eef_step
+            0.0,  # jump_threshold
+            True)  # avoid_collisions
+
+        # Increment the number of attempts
+        attempts += 1
+
+        # Print out a progress message
+        if attempts % 10 == 0:
+            rospy.loginfo("Still trying after " + str(attempts) + " attempts...")
+
+        # If we have a complete plan, execute the trajectory
+        if fraction == 1.0:
+            rospy.loginfo("Path computed successfully. Moving the arm.")
+
+            left.execute(plan)
+
+            rospy.loginfo("Path execution complete.")
+        else:
+            rospy.loginfo(
+                "Path planning failed with only " + str(fraction) + " success after " + str(max_tries) + " attempts.")
 
 
 def fun_timer():
@@ -50,6 +98,7 @@ def fun_timer():
     flag_record = False  # stop record the msg
     global ipromps_set, obs_data_list
     rospy.loginfo('The len of observed data is %d', len(obs_data_list))
+    global obs_data
     obs_data = np.array([]).reshape([0, ipromps_set[0].num_joints])
     timestamp = []
     for obs_data_list_idx in obs_data_list:
@@ -66,7 +115,7 @@ def fun_timer():
     # preprocessing for the data
     obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
     # consider the unobserved info
-    obs_data_post_arr[:, 3:10] = 0.0
+    obs_data_post_arr[:, 3:6] = 0.0
 
     # phase estimation
     rospy.loginfo('Phase estimating...')
@@ -90,7 +139,7 @@ def fun_timer():
         prob_task_temp = ipromp.prob_obs()
         prob_task.append(prob_task_temp)
     idx_max_prob = np.argmax(prob_task)
-    idx_max_prob = 0 # a trick for testing
+    idx_max_prob = 0    # a trick for testing
     rospy.loginfo('The max fit model index is task %s', task_name[idx_max_prob])
 
     # robot motion generation
@@ -99,80 +148,73 @@ def fun_timer():
     # robot_traj = traj[:, 3:10]
     robot_traj = traj[:, 3:6]
 
-    # # robot start point
-    # global left
-    # rospy.loginfo('Moving to start position...')
-    # left_start = make_command(robot_traj, 0)
-    # left.move_to_joint_positions(left_start)
-    #
-    # # move the robot along the trajectory
-    # rospy.loginfo('Moving along the trajectory...')
-    # start_time = rospy.get_time()
-    # for t in range(len(traj_time)):
-    #     l_cmd = make_command(robot_traj, t)
-    #     while (rospy.get_time()-start_time) < traj_time[t]:
-    #         left.set_joint_positions(l_cmd)
-    # rospy.loginfo('The whole trajectory has been run!')
+    ######
+    # for testing
+    datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
+    robot_traj = datasets_raw[0][1]['left_joints'][:, 0:3]
+    print robot_traj.shape
+
+    # move the robot
+    move_robot(robot_traj, traj_time)
 
     # save the conditional result
     rospy.loginfo('Saving the post IProMPs...')
     joblib.dump(ipromps_set, os.path.join(datasets_path, 'pkl/ipromps_set_post.pkl'))
     # save the robot traj
     rospy.loginfo('Saving the robot traj...')
-    joblib.dump(robot_traj, os.path.join(datasets_path, 'pkl/robot_traj.pkl'))
-
+    joblib.dump(robot_traj, os.path.join(datasets_path, 'pkl/robot_traj_online.pkl'))
+    # save the obs
+    rospy.loginfo('Saving the obs...')
+    joblib.dump(obs_data, os.path.join(datasets_path, 'pkl/obs_data_online.pkl'))
+    # finished
     rospy.loginfo('All finished!!!')
 
 
 def callback(data):
     global flag_record
+    # if not flag_record:
+    #     return
+
     if not flag_record:
-        return
+        # left_hand
+        left_hand = np.array([data.tf_of_interest.transforms[5].transform.translation.x,
+                              data.tf_of_interest.transforms[5].transform.translation.y,
+                              data.tf_of_interest.transforms[5].transform.translation.z])
+        # trigger
+        if np.linalg.norm(specify_position - left_hand) < threshold:
+            flag_record = True
+            print "I'm ready!!!"
+            # start the timer
+            global timer
+            timer.start()
+        else:
+            return
 
     global init_time
     if init_time is None:
         init_time = data.header.stamp
 
-    # emg
-    emg_data = np.array([data.emgStates.ch0, data.emgStates.ch1, data.emgStates.ch2,
-                         data.emgStates.ch3, data.emgStates.ch4, data.emgStates.ch5,
-                         data.emgStates.ch6, data.emgStates.ch7]).reshape([1, 8])
+    # # emg
+    # emg_data = np.array([data.emgStates.ch0, data.emgStates.ch1, data.emgStates.ch2,
+    #                      data.emgStates.ch3, data.emgStates.ch4, data.emgStates.ch5,
+    #                      data.emgStates.ch6, data.emgStates.ch7]).reshape([1, 8])
+
     # left_hand
     left_hand = np.array([data.tf_of_interest.transforms[5].transform.translation.x,
                           data.tf_of_interest.transforms[5].transform.translation.y,
                           data.tf_of_interest.transforms[5].transform.translation.z]).reshape([1, 3])
-    # left_joints
-    # left_joints = np.array(data.jointStates.position[2:9]).reshape([1, 7])
-    # left_hand actually
-    left_joints = np.array([data.tf_of_interest.transforms[5].transform.translation.x,
-                          data.tf_of_interest.transforms[5].transform.translation.y,
-                          data.tf_of_interest.transforms[5].transform.translation.z]).reshape([1, 3])
-    left_gripper = np.zeros_like(left_joints)
+
+    # left_joints: left_hand actually
+    left_joints = np.zeros_like(np.array([0, 0, 0]).reshape([1, 3]))
 
     global obs_data_list
     time_stamp = (data.header.stamp - init_time).secs + (data.header.stamp - init_time).nsecs*1e-9
     obs_data_list.append({
                           # 'emg': emg_data,
                           'left_hand': left_hand,
-                          'left_joints': left_gripper,
+                          'left_joints': left_joints,
                           'stamp': time_stamp})
     rospy.loginfo(obs_data_list[-1])
-
-
-def ready_go(count):
-    """
-    the func for press START key and countdown
-    :param count: the time duration for countdown
-    :return:
-    """
-    global flag_record
-    while not flag_record:
-        input_str = raw_input('Press ENTER to start: ')
-        if '' == input_str:
-            flag_record = True
-    for idx in range(count):
-        time.sleep(1.0)
-        rospy.loginfo('The remaining time: %ds', count-idx-1)
 
 
 def main():
@@ -191,36 +233,15 @@ def main():
     # to save the online data
     obs_data_list = []
     # create a timer
+    global timer
     timer = threading.Timer(timer_interval, fun_timer)
-
-    # baxter init
-    global left
-    rospy.loginfo("Getting robot state... ")
-    rs = baxter_interface.RobotEnable(CHECK_VERSION)
-    init_state = rs.state().enabled
-
-    def clean_shutdown():
-        print("\nExiting the script...")
-        if not init_state:
-            print("Disabling robot...")
-            rs.disable()
-    rospy.on_shutdown(clean_shutdown)
-
-    rospy.loginfo("Enabling robot... ")
-    rs.enable()
-    left = baxter_interface.Limb('left')
-
-    # the start cmd
-    ready_go(ready_time)
 
     # the init time
     global init_time
     init_time = None
+
     # subscribe the /multiModal_states topic
     rospy.Subscriber("/multiModal_states", multiModal, callback)
-
-    # start the timer
-    timer.start()
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
