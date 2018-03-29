@@ -50,7 +50,7 @@ def main():
                               'stamp': (data_csv.values[:, 2].astype(int)-data_csv.values[0, 2])*1e-9,  # the time stamp
                               # 'emg': data_csv.values[:, 7:15].astype(float),
                               'left_hand': data_csv.values[:, 207:210].astype(float),   # human left hand
-                              'left_joints': data_csv.values[:, 317:324].astype(float)  # robot ee actually
+                              'left_joints': data_csv.values[:, 317:320].astype(float)  # robot ee actually
                               # 'left_joints': data_csv.values[:, 99:106].astype(float)
                               })
         datasets_raw.append(demo_temp)
