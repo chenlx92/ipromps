@@ -18,7 +18,7 @@ num_basis = cp_models.getint('basisFunc', 'num_basisFunc')
 sigma_basis = cp_models.getfloat('basisFunc', 'sigma_basisFunc')
 datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
 
-num_basis = 15
+num_basis = 12
 
 ex = datasets_norm_preproc[0][0]['left_joints'][:,1]
 
@@ -29,16 +29,18 @@ h = np.exp(-.5*(np.array(map(lambda x: x-c_grid, np.tile(x_grid, (num_basis, 1))
 
 w = np.dot(np.linalg.inv(np.dot(h, h.T)), np.dot(h, ex.T)).T
 
-y = np.dot(w,h)
+y = np.dot(w, h)
 
 fig = plt.figure(0)
-plt.plot(x_grid, ex, linewidth=8, label='target curve', color='r')
+plt.plot(x_grid, ex, 'o', markersize=5, label='target data', color='r')
 plt.bar(c_grid, w, width=0.05)
 plt.plot(x_grid, h.T, linewidth=4, alpha=0.5)
-plt.plot(x_grid, y, '--', linewidth=8, alpha=0.5, label='approx curve')
+plt.plot(x_grid, y, linewidth=8, alpha=0.5, label='regression curve', color='g')
 
 plt.ylim((0, 1.5))
 plt.xlim((0, 1.1))
+plt.xlabel('t')
+plt.ylabel('y')
 
 plt.legend()
 plt.show()
