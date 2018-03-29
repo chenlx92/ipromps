@@ -8,7 +8,6 @@ import os
 import ConfigParser
 from sklearn import preprocessing
 from scipy.ndimage.filters import gaussian_filter1d
-from sklearn.decomposition import PCA
 
 # the current file path
 file_path = os.path.dirname(__file__)
@@ -16,6 +15,7 @@ file_path = os.path.dirname(__file__)
 # read models cfg file
 cp_models = ConfigParser.SafeConfigParser()
 cp_models.read(os.path.join(file_path, '../cfg/models.cfg'))
+
 # read models params
 datasets_path = os.path.join(file_path, cp_models.get('datasets', 'path'))
 len_norm = cp_models.getint('datasets', 'len_norm')
@@ -92,11 +92,12 @@ def main():
             demo_norm_temp.append(temp_dict)
         datasets_norm.append(demo_norm_temp)
 
-    # preprocessing for the norm data
+    # select the datasets
     datasets4train = []
     for task_idx, demo_list in enumerate(data_index):
         data = [datasets_norm[task_idx][i] for i in demo_list]
         datasets4train.append(data)
+    # construct a big array
     y_full = np.array([]).reshape(0, 3*len(tfoi))
     for task_idx, task_data in enumerate(datasets4train):
         print('Preprocessing data of task: ' + task_name_list[task_idx])
@@ -106,15 +107,48 @@ def main():
                 h_temp = np.hstack([h_temp, demo_data[term]])
             y_full = np.vstack([y_full, h_temp])
 
-    pca = PCA()
-    pca.fit(y_full)
+    # PCA
+    from sklearn.decomposition import PCA
+    pca = PCA(n_components=3)
+    a = pca.fit(y_full).transform(y_full)
+    b = pca.inverse_transform(a)
 
+    max = np.argmax(y_full)
     import matplotlib.pyplot as plt
-    plt.figure()
-    plt.plot(pca.explained_variance_, 'k', linewidth=2)
-    plt.xlabel('n_components', fontsize=16)
-    plt.ylabel('explained_variance_', fontsize=16)
+    plt.figure(0)
+    plt.imshow(y_full[0:50, :]/max)
+    plt.colorbar()
+
+    plt.figure(1)
+    plt.imshow(b[0:50, :]/max)
+    plt.colorbar()
+
+    plt.figure(2)
+    plt.imshow(b[0:50, :]/max-y_full[0:50, :]/max)
+    plt.colorbar()
+
+    print(b[0:50, :]-y_full[0:50, :])
+
     plt.show()
+
+    # plt.figure(0)
+    # plt.imshow(y_full)
+
+    #
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # plt.plot(pca.explained_variance_, 'k', linewidth=2)
+    # print(pca.explained_variance_ratio_)
+    # plt.xlabel('n_components', fontsize=16)
+    # plt.ylabel('explained_variance_', fontsize=16)
+
+    # from sklearn.feature_selection import VarianceThreshold
+    # sel = VarianceThreshold()
+    # sel.fit_transform(y_full)
+    # print sel.fit_transform(y_full).shape
+    #
+    #
+    # plt.show()
 
     # datasets_norm_full = min_max_scaler.fit_transform(y_full)
     # # construct a data structure to train the model
