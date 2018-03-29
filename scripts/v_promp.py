@@ -19,22 +19,29 @@ num_basis = cp_models.getint('basisFunc', 'num_basisFunc')
 sigma_basis = cp_models.getfloat('basisFunc', 'sigma_basisFunc')
 datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
 
-num_demo = 20
+num_demo = 15
+test_idx = 17
 
 promp = ipromps_lib.ProMP()
 for idx_demo in range(num_demo):
     promp.add_demonstration(datasets_norm_preproc[0][idx_demo]['left_joints'][:,0])
-promp.plot_prior(b_regression=False, linewidth_mean=5)
+promp.plot_prior(b_regression=False, linewidth_mean=5, b_dataset=False)
 
-promp.add_viapoint(0.1, datasets_norm_preproc[0][2]['left_joints'][10,0])
-promp.add_viapoint(0.2, datasets_norm_preproc[0][2]['left_joints'][20,0])
-promp.add_viapoint(0.3, datasets_norm_preproc[0][2]['left_joints'][30,0])
-promp.add_viapoint(0.4, datasets_norm_preproc[0][2]['left_joints'][40,0])
-promp.add_viapoint(0.5, datasets_norm_preproc[0][2]['left_joints'][50,0])
-promp.gen_uTrajectory()
-promp.plot_uUpdated()
+promp.add_viapoint(0.1, datasets_norm_preproc[0][test_idx]['left_joints'][10,0])
+# promp.add_viapoint(0.2, datasets_norm_preproc[0][test_idx]['left_joints'][20,0])
+promp.add_viapoint(0.3, datasets_norm_preproc[0][test_idx]['left_joints'][30,0])
+# promp.add_viapoint(0.4, datasets_norm_preproc[0][test_idx]['left_joints'][40,0])
+promp.add_viapoint(0.5, datasets_norm_preproc[0][test_idx]['left_joints'][50,0])
+# promp.add_viapoint(1.0, datasets_norm_preproc[0][test_idx]['left_joints'][100,0])
+promp.param_updata()
+promp.plot_uUpdated(legend='prediction trajectory')
+promp.plot_uViapoints()
 
-plt.plot(promp.x, datasets_norm_preproc[0][2]['left_joints'][:,0], color='g', linewidth=5)
+plt.plot(promp.x, datasets_norm_preproc[0][test_idx]['left_joints'][:,0], color='g', linewidth=5, label='ground truth')
 
+plt.xlabel('t')
+plt.ylabel('y')
+
+plt.legend(loc=2)
 plt.show()
 
