@@ -48,8 +48,11 @@ def main():
             # the info of interest: convert the object to int / float
             demo_temp.append({
                               'stamp': (data_csv.values[:, 2].astype(int)-data_csv.values[0, 2])*1e-9,  # the time stamp
-                              # 'emg': data_csv.values[:, 7:15].astype(float),
-                              'left_hand': data_csv.values[:, 207:210].astype(float),   # human left hand
+                              'left_hand':np.hstack([
+                                  # data_csv.values[:, 7:15].astype(float),  # emg
+                                  data_csv.values[:, 7:15].astype(float),  # emg
+                                  data_csv.values[:, 207:210].astype(float)   # human left hand
+                                  ]),
                               'left_joints': data_csv.values[:, 317:320].astype(float)  # robot ee actually
                               # 'left_joints': data_csv.values[:, 99:106].astype(float)
                               })
@@ -121,8 +124,8 @@ def main():
             (task_idx * num_demo + demo_idx) * len_norm + len_norm, :]
             datasets_temp.append({
                                   # 'emg': temp[:, 0:8],
-                                  'left_hand': temp[:, 0:3],
-                                  'left_joints': temp[:, 3:6],
+                                  'left_hand': temp[:, 0:11],
+                                  'left_joints': temp[:, 11:14],
                                   'alpha': datasets4train[task_idx][demo_idx]['alpha']})
         datasets_norm_preproc.append(datasets_temp)
 
