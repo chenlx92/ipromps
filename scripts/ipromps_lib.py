@@ -590,7 +590,8 @@ class IProMP(NDProMP):
             num = self.num_alpha_candidate
         self.num_alpha_candidate = num
 
-        alpha_candidate = np.linspace(self.mean_alpha-2*self.std_alpha, self.mean_alpha+2*self.std_alpha, num)
+        # alpha_candidate = np.linspace(self.mean_alpha-2*self.std_alpha, self.mean_alpha+2*self.std_alpha, num)
+        alpha_candidate = np.random.normal(self.mean_alpha, self.std_alpha, num)
         candidate_pdf = stats.norm.pdf(alpha_candidate, self.mean_alpha, self.std_alpha)
         alpha_gen = []
         for idx_candidate in range(self.num_alpha_candidate):
