@@ -611,10 +611,19 @@ class IProMP(NDProMP):
             h_full = self.obs_mat(time[obs_idx]/alpha_candidate)
             mean_t = np.dot(h_full, self.meanW_full)[:, 0]
             cov_t = np.dot(np.dot(h_full, self.covW_full), h_full.T) + self.sigmay
+            # cov_t = np.dot(np.dot(h_full, self.covW_full), h_full.T)
 
             prob = mvn.pdf(obs[obs_idx], mean_t, cov_t)
             log_prob = math.log(prob) if prob != 0.0 else -np.inf
             prob_full = prob_full + log_prob
+
+            # new_mean_t = mean_t[0: self.num_obs_joints]
+            # new_cov_t = cov_t[0:self.num_obs_joints, 0:self.num_obs_joints]
+
+            # prob = mvn.pdf(obs[obs_idx][0: self.num_obs_joints], new_mean_t, new_cov_t)
+            # log_prob = math.log(prob) if prob != 0.0 else -np.inf
+            # prob_full = prob_full + log_prob
+
         return prob_full
 
     def estimate_alpha(self, alpha_candidates, obs, times):
