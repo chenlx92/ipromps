@@ -29,7 +29,7 @@ sigma = cp_models.get('filter', 'sigma')
 cp_datasets = ConfigParser.SafeConfigParser()
 cp_datasets.read(os.path.join(datasets_path, './info/cfg/datasets.cfg'))
 # read datasets params
-data_index_sec = cp_datasets.items('index_15')
+data_index_sec = cp_datasets.items('index_17')
 data_index = [map(int, task[1].split(',')) for task in data_index_sec]
 
 
@@ -85,10 +85,9 @@ def main():
 
     ## single channel
     sel = VarianceThreshold(threshold=0.011)
-    print np.diag(np.cov(y_full.T), 0)
-
-    print sel.fit_transform(y_full)
-
+    # print np.diag(np.cov(y_full.T), 0)
+    #
+    # print sel.fit_transform(y_full)
     fig = plt.figure(0)
     ax = fig.add_subplot(1,1,1)
     label1 = ('head_x', 'head_y', 'head_z', 'neck_x', 'neck_y', 'neck_z',
@@ -96,10 +95,11 @@ def main():
               'left_elbow_x', 'left_elbow_y', 'left_elbow_z',
               'left_hand_x', 'left_hand_y', 'left_hand_z', 'right_shoulder_x', 'right_shoulder_y', 'right_shoulder_z',
               'right_elbow_x', 'right_elbow_y', 'right_elbow_z', 'right_hand_x', 'right_hand_y', 'right_hand_z')
-    plt.errorbar(np.linspace(1,human_dim,human_dim), np.zeros([1, human_dim])[0], np.diag(np.cov(y_full.T), 0), fmt='o', markersize=8,capsize=8, elinewidth=5)
-    plt.xticks(np.linspace(1, human_dim, human_dim), label1, rotation=20)
+    plt.errorbar(np.linspace(1,human_dim,human_dim), np.zeros([1, human_dim])[0], np.diag(np.cov(y_full.T), 0), fmt='o', markersize=8, capsize=6,
+                     elinewidth=2, markerfacecolor='none', markeredgewidth=2, markeredgecolor='black', color='black')
+    plt.xticks(np.linspace(1, human_dim, human_dim), label1, rotation=15)
     ax.set_xlabel('feature channel')
-    ax.set_ylabel('position variance/(m*m)')
+    ax.set_ylabel('position variance (m*m)')
 
     ## distance
     mean_full = np.mean(y_full,0)
@@ -114,13 +114,14 @@ def main():
     print sel2.fit_transform(euclidean_dis)
     fig2 = plt.figure(3)
     ax2 = fig2.add_subplot(1,1,1)
-    plt.errorbar(np.linspace(1,human_dim/3,human_dim/3), np.zeros([1, human_dim/3])[0], np.diag(np.cov(euclidean_dis.T), 0), fmt='o', markersize=8,capsize=8, elinewidth=5)
-    plt.xlim([0,human_dim/3+1])
+    plt.errorbar(np.linspace(1,human_dim/3,human_dim/3), np.zeros([1, human_dim/3])[0], np.diag(np.cov(euclidean_dis.T), 0),
+    fmt = 'o', markersize = 8, capsize = 6, elinewidth = 2, markerfacecolor = 'none', markeredgewidth = 2, markeredgecolor = 'black', color = 'black')
+    plt.xlim([0,human_dim/3+0.5])
     label2 = ('head', 'neck', 'torso', 'left_shoulder', 'left_elbow', 'left_hand', 'right_shoulder', 'right_elbow',
              'right_hand')
     plt.xticks(np.linspace(1,human_dim/3,human_dim/3), label2, rotation=15)
     ax2.set_xlabel('feature channel')
-    ax2.set_ylabel('position variance/(m*m)')
+    ax2.set_ylabel('position variance (m*m)')
 
     plt.show()
 

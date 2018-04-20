@@ -21,25 +21,28 @@ datasets_path = os.path.join(file_path, cp_models.get('datasets', 'path'))
 # load datasets
 ipromps_set = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
 # ipromps_set_post = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set_post.pkl'))
-datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
-datasets_norm = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm.pkl'))
 datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
+datasets_norm = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm.pkl'))
 datasets_filtered = joblib.load(os.path.join(datasets_path, 'pkl/datasets_filtered.pkl'))
+datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
 task_name = joblib.load(os.path.join(datasets_path, 'pkl/task_name_list.pkl'))
-# [robot_traj_offline, ground_truth] = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_offline.pkl'))
-# robot_traj_online = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_online.pkl'))
-# obs_data_online = joblib.load(os.path.join(datasets_path, 'pkl/obs_data_online.pkl'))
-
+[robot_traj_offline, ground_truth, num_obs] = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_offline.pkl'))
+robot_traj_online = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_online.pkl'))
+obs_data_online = joblib.load(os.path.join(datasets_path, 'pkl/obs_data_online.pkl'))
 
 
 # read datasets cfg file
 cp_datasets = ConfigParser.SafeConfigParser()
 cp_datasets.read(os.path.join(datasets_path, 'info/cfg/datasets.cfg'))
 # read datasets params
-data_index_sec = cp_datasets.items('index_15')
+data_index_sec = cp_datasets.items('index_17')
 data_index = [map(int, task[1].split(',')) for task in data_index_sec]
 
 # the idx of interest info in data structure
+# info_n_idx = {
+#             'left_hand': [0, 11],
+#             'left_joints': [11, 14]
+#             }
 info_n_idx = {
             'left_hand': [0, 3],
             'left_joints': [3, 6]
@@ -47,14 +50,13 @@ info_n_idx = {
 # the info to be plotted
 info = cp_models.get('visualization', 'info')
 joint_num = info_n_idx[info][1] - info_n_idx[info][0]
-num_obs = cp_models.getint('visualization', 'num_obs')
 
 
-# zh config
-def conf_zh(font_name):
-    from pylab import mpl
-    mpl.rcParams['font.sans-serif'] = [font_name]
-    mpl.rcParams['axes.unicode_minus'] = False
+# # zh config
+# def conf_zh(font_name):
+#     from pylab import mpl
+#     mpl.rcParams['font.sans-serif'] = [font_name]
+#     mpl.rcParams['axes.unicode_minus'] = False
 
 
 # plot the raw data
@@ -67,8 +69,8 @@ def plot_raw_data(num=0):
                 ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
                 data = datasets_raw[task_idx][demo_idx][info][:, joint_idx]
                 plt.plot(np.array(range(len(data)))/100.0, data)
-                ax.set_xlabel(u'时间/秒')
-                ax.set_ylabel(u'位移/米')
+                ax.set_xlabel('t(s)')
+                ax.set_ylabel('y(m)')
 
 # plot the norm data
 def plot_norm_data(num=0):
@@ -80,8 +82,8 @@ def plot_norm_data(num=0):
                 ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
                 data = datasets_norm[task_idx][demo_idx][info][:, joint_idx]
                 plt.plot(np.array(range(len(data)))/100.0, data)
-                ax.set_xlabel(u'时间/秒')
-                ax.set_ylabel(u'位移/米')
+                ax.set_xlabel('t(s)')
+                ax.set_ylabel('y(m)')
 
 # plot the filtered data
 def plot_filtered_data(num=0):
@@ -93,9 +95,22 @@ def plot_filtered_data(num=0):
                 ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
                 data = datasets_filtered[task_idx][demo_idx][info][:, joint_idx]
                 plt.plot(np.array(range(len(data)))/100.0, data, )
-                ax.set_xlabel(u'时间/秒')
-                ax.set_ylabel(u'位移/米')
+                ax.set_xlabel('t(s)')
+                ax.set_ylabel('y(m)')
                 plt.legend()
+
+# plot the norm data
+def plot_preproc_data(num=0):
+    for task_idx, ipromps_idx in enumerate(ipromps_set):
+        fig = plt.figure(task_idx + num)
+        fig.suptitle('the raw data of ' + info)
+        for demo_idx in range(ipromps_idx.num_demos):
+            for joint_idx in range(joint_num):
+                ax = fig.add_subplot(joint_num, 1, 1 + joint_idx)
+                data = datasets_norm_preproc[task_idx][demo_idx][info][:, joint_idx]
+                plt.plot(np.array(range(len(data))) / 100.0, data)
+                ax.set_xlabel('t(s)')
+                ax.set_ylabel('y(m)')
 
 
 # plot the prior distribution
@@ -112,14 +127,41 @@ def plot_prior(num=0):
 def plot_alpha(num=0):
     fig = plt.figure(num)
     for idx, ipromp in enumerate(ipromps_set):
-        ax = fig.add_subplot(len(ipromps_set), 1, 1+idx)
+        # ax = fig.add_subplot(len(ipromps_set), 1, 1+idx)
+        plt.figure(idx)
         h = ipromps_set[idx].alpha
         h.sort()
         h_mean = np.mean(h)
         h_std = np.std(h)
         pdf = stats.norm.pdf(h, h_mean, h_std)
-        pl.hist(h, normed=True, color='b')
-        plt.plot(h, pdf, linewidth=5, color='r', marker='o', markersize=10)
+        pdf = np.zeros_like(pdf)
+        # pl.hist(h, normed=True, color='g')
+        # plt.plot(h, pdf, marker='o', markersize=10, color='r')
+        plt.scatter(h, pdf, s=100)
+        xx = np.linspace(h_mean-3*h_std, h_mean+3*h_std, 100)
+        yy = stats.norm.pdf(xx, h_mean, h_std)
+        plt.plot(xx, yy, linewidth=2, color='r', markersize=10, alpha=0.8)
+        plt.xlabel('Phase factor')
+        plt.ylabel('Probability')
+    # plt.figure(100)
+    #
+    # for i in range(10):
+    #     plt.figure(i)
+    #     h = ipromps_set[0].alpha
+    #     h_mean = np.mean(h)
+    #     h_std = np.std(h)
+    #     s = np.random.normal(h_mean, h_std, i+1)
+    #     pdf = stats.norm.pdf(s, h_mean, h_std)
+    #     plt.scatter(s, pdf, s=100, label='Phase factor candidate')
+    #     xx = np.linspace(h_mean - 3 * h_std, h_mean + 3 * h_std, 100)
+    #     yy = stats.norm.pdf(xx, h_mean, h_std)
+    #     plt.plot(xx, yy, linewidth=2, color='r', markersize=10, alpha=0.8)
+    #     plt.legend(loc=2)
+    #     plt.xlabel('Phase factor candidate number')
+    #     plt.ylabel('Probability')
+
+
+
         # candidate = ipromp.alpha_candidate()
         # candidate_x = [x['candidate'] for x in candidate]
         # prob = [x['prob'] for x in candidate]
@@ -168,6 +210,15 @@ def plot_filter_data_index(num=0):
                 data = datasets_filtered[task_idx][demo_idx][info][:, joint_idx]
                 plt.plot(range(len(data)), data, label=str(demo_idx))
                 ax.legend()
+    # for task_idx, demo_list in enumerate(data_index):
+    #     fig = plt.figure(num)
+    #     for demo_idx in demo_list:
+    #         ax = fig.add_subplot(len(data_index), 1, task_idx)
+    #         data = datasets_filtered[task_idx][demo_idx][info][:, 2]
+    #         plt.plot(range(len(data)), data)
+    #         plt.xlabel('t(s)')
+    #         plt.ylabel('EMG(mA)')
+    #         ax.legend()
 
 
 # plot the 3d raw traj
@@ -194,10 +245,10 @@ def plot_3d_filtered_h_traj(num=0):
             data = datasets_filtered[task_idx][demo_idx]['left_hand']
             ax.plot(data[:, 0], data[:, 1], data[:, 2], linewidth=2,
                     # label='training sets about human '+str(demo_idx), alpha=0.3)
-                    alpha=1.0)
-            ax.set_xlabel('X Label')
-            ax.set_ylabel('Y Label')
-            ax.set_zlabel('Z Label')
+                    alpha=0.8)
+            ax.set_xlabel('X (m)')
+            ax.set_ylabel('Y (m)')
+            ax.set_zlabel('Z (m)')
             ax.legend()
 
 
@@ -208,16 +259,18 @@ def plot_offline_3d_obs(num=0):
         ax = fig.gca(projection='3d')
         obs_data_dict = ground_truth
         data = obs_data_dict['left_hand']
-        ax.plot(data[0:num_obs, 0], data[0:num_obs, 1], data[0:num_obs, 2],
-                # 'o', markersize=10, label='observation points', alpha=1.0, color='green')
-                'o', markersize = 12, label = u'人运动的观测点', alpha = 1.0, color = 'green')
+        ax.plot(data[0:num_obs:15, 0], data[0:num_obs:15, 1], data[0:num_obs:15, 2],
+                'o', markersize=10, label='Human motion observations', alpha=1.0,
+                markerfacecolor='none', markeredgewidth=3.0, markeredgecolor='g')
         ax.plot(data[:, 0], data[:, 1], data[:, 2],
-                # '-', linewidth=5, color='blue', label='ground truth human trajectory', alpha=1.0)
-                '-', linewidth = 5, color = 'blue', label = u'人运动轨迹的真实值', alpha = 1.0)
-        # ax.set_xlabel('X Label')
-        # ax.set_ylabel('Y Label')
-        # ax.set_zlabel('Z Label')
-        ax.legend()
+                '-', linewidth=5, color='blue', label='Human trajectory ground truth', alpha = 1.0)
+        data = ground_truth['left_joints']
+        ax.plot(data[:, -3], data[:, -2], data[:, -1],
+                linewidth=5, linestyle='-', color='r', label='Robot trajectory ground Truth', alpha=1.0)
+        ax.set_xlabel('X (m)')
+        ax.set_ylabel('Y (m)')
+        ax.set_zlabel('Z (m)')
+        # ax.legend(loc=2)
 
 
 # plot the 3d filtered robot traj
@@ -229,13 +282,13 @@ def plot_3d_filtered_r_traj(num=0):
             data = datasets_filtered[task_idx][demo_idx]['left_joints']
             ax.plot(data[:, 0], data[:, 1], data[:, 2],
                     # linewidth=3, linestyle='-', label='training sets about robot '+str(demo_idx), alpha=0.3)
-                    linewidth=2, linestyle='-', alpha=1.0)
+                    linewidth=2, linestyle='-', alpha=0.8)
             # ax.set_xlabel('X Label')
             # ax.set_ylabel('Y Label')
             # ax.set_zlabel('Z Label')
-            ax.set_xlabel(u'X/米')
-            ax.set_ylabel(u'Y/米')
-            ax.set_zlabel(u'Z/米')
+            # ax.set_xlabel(u'X/米')
+            # ax.set_ylabel(u'Y/米')
+            # ax.set_zlabel(u'Z/米')
             ax.legend()
 
 
@@ -244,18 +297,17 @@ def plot_gen_3d_offline_r_traj(num=0):
     for task_idx, demo_list in enumerate(data_index):
         fig = plt.figure(task_idx+num)
         ax = fig.gca(projection='3d')
-        data = robot_traj_offline
-        ax.plot(data[:, 0], data[:, 1], data[:, 2],
-                # linewidth=5, linestyle='--', label='generated robot trajectory')
-                linewidth = 5, linestyle = '--', label = u'生成的机器人运动轨迹')
-        data = ground_truth['left_joints']
-        ax.plot(data[:, 0], data[:, 1], data[:, 2],
-                # linewidth=5, linestyle='-', color='r', label='ground truth robot trajectory', alpha=1.0)
-                linewidth=5, linestyle='-', color='r', label=u'机器人运动轨迹的真实值', alpha=1.0)
-        ax.set_xlabel(u'X/米')
-        ax.set_ylabel(u'Y/米')
-        ax.set_zlabel(u'Z/米')
-        ax.legend()
+        data = robot_traj_offline[task_idx][1]
+        ax.plot(data[:, -3], data[:, -2], data[:, -1], 'r',
+                linewidth=5, linestyle='--', label='Predicted robot trajectory')
+        data = robot_traj_offline[task_idx][0]
+        ax.plot(data[:, 0], data[:, 1], data[:, 2], 'b',
+                linewidth=5, linestyle='--', label='Predicted human trajectory')
+
+        ax.set_xlabel('X (m)')
+        ax.set_ylabel('Y (m)')
+        ax.set_zlabel('Z (m)')
+        ax.legend(loc=0)
 
 
 # plot the 3d generated robot traj
@@ -279,9 +331,9 @@ def plot_online_3d_obs(num):
         data = obs_data_online
         ax.plot(data[0:num_obs, 0], data[0:num_obs, 1], data[0:num_obs, 2],
                 'o', linewidth=3, label='obs points', alpha=0.2)
-        ax.set_xlabel('X Label')
-        ax.set_ylabel('Y Label')
-        ax.set_zlabel('Z Label')
+        ax.set_xlabel('X (m)')
+        ax.set_ylabel('Y (m)')
+        ax.set_zlabel('Z (m)')
         ax.legend()
 
 
@@ -289,8 +341,8 @@ def plot_online_3d_obs(num):
 def pairs_offline(num=0):
     plot_3d_filtered_h_traj(num)
     plot_3d_filtered_r_traj(num)
-    # plot_offline_3d_obs(num)
-    # plot_gen_3d_offline_r_traj(num)
+    plot_offline_3d_obs(num)
+    plot_gen_3d_offline_r_traj(num)
 
 
 # plot online test pair
@@ -300,24 +352,74 @@ def pairs_online(num=0):
     plot_online_3d_obs(num)
     plot_gen_3d_online_r_traj(num)
 
+# plot the filtered data
+def plot_single_dim(num=0):
+    for task_idx, ipromps_idx in enumerate(ipromps_set):
+        fig = plt.figure(task_idx + num)
+        fig.suptitle('the filtered data of ' + info)
+        for demo_idx in range(ipromps_idx.num_demos):
+            ax = fig.add_subplot(1, 1, 1 )
+            data = datasets_filtered[task_idx][demo_idx][info][:, 1]
+            plt.plot(np.array(range(len(data)))/100.0, data, )
+            ax.set_xlabel('t(s)')
+            ax.set_ylabel('y(m)')
+            plt.legend()
+
+def plot_preproc_result(num):
+    fig = plt.figure(num)
+    for demo_idx in range(17):
+        ax = fig.add_subplot(1, 1, 1)
+        data = datasets_norm[0][demo_idx][info][:, 1]
+        plt.plot(np.array(range(len(data))) / 100.0, data)
+        ax.set_xlabel('t(s)')
+        ax.set_ylabel('y(m)')
+    fig = plt.figure(num+1)
+    for demo_idx in range(17):
+        ax = fig.add_subplot(1, 1, 1)
+        data = datasets_norm_preproc[0][demo_idx][info][:, 1]
+        plt.plot(np.array(range(len(data))) / 100.0, data)
+        ax.set_xlabel('t(s)')
+        ax.set_ylabel('y(m)')
+
+
+def plot_norm_result(num):
+    fig = plt.figure(num)
+    for demo_idx in range(17):
+        ax = fig.add_subplot(1, 1, 1)
+        data = datasets_filtered[0][demo_idx][info][:, 1]
+        plt.plot(np.array(range(len(data))) / 100.0, data)
+        ax.set_xlabel('t(s)')
+        ax.set_ylabel('y(m)')
+    fig = plt.figure(num+1)
+    for demo_idx in range(17):
+        ax = fig.add_subplot(1, 1, 1)
+        data = datasets_norm[0][demo_idx][info][:, 1]
+        plt.plot(np.array(range(len(data))) / 100.0, data)
+        ax.set_xlabel('t(s)')
+        ax.set_ylabel('y(m)')
+
 
 def main():
-    conf_zh("Droid Sans Fallback")
+    # conf_zh("Droid Sans Fallback")
     # plt.close('all')
     # plot_raw_data(0)
-    # plot_norm_data(2)
-    plot_filtered_data(1)
-    # plot_prior(1)
+    # plot_norm_data(0)
+    # plot_preproc_data(10)
+    # plot_filtered_data(10)
+    # plot_single_dim(0)
+    # plot_prior(0)
     # plot_post()
     # plot_alpha()
     # plot_robot_traj()
     # plot_raw_data_index()
     # plot_filter_data_index(20)
+    # plot_preproc_result(10)
+    # plot_norm_result(10)
 
     #3D
     # plot_3d_raw_traj(10)
     # plot_3d_gen_r_traj_online(10)
-    # pairs_offline(10)
+    pairs_offline(0)
     # pairs_online(10)
     # plt.legend(prop = {'size': 20})
     plt.show()

@@ -452,7 +452,10 @@ class IProMP(NDProMP):
         :param num_alpha_candidate:
         """
         # compute the obs noise after preprocessing
-        noise_cov_full = min_max_scaler.scale_.T * sigmay * min_max_scaler.scale_
+        # noise_cov_full = min_max_scaler.scale_.T * sigmay * min_max_scaler.scale_
+        # noise_cov_full = np.diag(min_max_scaler.scale_, 0) * np.diag(min_max_scaler.scale_, 0) * sigmay
+        # noise_cov_full = np.diag(min_max_scaler.scale_, 0) * sigmay
+        noise_cov_full = sigmay
 
         NDProMP.__init__(self, num_joints=num_joints, num_basis=num_basis,
                          sigma_basis=sigma_basis, num_samples=num_samples, sigmay=noise_cov_full)
@@ -565,7 +568,7 @@ class IProMP(NDProMP):
             # the y mean and cov
             mean_t = np.dot(h_full, self.meanW_full)[:,0]
             cov_t = np.dot(h_full, np.dot(self.covW_full, h_full.T)) + self.sigmay
-            prob = mvn.pdf(viapoint['obsy'], mean_t, cov_t)
+            prob = mvn.pdf(viapoint['obsy'], mean_t, cov_t, allow_singular=True)
             log_prob = math.log(prob) if prob != 0.0 else -np.inf
             prob_full = prob_full + log_prob
         return prob_full
@@ -611,9 +614,9 @@ class IProMP(NDProMP):
             h_full = self.obs_mat(time[obs_idx]/alpha_candidate)
             mean_t = np.dot(h_full, self.meanW_full)[:, 0]
             cov_t = np.dot(np.dot(h_full, self.covW_full), h_full.T) + self.sigmay
-            # cov_t = np.dot(np.dot(h_full, self.covW_full), h_full.T)
+            cov_t = np.dot(np.dot(h_full, self.covW_full), h_full.T)
 
-            prob = mvn.pdf(obs[obs_idx], mean_t, cov_t)
+            prob = mvn.pdf(obs[obs_idx], mean_t, cov_t, allow_singular=True)
             log_prob = math.log(prob) if prob != 0.0 else -np.inf
             prob_full = prob_full + log_prob
 

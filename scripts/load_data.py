@@ -27,7 +27,7 @@ sigma = cp_models.get('filter', 'sigma')
 cp_datasets = ConfigParser.SafeConfigParser()
 cp_datasets.read(os.path.join(datasets_path, './info/cfg/datasets.cfg'))
 # read datasets params
-data_index_sec = cp_datasets.items('index_15')
+data_index_sec = cp_datasets.items('index_17')
 data_index = [map(int, task[1].split(',')) for task in data_index_sec]
 
 
@@ -49,12 +49,10 @@ def main():
             demo_temp.append({
                               'stamp': (data_csv.values[:, 2].astype(int)-data_csv.values[0, 2])*1e-9,  # the time stamp
                               'left_hand':np.hstack([
-                                  # data_csv.values[:, 7:15].astype(float),  # emg
+                                  data_csv.values[:, 207:210].astype(float),   # human left hand position
                                   data_csv.values[:, 7:15].astype(float),  # emg
-                                  data_csv.values[:, 207:210].astype(float)   # human left hand
                                   ]),
                               'left_joints': data_csv.values[:, 317:320].astype(float)  # robot ee actually
-                              # 'left_joints': data_csv.values[:, 99:106].astype(float)
                               })
         datasets_raw.append(demo_temp)
 
@@ -110,7 +108,6 @@ def main():
     for task_idx, task_data in enumerate(datasets4train):
         print('Preprocessing data of task: ' + task_name_list[task_idx])
         for demo_data in task_data:
-            # h = np.hstack([demo_data['emg'], demo_data['left_hand'], demo_data['left_joints']])
             h = np.hstack([demo_data['left_hand'], demo_data['left_joints']])
             y_full = np.vstack([y_full, h])
     min_max_scaler = preprocessing.MinMaxScaler()
@@ -123,9 +120,10 @@ def main():
             temp = datasets_norm_full[(task_idx * num_demo + demo_idx) * len_norm:
             (task_idx * num_demo + demo_idx) * len_norm + len_norm, :]
             datasets_temp.append({
-                                  # 'emg': temp[:, 0:8],
-                                  'left_hand': temp[:, 0:11],
-                                  'left_joints': temp[:, 11:14],
+                                  # 'left_hand': temp[:, 0:3],
+                                  # 'left_joints': temp[:, 3:6],
+                                    'left_hand': temp[:, 0:11],
+                                    'left_joints': temp[:, 11:14],
                                   'alpha': datasets4train[task_idx][demo_idx]['alpha']})
         datasets_norm_preproc.append(datasets_temp)
 

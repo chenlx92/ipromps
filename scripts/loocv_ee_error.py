@@ -16,22 +16,13 @@ cp_models = ConfigParser.SafeConfigParser()
 cp_models.read(os.path.join(file_path, '../cfg/models.cfg'))
 # read models params
 datasets_path = os.path.join(file_path, cp_models.get('datasets', 'path'))
-num_joints = cp_models.getint('datasets', 'num_joints')
-num_obs_joints = cp_models.getint('datasets', 'num_obs_joints')
-len_norm = cp_models.getint('datasets', 'len_norm')
-num_basis = cp_models.getint('basisFunc', 'num_basisFunc')
-sigma_basis = cp_models.getfloat('basisFunc', 'sigma_basisFunc')
-num_alpha_candidate = cp_models.getint('phase', 'num_phaseCandidate')
 
 # the pkl data
 datasets_pkl_path = os.path.join(datasets_path, 'pkl')
-task_name_path = os.path.join(datasets_pkl_path, 'task_name_list.pkl')
 datasets_norm_preproc_path = os.path.join(datasets_pkl_path, 'datasets_norm_preproc.pkl')
-min_max_scaler_path = os.path.join(datasets_pkl_path, 'min_max_scaler.pkl')
-noise_cov_path = os.path.join(datasets_pkl_path, 'noise_cov.pkl')
 
 
-def main(obs_ratio, task_id):
+def main(obs_ratio, task_id, num_alpha_candidate):
     # load the data from pkl
     datasets_norm_preproc = joblib.load(datasets_norm_preproc_path)
 
@@ -39,16 +30,18 @@ def main(obs_ratio, task_id):
     loo = LeaveOneOut()
     loo.get_n_splits(X)
 
-    error_full = []
+    ee_error_full = []
+    phase_error_full = []
     i = 0.0
     for train_index, test_index in loo.split(X):
         ipromps_set = train_model_func.main(train_index)
-        [idx_max_prob, error] = error_compute.main(ipromps_set, test_index, obs_ratio, task_id)
-        error_full.append(error)
+        [idx_max_prob, positioning_error, phase_error] = error_compute.main(ipromps_set, test_index, obs_ratio, task_id, num_alpha_candidate)
+        ee_error_full.append(positioning_error)
+        phase_error_full.append(phase_error)
         if idx_max_prob == task_id:
-            i=i+1.0
+            i += 1.0
     acc = i/len(datasets_norm_preproc[0])
-    return [error_full, acc]
+    return [ee_error_full, acc, phase_error_full]
 
 
 if __name__ == '__main__':

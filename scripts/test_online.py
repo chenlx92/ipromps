@@ -11,6 +11,11 @@ from sklearn.externals import joblib
 import sys
 from geometry_msgs.msg import Pose
 import moveit_commander
+import util
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Pose
+import baxter_interface
+from baxter_interface import CHECK_VERSION
 
 # read conf file
 file_path = os.path.dirname(__file__)
@@ -26,12 +31,17 @@ task_name = joblib.load(task_name_path)
 sigma = cp.get('filter', 'sigma')
 GROUP_NAME_ARM = 'left_arm'
 
-specify_position = np.array([1.1132629934, -0.2387471985, 0.271010064])
+# tape: [ 1.1169808  -0.12402304 0.23784241]
+# screw: [ 1.09847439 -0.11998706 0.25383563]
+# box: [ 1.10284653 -0.13208417 0.2812103 ]
+#measure: [ 1.12147662 -0.08184267 0.26975943]
+specify_position = np.array([1.12147662, -0.08184267, 0.26975943])
+
+# threshold = 0.08
 threshold = 0.08
 
 
 def move_robot(traj, traj_time):
-
     moveit_commander.roscpp_initialize(sys.argv)
     moveit_commander.RobotCommander()
     moveit_commander.PlanningSceneInterface()
@@ -43,22 +53,27 @@ def move_robot(traj, traj_time):
     left.allow_replanning(True)
     left.set_planning_time(5)
     left.set_pose_reference_frame(reference_frame)
+    # left.set_end_effector_link('left_hand')
     end_effector_link = left.get_end_effector_link()
-
-    current_pose = left.get_current_pose(end_effector_link).pose
-
+    # print end_effector_link
+    # # end_effector_link = 'left_hand'
+    #
+    # current_pose = left.get_current_pose(end_effector_link).pose
+    # print current_pose
+    global left_gripper
+    left_gripper.open()
     list_of_poses = []
     for idx in range(len(traj)):
         traj_pose = Pose()
         traj_pose.position.x = traj[idx, 0]
         traj_pose.position.y = traj[idx, 1]
-        traj_pose.position.z = traj[idx, 2]
-        traj_pose.orientation.x = 0.0075093375
-        traj_pose.orientation.y = 0.999812779
-        traj_pose.orientation.z = -0.0177864406
-        traj_pose.orientation.w = 0.0012881299
-        list_of_poses.append(traj_pose)
+        traj_pose.position.z = traj[idx, 2]-0.218
+        traj_pose.orientation.x = 0.000016822
+        traj_pose.orientation.y = 0.9993395783
+        traj_pose.orientation.z = - 0.0362892576
+        traj_pose.orientation.w = 0.0018699794
 
+        list_of_poses.append(traj_pose)
     max_tries = 50
     attempts = 0
     fraction = 0.0
@@ -86,6 +101,30 @@ def move_robot(traj, traj_time):
         else:
             rospy.loginfo(
                 "Path planning failed with only " + str(fraction) + " success after " + str(max_tries) + " attempts.")
+    rospy.sleep(1)
+    global left_gripper
+    left_gripper.close()
+    print 'closed the gripper'
+    draw_line_rviz(traj)
+
+
+def draw_line_rviz(traj):
+    marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=1000)
+    rospy.sleep(0.5)
+    for idx in range(traj.shape[0]):
+        traj_pose = Pose()
+        traj_pose.position.x = traj[idx, 0]
+        traj_pose.position.y = traj[idx, 1]
+        # traj_pose.position.z = traj[idx, 2]-0.15
+        traj_pose.position.z = traj[idx, 2] - 0.21
+        traj_pose.orientation.x = 0.000016822
+        traj_pose.orientation.y = 0.9993395783
+        traj_pose.orientation.z = - 0.0362892576
+        traj_pose.orientation.w = 0.0018699794
+        # visualize the pose in rviz using marker
+        alpha = float(idx) / traj.shape[0] * 0.5 + 0.5
+        rgba_tuple = ((0.5 * idx), 0.5, (0.5 * idx), alpha)
+        util.send_traj_point_marker(marker_pub=marker_pub, pose=traj_pose, id=idx, rgba_tuple=rgba_tuple)
 
 
 def fun_timer():
@@ -139,7 +178,7 @@ def fun_timer():
         prob_task_temp = ipromp.prob_obs()
         prob_task.append(prob_task_temp)
     idx_max_prob = np.argmax(prob_task)
-    idx_max_prob = 0    # a trick for testing
+    idx_max_prob = 3    # a trick for testing
     rospy.loginfo('The max fit model index is task %s', task_name[idx_max_prob])
 
     # robot motion generation
@@ -147,13 +186,9 @@ def fun_timer():
     traj = ipromps_set[idx_max_prob].min_max_scaler.inverse_transform(traj)
     # robot_traj = traj[:, 3:10]
     robot_traj = traj[:, 3:6]
+    robot_traj = filter_static_points(robot_traj)
 
     ######
-    # for testing
-    datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
-    robot_traj = datasets_raw[0][1]['left_joints'][:, 0:3]
-    print robot_traj.shape
-
     # move the robot
     move_robot(robot_traj, traj_time)
 
@@ -168,6 +203,8 @@ def fun_timer():
     joblib.dump(obs_data, os.path.join(datasets_path, 'pkl/obs_data_online.pkl'))
     # finished
     rospy.loginfo('All finished!!!')
+
+    rospy.loginfo('The max fit model index is task %s', task_name[idx_max_prob])
 
 
 def callback(data):
@@ -184,9 +221,11 @@ def callback(data):
         if np.linalg.norm(specify_position - left_hand) < threshold:
             flag_record = True
             print "I'm ready!!!"
-            # start the timer
             global timer
-            timer.start()
+            # rospy.sleep(3)
+            # print "go"
+            # rospy.sleep(1)
+            timer.start()   # start the timer
         else:
             return
 
@@ -217,6 +256,18 @@ def callback(data):
     rospy.loginfo(obs_data_list[-1])
 
 
+def filter_static_points(mat):
+    last = mat[0] # for refercence
+    new_mat = [last]
+    for idx in range(mat.shape[0]):
+        if np.linalg.norm(mat[idx]-last)<0.01:
+            pass
+        else:
+            new_mat.append(mat[idx])
+            last = mat[idx]
+    return np.array(new_mat)
+
+
 def main():
     # init node
     rospy.init_node('online_ipromps_node', anonymous=True)
@@ -226,6 +277,12 @@ def main():
     rospy.loginfo('Loading the datasets...')
     global ipromps_set
     ipromps_set = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
+
+    # gripper
+    rs = baxter_interface.RobotEnable(CHECK_VERSION)
+    init_state = rs.state().enabled
+    global left_gripper
+    left_gripper = baxter_interface.Gripper('left', CHECK_VERSION)
 
     # the flag var of starting info record
     global flag_record, obs_data_list
