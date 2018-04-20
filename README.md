@@ -111,4 +111,8 @@ Take some significant notes to be used in testing.
  - Armband wear position on hand  
  - Object grasp position  
  - Collaborative task process video  
+ 
+## Note
+- We need enough observation to conditioning, phase estimation fail (all observation stack on the begining) with too little observation
+ 
 
