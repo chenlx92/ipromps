@@ -40,19 +40,18 @@ def main():
     datasets_raw = []
     for task_path in task_path_list:
         task_csv_path = os.path.join(task_path, 'csv')
-        print('Loading data from ' + task_csv_path)
-        demo_path_list = glob.glob(os.path.join(task_csv_path, '201*'))   # the prefix of data, guarantee the right file
+        print('Loading data from: ' + task_csv_path)
+        demo_path_list = glob.glob(os.path.join(task_csv_path, '201*'))   # the prefix of dataset file
         demo_temp = []
         for demo_path in demo_path_list:
             data_csv = pd.read_csv(os.path.join(demo_path, 'multiModal_states.csv'))    # the file name of csv
-            # the info of interest: convert the object to int / float
             demo_temp.append({
-                              'stamp': (data_csv.values[:, 2].astype(int)-data_csv.values[0, 2])*1e-9,  # the time stamp
-                              'left_hand':np.hstack([
+                              'stamp': (data_csv.values[:, 2].astype(int)-data_csv.values[0, 2])*1e-9,
+                              'left_hand': np.hstack([
                                   data_csv.values[:, 207:210].astype(float),   # human left hand position
                                   data_csv.values[:, 7:15].astype(float),  # emg
                                   ]),
-                              'left_joints': data_csv.values[:, 317:320].astype(float)  # robot ee actually
+                              'left_joints': data_csv.values[:, 317:324].astype(float)  # robot ee actually
                               })
         datasets_raw.append(demo_temp)
 
@@ -69,7 +68,6 @@ def main():
             # append them to list
             demo_norm_temp.append({
                 'alpha': time_stamp[-1],
-                # 'emg': emg_filtered,
                 'left_hand': left_hand_filtered,
                 'left_joints': left_joints_filtered
             })
@@ -87,13 +85,11 @@ def main():
             left_hand_filtered = gaussian_filter1d(demo_data['left_hand'].T, sigma=sigma).T
             left_joints_filtered = gaussian_filter1d(demo_data['left_joints'].T, sigma=sigma).T
             # normalize the datasets
-            # emg_norm = griddata(time_stamp, emg_filtered, grid, method='linear')
             left_hand_norm = griddata(time_stamp, left_hand_filtered, grid, method='linear')
             left_joints_norm = griddata(time_stamp, left_joints_filtered, grid, method='linear')
             # append them to list
             demo_norm_temp.append({
                                     'alpha': time_stamp[-1],
-                                    # 'emg': emg_norm,
                                     'left_hand': left_hand_norm,
                                     'left_joints': left_joints_norm
                                     })
@@ -106,7 +102,7 @@ def main():
         datasets4train.append(data)
     y_full = np.array([]).reshape(0, num_joints)
     for task_idx, task_data in enumerate(datasets4train):
-        print('Preprocessing data of task: ' + task_name_list[task_idx])
+        print('Preprocessing data for task: ' + task_name_list[task_idx])
         for demo_data in task_data:
             h = np.hstack([demo_data['left_hand'], demo_data['left_joints']])
             y_full = np.vstack([y_full, h])
@@ -120,11 +116,9 @@ def main():
             temp = datasets_norm_full[(task_idx * num_demo + demo_idx) * len_norm:
             (task_idx * num_demo + demo_idx) * len_norm + len_norm, :]
             datasets_temp.append({
-                                  # 'left_hand': temp[:, 0:3],
-                                  # 'left_joints': temp[:, 3:6],
                                     'left_hand': temp[:, 0:11],
-                                    'left_joints': temp[:, 11:14],
-                                  'alpha': datasets4train[task_idx][demo_idx]['alpha']})
+                                    'left_joints': temp[:, 11:18],
+                                    'alpha': datasets4train[task_idx][demo_idx]['alpha']})
         datasets_norm_preproc.append(datasets_temp)
 
     # save all the datasets

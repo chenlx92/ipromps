@@ -27,8 +27,8 @@ datasets_filtered = joblib.load(os.path.join(datasets_path, 'pkl/datasets_filter
 datasets_norm_preproc = joblib.load(os.path.join(datasets_path, 'pkl/datasets_norm_preproc.pkl'))
 task_name = joblib.load(os.path.join(datasets_path, 'pkl/task_name_list.pkl'))
 [robot_traj_offline, ground_truth, num_obs] = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_offline.pkl'))
-robot_traj_online = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_online.pkl'))
-obs_data_online = joblib.load(os.path.join(datasets_path, 'pkl/obs_data_online.pkl'))
+# robot_traj_online = joblib.load(os.path.join(datasets_path, 'pkl/robot_traj_online.pkl'))
+# obs_data_online = joblib.load(os.path.join(datasets_path, 'pkl/obs_data_online.pkl'))
 
 
 # read datasets cfg file
@@ -44,8 +44,8 @@ data_index = [map(int, task[1].split(',')) for task in data_index_sec]
 #             'left_joints': [11, 14]
 #             }
 info_n_idx = {
-            'left_hand': [0, 3],
-            'left_joints': [3, 6]
+            'left_hand': [0, 11],
+            'left_joints': [11, 18]
             }
 # the info to be plotted
 info = cp_models.get('visualization', 'info')
@@ -265,7 +265,7 @@ def plot_offline_3d_obs(num=0):
         ax.plot(data[:, 0], data[:, 1], data[:, 2],
                 '-', linewidth=5, color='blue', label='Human trajectory ground truth', alpha = 1.0)
         data = ground_truth['left_joints']
-        ax.plot(data[:, -3], data[:, -2], data[:, -1],
+        ax.plot(data[:, -7], data[:, -6], data[:, -5],
                 linewidth=5, linestyle='-', color='r', label='Robot trajectory ground Truth', alpha=1.0)
         ax.set_xlabel('X (m)')
         ax.set_ylabel('Y (m)')
@@ -298,7 +298,7 @@ def plot_gen_3d_offline_r_traj(num=0):
         fig = plt.figure(task_idx+num)
         ax = fig.gca(projection='3d')
         data = robot_traj_offline[task_idx][1]
-        ax.plot(data[:, -3], data[:, -2], data[:, -1], 'r',
+        ax.plot(data[:, -7], data[:, -6], data[:, -5], 'r',
                 linewidth=5, linestyle='--', label='Predicted robot trajectory')
         data = robot_traj_offline[task_idx][0]
         ax.plot(data[:, 0], data[:, 1], data[:, 2], 'b',

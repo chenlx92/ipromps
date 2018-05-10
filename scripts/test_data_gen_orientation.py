@@ -20,42 +20,39 @@ task_name = joblib.load(task_name_path)
 sigma = cp_models.get('filter', 'sigma')
 ipromps_set = joblib.load(os.path.join(datasets_path, 'pkl/ipromps_set.pkl'))
 datasets_raw = joblib.load(os.path.join(datasets_path, 'pkl/datasets_raw.pkl'))
-test_index = cp_models.getint('visualization', 'test_index')
-
 
 # read datasets cfg file
 cp_datasets = ConfigParser.SafeConfigParser()
 cp_datasets.read(os.path.join(datasets_path, './info/cfg/datasets.cfg'))
+
 # read datasets params
 data_index_sec = cp_datasets.items('index_17')
-# data_index_sec = cp_datasets.items('index_25')
 data_index = [map(int, task[1].split(',')) for task in data_index_sec]
 
 
 def main():
-    task_id = 0
-    test_index = 37
-    obs_ratio = 0.35
+    # super param
+    task_id = 1
+    test_index = 1
+    obs_ratio = 0.5
 
-    # read test data
+    # load test data
     obs_data_dict = datasets_raw[task_id][test_index]
-
     left_hand = obs_data_dict['left_hand']
     left_joints = obs_data_dict['left_joints']
     obs_data = np.hstack([left_hand, left_joints])
     timestamp = obs_data_dict['stamp']
 
-    # filter the data
+    # filter data and preprocessing data
     obs_data = gaussian_filter1d(obs_data.T, sigma=sigma).T
-    # preprocessing for the data
-    obs_data_post_arr = ipromps_set[0].min_max_scaler.transform(obs_data)
-    # consider the unobserved info
-    obs_data_post_arr[:, -7:] = 0.0
+    obs_data_preproc = ipromps_set[0].min_max_scaler.transform(obs_data)
+    # set unobserved info
+    obs_data_preproc[:, -7:] = 0.0
 
     # choose the data
     num_obs = int(len(timestamp)*obs_ratio)
-    num_obs = num_obs - num_obs%15
-    obs_data_post_arr = obs_data_post_arr[0:num_obs:15, :]
+    num_obs -= num_obs % 15
+    obs_data_preproc = obs_data_preproc[0:num_obs:15, :]
     timestamp = timestamp[0:num_obs:15]
 
     # phase estimation
@@ -63,7 +60,7 @@ def main():
     alpha_max_list = []
     for ipromp in ipromps_set:
         alpha_temp = ipromp.alpha_candidate(num_alpha_candidate)
-        idx_max = ipromp.estimate_alpha(alpha_temp, obs_data_post_arr, timestamp)
+        idx_max = ipromp.estimate_alpha(alpha_temp, obs_data_preproc, timestamp)
         alpha_max_list.append(alpha_temp[idx_max]['candidate'])
         ipromp.set_alpha(alpha_temp[idx_max]['candidate'])
 
@@ -71,7 +68,7 @@ def main():
     print('Adding via points in each trained model...')
     for task_idx, ipromp in enumerate(ipromps_set):
         for idx in range(len(timestamp)):
-            ipromp.add_viapoint(timestamp[idx] / alpha_max_list[task_idx], obs_data_post_arr[idx, :])
+            ipromp.add_viapoint(timestamp[idx] / alpha_max_list[task_idx], obs_data_preproc[idx, :])
         ipromp.param_update(unit_update=True)
     print('Computing the likelihood for each model under observations...')
 
@@ -83,24 +80,14 @@ def main():
     # idx_max_prob = 0 # a trick for testing
     print('The max fit model index is task %s' % task_name[idx_max_prob])
 
-    # # robot motion generation
-    # [traj_time, traj] = ipromps_set[idx_max_prob].gen_real_traj(alpha_max_list[idx_max_prob])
-    # traj = ipromps_set[idx_max_prob].min_max_scaler.inverse_transform(traj)
-    # robot_traj = traj[:, -3:]
-
     # robot motion generation
     traj_full = []
     for ipromp_id, ipromp in enumerate(ipromps_set):
         [traj_time, traj] = ipromp.gen_real_traj(alpha_max_list[ipromp_id])
         traj = ipromp.min_max_scaler.inverse_transform(traj)
         robot_traj = traj[:, -7:]
-        human_traj= traj[:, 0:-7]
+        human_traj = traj[:, 0:3]
         traj_full.append([human_traj, robot_traj])
-
-    # # test: robot motion generation for task2
-    # [traj_time2, traj2] = ipromps_set[2].gen_real_traj(alpha_max_list[2])
-    # traj2 = ipromps_set[2].min_max_scaler.inverse_transform(traj2)
-    # robot_traj2 = traj2[:, -3:]
 
     # save the conditional result
     print('Saving the post IProMPs...')
@@ -112,4 +99,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # visualization.main()

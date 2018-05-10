@@ -33,8 +33,8 @@ data_index = [map(int, task[1].split(',')) for task in data_index_sec]
 
 def main():
     task_id = 0
-    test_index = 37
-    obs_ratio = 0.5
+    test_index = 25
+    obs_ratio = 0.1
 
     # read test data
     obs_data_dict = datasets_raw[task_id][test_index]
@@ -53,7 +53,7 @@ def main():
 
     # choose the data
     num_obs = int(len(timestamp)*obs_ratio)
-    num_obs = num_obs - num_obs%15
+    num_obs -= num_obs % 15
     obs_data_post_arr = obs_data_post_arr[0:num_obs:15, :]
     timestamp = timestamp[0:num_obs:15]
     obs_data_post_arr = obs_data_post_arr
@@ -113,4 +113,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # visualization.main()

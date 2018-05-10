@@ -452,11 +452,7 @@ class IProMP(NDProMP):
         :param num_alpha_candidate:
         """
         # compute the obs noise after preprocessing
-        # noise_cov_full = min_max_scaler.scale_.T * sigmay * min_max_scaler.scale_
-        # noise_cov_full = np.diag(min_max_scaler.scale_, 0) * np.diag(min_max_scaler.scale_, 0) * sigmay
-        # noise_cov_full = np.diag(min_max_scaler.scale_, 0) * sigmay
         noise_cov_full = sigmay
-
         NDProMP.__init__(self, num_joints=num_joints, num_basis=num_basis,
                          sigma_basis=sigma_basis, num_samples=num_samples, sigmay=noise_cov_full)
 
